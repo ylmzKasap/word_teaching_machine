@@ -62,8 +62,8 @@ class MainApp extends React.Component {
 }
 
 var words = [
-  'natural', 'coffee table' //, 'curtain', 'carpet', "sock",
-  //'skirt', 'pillow', 'blanket', 'ladle', 'strainer', 'roof', 'elevator', 'stair'
+  'natural', 'coffee table', 'curtain', 'carpet', "sock",
+  'skirt', 'pillow', 'blanket', 'ladle', 'strainer', 'roof', 'elevator', 'stair'
 ]
 
 ReactDOM.render(

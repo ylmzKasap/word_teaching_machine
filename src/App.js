@@ -10,34 +10,23 @@ class IntroText extends React.Component {
       isMobile: utils.is_mobile(),
       isAnimated: false,
     };
-    this.animateOn = this.animateOn.bind(this);
-    this.animateOff = this.animateOff.bind(this);
+    this.toggleAnimation = this.toggleAnimation.bind(this);
     this.playSound = this.playSound.bind(this);
   }
 
   componentDidMount() {
-    setTimeout(() => (this.playSound()), 200);
+    setTimeout(() => (this.playSound()), 400);
     this.setState({isAnimated: true});
   }
 
-  animateOn() {
-    this.setState({isAnimated: true});
-  }
-
-  animateOff() {
-    this.setState({isAnimated: false});
+  toggleAnimation() {
+    this.setState(state => ({isAnimated: !state.isAnimated}));
   }
 
   playSound() {
     audioMixer.src = `./sounds/${this.props.word}.mp3`;
     audioMixer.load();
-    const playPromise = audioMixer.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .catch(() => {
-          console.log("Playback prevented by the browser.");
-        });
-    }
+    utils.playAndCatchError(audioMixer, "Playback prevented by browser.")
   }
 
   render() {
@@ -46,7 +35,7 @@ class IntroText extends React.Component {
   return (
     <label className="text-intro-box" >
       <p className={`intro-text ${(this.state.isAnimated) ? 'emphasize' : ''}`} 
-        onClick={() => {this.animateOn(); this.playSound();}} onAnimationEnd={this.animateOff}>{this.props.word}</p>
+         onClick={() => {this.toggleAnimation(); this.playSound();}} onAnimationEnd={this.toggleAnimation}>{this.props.word}</p>
       <div className="continue"><i className={`continue-icon ${pageIcon}`}></i> {pageMessage} anywhere</div>
     </label>
     )
@@ -70,41 +59,46 @@ class TextOptionBox extends React.Component {
     this.state = {
       animationClass: "",
       numberStyle: "",
+      timeouts: {}
     };
     this.handleClick = this.handleClick.bind(this);
   }
 
-  componentDidMount() {
-    this.setState({
-      animationClass: "", numberStyle: "",
-    });
+  componentWillUnmount() {
+    for (let key in this.state.timeouts) {
+      clearTimeout(this.state.timeouts[key]);
+    }
   }
 
   handleClick() {
+    let errorMessage = 'Sound interrupted by user.';
     if (this.props.isCorrect === true) {
       if (this.state.animationClass === "") {
         audioMixer.src = "./sounds/correct.mp3";
         audioMixer.load();
-        audioMixer.play();
+        utils.playAndCatchError(audioMixer, errorMessage);
         this.setState({
           animationClass: "correct-answer",
-          numberStyle: "correct-number"});
-        setTimeout(() => {
-          this.props.animateImg();
-          audioMixer.src = `./sounds/${this.props.word}.mp3`;
-          audioMixer.load();
-          audioMixer.play();
-          }, 1000)
-        setTimeout(() =>
-          this.props.click(), 2000)
-      }
+          numberStyle: "correct-number",
+          timeouts: {
+            'sound': setTimeout(() => {
+              this.props.animateImg();
+              audioMixer.src = `./sounds/${this.props.word}.mp3`;
+              audioMixer.load();
+              utils.playAndCatchError(audioMixer, errorMessage);
+              }, 1000),
+            'click': setTimeout(() =>
+            this.props.click(), 2000)}
+          }
+        )
+      }        
     }
     else {
       if (this.state.animationClass === "") {
         this.props.incorrect();
         audioMixer.src = "./sounds/incorrect.mp3";
         audioMixer.load();
-        audioMixer.play();
+        utils.playAndCatchError(audioMixer, errorMessage);
         this.setState({
           animationClass: "incorrect-answer",
           numberStyle: "incorrect-number"});

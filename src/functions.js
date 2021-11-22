@@ -23,3 +23,12 @@ export function is_mobile() {
 export function randint(fromN, toN) {
   return Math.floor(Math.random() * (toN - fromN + 1)) + fromN;
 }
+
+export function playAndCatchError(mixer, message) {
+  let playPromise = mixer.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+        console.log(message);
+      });
+  }
+}
