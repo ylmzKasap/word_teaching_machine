@@ -1,65 +1,78 @@
-import React from 'react';
+import React, { useState, createContext} from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import App, { AskFromPicture } from './App.js'
+import * as utils from './functions.js';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.css';
 
-class NavBar extends React.Component {
-  render() {
+
+function NavBar(props) {
     return (
       <div className="navbar sticky-top navbar-dark bg-dark">
-        <i className="fas fa-arrow-left arrow" onClick={this.props.goBack}></i>
-        <i className="fas fa-arrow-right arrow" onClick={this.props.goBack}></i>
+        <i className="fas fa-arrow-left arrow" onClick={props.goBack}></i>
+        <i className="fas fa-arrow-right arrow" onClick={props.goForward}></i>
         {/** <a className="navbar-brand" href="#">navigasyon çubuğu</a> */}
       </div>
     )
-  }
 }
 
-class MainApp extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      childPage: 0,
-      childAnimation: "load-page"
-      };
-    this.handleClick = this.handleClick.bind(this);
-    this.goBack = this.goBack.bind(this);   
+
+export const FunctionContext = createContext();
+
+function MainApp() {
+  const [page, setPage] = useState(0);
+  const [childAnimation, setChildAnimtion] = useState('load-page');
+  const [pages, setPages] = useState(utils.generate_pages(words));
+  const [correctFound, setCorrectFound] = useState(false);  
+
+  function goBack() {
+    if (page > 0) {
+      setPage(cPage => cPage - 1);
+      setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
+    }
   }
 
-  goBack() {
-    if (this.state.childPage > 0) {
-      this.setState(state => (
-        {childPage: 
-          state.childPage - 1,
-        childAnimation: (
-          state.childAnimation === 'load-page') ? 'load-page-2' : 'load-page'}
-        )
-      )
-    };
+  function goForward() {
+    if (page < pages.length) {
+      setPage(cPage => cPage + 1);
+      setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
+    }
   }
 
-  handleClick() {
-    this.setState((state) => (
-      {childAnimation: 
-        (state.childAnimation === "load-page") ? 'load-page-2' : 'load-page',
-      childPage:
-        state.childPage + 1}
-      )
-    )
+  function handleClick() {
+    setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
+    setPage(cPage => cPage + 1);
   }
 
-  render() {
-    return (
-      <div className="main-app">
-        <NavBar goBack={this.goBack.bind(this)} />
-        <App 
-          words={words} page={this.state.childPage}
-          click={this.handleClick} animation={this.state.childAnimation} />
-      </div>
-    )
+  function handleIncorrect() {
+    if (!correctFound) {
+      let restOfArray = pages.slice(page + 1);
+      let currentPage = pages[page];
+      for (let i = 0; i < restOfArray.length; i++) {
+        if (restOfArray[i].props.word === currentPage.props.word) {
+          return null
+        }
+      }
+      let repeatPage = <AskFromPicture 
+        allWords={words} word={currentPage.props.word} key={pages.length + 1} />
+      let copyPages = [...pages];
+      copyPages.splice(copyPages.indexOf(currentPage) + utils.randint(2, 4), 0, repeatPage);
+      setPages(copyPages);
+    }   
   }
+
+  return (
+    <div className="main-app">
+      <NavBar goBack={goBack} goForward={goForward} />
+      <FunctionContext.Provider value={
+        {'click': handleClick, 'incorrect': handleIncorrect,
+        'correctFound': correctFound, 'setCorrectFound': setCorrectFound}}>
+        <App animation={childAnimation} page={pages[page]} />
+      </FunctionContext.Provider>
+    </div>
+  )
 }
+
 
 var words = [
   'natural', 'coffee table', 'curtain', 'carpet', "sock",
