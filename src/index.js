@@ -1,6 +1,6 @@
 import React, { useState, createContext} from 'react';
 import ReactDOM from 'react-dom';
-import App, { AskFromPicture } from './App.js'
+import App from './App.js'
 import * as utils from './functions.js';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.css';
@@ -20,9 +20,9 @@ function NavBar(props) {
 export const FunctionContext = createContext();
 
 function MainApp() {
+  const [pages, setPages] = useState(utils.generate_pages(words));
   const [page, setPage] = useState(0);
   const [childAnimation, setChildAnimtion] = useState('load-page');
-  const [pages, setPages] = useState(utils.generate_pages(words));
   const [correctFound, setCorrectFound] = useState(false);  
 
   function goBack() {
@@ -44,7 +44,7 @@ function MainApp() {
     setPage(cPage => cPage + 1);
   }
 
-  function handleIncorrect() {
+  function handleIncorrect(Component) {
     if (!correctFound) {
       let restOfArray = pages.slice(page + 1);
       let currentPage = pages[page];
@@ -53,7 +53,7 @@ function MainApp() {
           return null
         }
       }
-      let repeatPage = <AskFromPicture 
+      let repeatPage = <Component 
         allWords={words} word={currentPage.props.word} key={pages.length + 1} />
       let copyPages = [...pages];
       copyPages.splice(copyPages.indexOf(currentPage) + utils.randint(2, 4), 0, repeatPage);
@@ -62,7 +62,7 @@ function MainApp() {
   }
 
   return (
-    <div className="main-app">
+    <div className="question-page">
       <NavBar goBack={goBack} goForward={goForward} />
       <FunctionContext.Provider value={
         {'click': handleClick, 'incorrect': handleIncorrect,

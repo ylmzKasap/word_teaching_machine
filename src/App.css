@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Taviraj&display=swap");
 .navbar {
   display: flex;
   justify-content: center;
@@ -29,7 +30,7 @@
   flex-direction: row;
 }
 
-.intro-text, .text-option {
+.intro-text, .ask-from-text, .text-option {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -43,12 +44,13 @@
   min-height: 60px;
   border-radius: 20px;
   transition: 0.3s;
+  cursor: pointer;
 }
-.intro-text:hover, .text-option:hover {
+.intro-text:hover, .ask-from-text:hover, .text-option:hover {
   border-color: #d5e06e;
   transition: 0.15s;
 }
-.intro-text:hover > .number-box, .text-option:hover > .number-box {
+.intro-text:hover > .text-number-box, .ask-from-text:hover > .text-number-box, .text-option:hover > .text-number-box {
   background-color: #d5e06e;
   transition: 0.2s;
 }
@@ -96,7 +98,7 @@
   border-radius: 1vh;
 }
 
-.number-box {
+.text-number-box {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -109,6 +111,8 @@
   left: 0px;
   font-size: 90%;
   border-radius: 3px 1px 1px 3px;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .option-text {
@@ -119,6 +123,65 @@
   line-height: 1.4em;
   margin-left: 6vw;
   margin-right: 3vw;
+}
+
+.ask-from-text-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 90vh;
+}
+
+.ask-from-text {
+  margin-top: 9vh;
+  border-color: gray;
+}
+
+.image-options {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0px 30px 20px 30px;
+  border-radius: 15px;
+}
+
+.image-option-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 5px;
+  box-shadow: -1px 1px 5px #a1a0a0;
+  border-radius: 25px;
+  cursor: pointer;
+}
+.image-option-box:hover {
+  transform: scale(1.03);
+}
+
+.image-option {
+  min-height: 150px;
+  max-width: 100%;
+  width: 25vw;
+  height: 45vh;
+  border-radius: 25px 25px 0px 0px;
+  box-shadow: 0px 1px 1px #c5c5c5;
+}
+
+.image-number-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Taviraj", serif;
+  font-size: 140%;
+  font-weight: bold;
+  color: black;
+  height: 7vh;
+  width: 100%;
+  border-radius: 0px 0px 25px 25px;
+  cursor: pointer;
 }
 
 .incorrect-answer {
@@ -138,11 +201,16 @@
 }
 
 .correct-number {
+  color: white;
   background-color: black !important;
 }
 
 .incorrect-number {
   background-color: #3ea2ff !important;
+}
+
+.incorrect-image-number {
+  background-color: #e4e4e4 !important;
 }
 
 .load-page, .load-page-2 {
@@ -168,10 +236,10 @@
 
   .intro-word, .ask-from-picture {
     flex-direction: column;
-    height: 80vh;
+    height: 90vh;
   }
 
-  .intro-text, .text-option {
+  .intro-text, .text-option, .ask-from-text {
     font-size: 130%;
     width: 60vw;
   }
@@ -192,7 +260,7 @@
     grid-column-gap: 20px;
   }
 
-  .number-box {
+  .text-number-box {
     width: 14%;
   }
 
@@ -202,12 +270,35 @@
 
   .option-text {
     font-size: 100%;
-    margin-left: 7vw;
+    margin-left: 6vw;
     margin-right: 0px;
+  }
+
+  .ask-from-text {
+    margin-top: 4vh;
+  }
+
+  .image-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .image-option {
+    min-height: 50px;
+    max-width: 100%;
+    width: 40vw;
+    height: 25vh;
+    border-radius: 25px 25px 0px 0px;
+    box-shadow: 0px 1px 1px #c5c5c5;
   }
 }
 @media (max-height: 600px) {
-  .intro-text, .text-option {
+  .ask-from-text {
+    margin-top: 4vh;
+  }
+
+  .intro-text, .text-option, .ask-from-text {
     font-size: 150%;
   }
 
@@ -218,20 +309,59 @@
 }
 @media (max-height: 500px) {
   .navbar {
-    height: 50px;
+    height: 40px;
   }
 
   .intro-word, .ask-from-picture {
     height: 85vh;
   }
 
-  .intro-text, .text-option {
+  .intro-text, .text-option, .ask-from-text {
     font-size: 120%;
   }
 
   .text-option {
     font-size: 110%;
     margin-bottom: 10px;
+  }
+
+  .ask-from-text {
+    margin-top: 5vh;
+  }
+
+  .image-number-box {
+    height: 10vh;
+  }
+
+  .image-option {
+    height: 35vh;
+  }
+}
+@media screen and (max-aspect-ratio: 1/1) {
+  .ask-from-text {
+    margin-top: 4vh;
+  }
+
+  .image-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .image-option {
+    width: 35vh;
+    height: 25vh;
+  }
+
+  .intro-word, .ask-from-picture {
+    flex-direction: column;
+    height: 90vh;
+  }
+
+  .text-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: 20px;
   }
 }
 @keyframes shakeIt {

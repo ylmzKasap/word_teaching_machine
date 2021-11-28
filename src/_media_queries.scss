@@ -9,46 +9,58 @@ $small-screen: 1024px;
     }
     .intro-word {
         flex-direction: column;
-        height: 80vh;
+        height: 90vh;
     }
-
     .intro-text {
         font-size: 130%;
         width: 60vw;
     }
-
     .intro-img-box {
         height: 65vh;
         width: 75vw;
     }
-
     .intro-img {
         height: 100%;
         width: 100%;
     }
-
     .text-options {
         display: grid;
         grid-template-columns: 1fr 1fr;
         grid-column-gap: 20px;
     }
-
-    .number-box {
+    .text-number-box {
         width: 14%;
     }
-
     .text-option {
         width: 40vw;
     }
-
     .option-text {
         font-size: 100%;
-        margin-left: 7vw;
+        margin-left: 6vw;
         margin-right: 0px;
+    }
+    .ask-from-text {
+        margin-top: 4vh;
+    }
+    .image-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+    .image-option {
+        min-height: 50px;
+        max-width: 100%;
+        width: 40vw;
+        height: 25vh;
+        border-radius: 25px 25px 0px 0px;
+        box-shadow: 0px 1px 1px rgb(197, 197, 197);
     }
 }
 
 @media (max-height: 600px) {
+    .ask-from-text {
+        margin-top: 4vh;
+    }
     .intro-text {
         font-size: 150%;
     }
@@ -60,7 +72,7 @@ $small-screen: 1024px;
 
 @media (max-height: 500px) {
     .navbar {
-        height: 50px;
+        height: 40px;
     }
     .intro-word {
         height: 85vh;
@@ -72,6 +84,37 @@ $small-screen: 1024px;
         font-size: 110%;
         margin-bottom: 10px;
     }
+    .ask-from-text {
+        margin-top: 5vh;
+    }
+    .image-number-box {
+        height: 10vh;
+    }
+    .image-option {
+        height: 35vh;
+    }
 }
 
-    
+@media screen and (max-aspect-ratio: 1/1) {
+    .ask-from-text {
+        margin-top: 4vh;
+    }
+    .image-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+    .image-option {
+        width: 35vh;
+        height: 25vh;
+    }
+    .intro-word {
+        flex-direction: column;
+        height: 90vh;
+    }
+    .text-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-column-gap: 20px;
+    }
+}

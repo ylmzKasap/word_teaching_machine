@@ -1,4 +1,4 @@
-import { AskFromPicture, IntroduceWord } from './App.js'
+import { AskFromPicture, AskFromText, IntroduceWord } from './App.js'
 
 export function shuffle(array) {
     let currentIndex = array.length,  randomIndex;
@@ -36,10 +36,11 @@ export function playAndCatchError(mixer, message) {
   }
 }
 
-export function getRandomOptions(allOptions, correctOption, Component, props) {
-  let allOptionsCopy = [...allOptions];
+export function getRandomOptions(Component, props) {
+  let allOptionsCopy = [...props.allWords];
+  let correctOption = props.word;
   let options = [];
-  let optionCount = allOptions.length;
+  let optionCount = allOptionsCopy.length;
   // Maximum four options.
   if (optionCount > 4) {
     optionCount = 4;}
@@ -54,7 +55,7 @@ export function getRandomOptions(allOptions, correctOption, Component, props) {
   // Shuffle and set the option indexes.
   shuffle(options);
   options = options.map((vocab, index) => {
-    return <Component 
+    return <Component
       isCorrect={vocab === correctOption} word={vocab} number={index + 1}
       key={vocab} animateImg={props.animateImg} />
     }
@@ -70,8 +71,9 @@ export function generate_pages(words) {
       randomRange = (randomRange < .05) ? 1 : (randomRange < .20) ? 3 : 2;
       copyArray.splice(
         copyArray.indexOf(array[i]) + randomRange, 0, 
-        <AskFromPicture allWords={words} word={words[i]} key={words[i] + '-question'} />
-      );
+        (i % 2 === 0) ? 
+        <AskFromText allWords={words} word={words[i]} key={words[i] + '-question'} />
+        : <AskFromPicture allWords={words} word={words[i]} key={words[i] + '-question'} />);
     }
     return copyArray;
   }
