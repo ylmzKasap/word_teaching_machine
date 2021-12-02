@@ -21,6 +21,13 @@
     }
   }
 
+@keyframes onlyLightIt {
+  100% {
+    color: white;
+    background-color: rgb(33, 223, 33);
+  }
+}
+
 @keyframes emphasis {
   50% {
     transform: scale(1.05);

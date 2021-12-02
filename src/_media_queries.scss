@@ -2,6 +2,78 @@ $mobile: 480px;
 $tablet: 768px;
 $small-screen: 1024px;
 
+@media (max-height: 600px) {
+    .ask-from-text {
+        margin-top: 4vh;
+    }
+    .intro-text {
+        font-size: 150%;
+    }
+    .text-option {
+        font-size: 110%;
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-height: 500px) {
+    .navbar {
+        height: 40px;
+    }
+    .intro-word {
+        height: 85vh;
+    }
+    .intro-text {
+        font-size: 120%;
+    }
+    .text-option {
+        font-size: 110%;
+        margin-bottom: 10px;
+    }
+    .ask-from-text {
+        margin-top: 5vh;
+    }
+    .image-number-box {
+        height: 10vh;
+    }
+    .image-option {
+        height: 35vh;
+    }
+}
+
+@media screen and (max-aspect-ratio: 1/1) {
+    .intro-text {
+        width: 60vw;
+    }
+    .text-option {
+        font-size: 3vh;
+        width: 40vw;
+    }
+    .text-number-box {
+        width: 15%;
+    }
+    .ask-from-text {
+        margin-top: 4vh;
+    }
+    .image-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+    .image-option {
+        width: 35vh;
+        height: 25vh;
+    }
+    .intro-word {
+        flex-direction: column;
+        height: 90vh;
+    }
+    .text-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-column-gap: 20px;
+    }
+}
+
 @media (max-width: $mobile) {
     .navbar {
         padding-left: 3%;
@@ -54,67 +126,5 @@ $small-screen: 1024px;
         height: 25vh;
         border-radius: 25px 25px 0px 0px;
         box-shadow: 0px 1px 1px rgb(197, 197, 197);
-    }
-}
-
-@media (max-height: 600px) {
-    .ask-from-text {
-        margin-top: 4vh;
-    }
-    .intro-text {
-        font-size: 150%;
-    }
-    .text-option {
-        font-size: 110%;
-        margin-bottom: 10px;
-    }
-}
-
-@media (max-height: 500px) {
-    .navbar {
-        height: 40px;
-    }
-    .intro-word {
-        height: 85vh;
-    }
-    .intro-text {
-        font-size: 120%;
-    }
-    .text-option {
-        font-size: 110%;
-        margin-bottom: 10px;
-    }
-    .ask-from-text {
-        margin-top: 5vh;
-    }
-    .image-number-box {
-        height: 10vh;
-    }
-    .image-option {
-        height: 35vh;
-    }
-}
-
-@media screen and (max-aspect-ratio: 1/1) {
-    .ask-from-text {
-        margin-top: 4vh;
-    }
-    .image-options {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr 1fr;
-    }
-    .image-option {
-        width: 35vh;
-        height: 25vh;
-    }
-    .intro-word {
-        flex-direction: column;
-        height: 90vh;
-    }
-    .text-options {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-column-gap: 20px;
     }
 }

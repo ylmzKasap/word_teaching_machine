@@ -1,8 +1,24 @@
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import * as utils from './functions.js';
-import { FunctionContext } from './index.js'
 
 var audioMixer = new Audio();
+
+
+function NavBar(props) {
+  return (
+    <div className="navbar sticky-top navbar-dark bg-dark">
+      <i className="fas fa-arrow-left arrow" onClick={props.goBack}></i>
+      <i className="fas fa-arrow-right arrow" onClick={props.goForward}></i>
+    </div>
+  )
+}
+
+function ProgressBar(props) {
+  return (
+    <div id="progress-bar" style={{width: `${props.width}%`}} >
+    </div>
+  )
+}
 
 
 function IntroText(props) {
@@ -74,7 +90,6 @@ export function IntroduceWord(props) {
       {(layout >= .50 && window.innerWidth > 1024) ? [...pageItems] : [...pageItems.reverse()]}
     </div>
   )
-
 }
 
 
@@ -228,7 +243,7 @@ function ImageOptionBox(props) {
         audioMixer.src = "./sounds/correct.mp3";
         utils.playAndCatchError(audioMixer, errorMessage);
         setAnimation("correct-answer");
-        setNumStyle("correct-answer");
+        setNumStyle("correct-image-number");
         handleTimeouts({
           'sound': setTimeout(() => {
             animateText('emphasize');
@@ -272,6 +287,7 @@ function ImageOptions(props) {
   )
 }
 
+
 const textAnimContext = createContext();
 
 export function AskFromText(props) {
@@ -289,7 +305,7 @@ export function AskFromText(props) {
 }
 
 
-function MainQuestionPage(props) {
+function QuestionBody(props) {
     return (
     <div className={`main-page ${props.animation}`}>
       {props.page}
@@ -297,4 +313,67 @@ function MainQuestionPage(props) {
     )
 }
 
-export default MainQuestionPage;
+
+const FunctionContext = createContext();
+
+function QuestionPage(props) {
+  const [pages, setPages] = useState(utils.generate_pages(props.words));
+  const [page, setPage] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [childAnimation, setChildAnimtion] = useState('load-page');
+  const [correctFound, setCorrectFound] = useState(false);  
+
+  function goBack() {
+    if (page > 0) {
+      setPage(cPage => cPage - 1);
+      setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
+      setProgress(parseInt(((page - 1) * 110) / pages.length) + 5);
+    }
+  }
+
+  function goForward() {
+    if (page < pages.length) {
+      setPage(cPage => cPage + 1);
+      setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
+      setProgress(parseInt(((page + 1) * 110) / pages.length) + 5);
+    }
+  }
+
+  function handleClick() {
+    setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
+    setPage(cPage => cPage + 1);
+    setProgress(parseInt((page * 110) / pages.length) + 5);
+  }
+
+  function handleIncorrect(Component) {
+    if (!correctFound) {
+      let restOfArray = pages.slice(page + 1);
+      let currentPage = pages[page];
+      for (let i = 0; i < restOfArray.length; i++) {
+        if (restOfArray[i].props.word === currentPage.props.word) {
+          return null
+        }
+      }
+      let repeatPage = <Component 
+        allWords={props.words} word={currentPage.props.word} key={pages.length + 1} />
+      let copyPages = [...pages];
+      copyPages.splice(copyPages.indexOf(currentPage) + utils.randint(2, 4), 0, repeatPage);
+      setPages(copyPages);
+      setProgress(parseInt(((page - 1) * 110) / pages.length));
+    }   
+  }
+
+  return (
+    <div className="question-page">
+      <NavBar goBack={goBack} goForward={goForward} />
+      <ProgressBar width={progress} />
+      <FunctionContext.Provider value={
+        {'click': handleClick, 'incorrect': handleIncorrect,
+        'correctFound': correctFound, 'setCorrectFound': setCorrectFound}}>
+        <QuestionBody animation={childAnimation} page={pages[page]} />
+      </FunctionContext.Provider>
+    </div>
+  )
+}
+
+export default QuestionPage;
