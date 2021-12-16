@@ -1,0 +1,40 @@
+[
+    {
+        "username": "mahmut",
+        "user_pic": "mahmut.jpg",
+        "user_decks": {
+            "d1": [
+                "natural",
+                "coffee table",
+                "curtain",
+                "carpet"
+            ],
+            "d2": [
+                "sock",
+                "skirt",
+                "pillow",
+                "blanket"
+            ]
+        }
+    },
+    {
+        "username": "hm",
+        "user_pic": "hm.jpg",
+        "user_decks": {
+            "d1": [
+                "ladle",
+                "strainer",
+                "roof",
+                "elevator",
+                "stair"
+            ],
+            "d2": [
+                "natural",
+                "strainer",
+                "sock",
+                "elevator",
+                "coffee table"
+            ]
+        }
+    }  
+]

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import * as utils from './functions.js';
+import { renderMain, ProfilePage } from './index.js';
 
 var audioMixer = new Audio();
 
@@ -8,6 +9,7 @@ function NavBar(props) {
   return (
     <div className="navbar sticky-top navbar-dark bg-dark">
       <i className="fas fa-arrow-left arrow" onClick={props.goBack}></i>
+      <i className="fas fa-home" onClick={() => renderMain(ProfilePage)}></i>
       <i className="fas fa-arrow-right arrow" onClick={props.goForward}></i>
     </div>
   )
@@ -38,7 +40,7 @@ function IntroText(props) {
   }
 
   function playSound() {
-    audioMixer.src = `./sounds/${props.word}.mp3`;
+    audioMixer.src = `${props.word}.mp3`;
     audioMixer.load();
     utils.playAndCatchError(audioMixer, "Playback prevented by browser.")
   }
@@ -62,9 +64,10 @@ function IntroText(props) {
 
 
 function IntroImage(props) {
-  let imgLink = `./images/${props.word}.png`;
+  let imgLink = `${props.word}.png`;
+  let imgAnim = (props.imageAnimation === undefined) ? "" : props.imageAnimation;
   return (
-    <div className={`intro-img-box ${props.imageAnimation}`}>
+    <div className={`intro-img-box ${imgAnim}`}>
       <img className="intro-img" src={imgLink} alt={props.word} />
     </div>
     )
@@ -75,7 +78,7 @@ export function IntroduceWord(props) {
   const [layout] = useState(Math.random());
   const pageItems = [
     <IntroText word={props.word} key={props.word + '-text'} type="intro" textAnimation="" />,
-    <IntroImage word={props.word} key={props.word + '-image'} /> 
+    <IntroImage word={props.word} key={props.word + '-image'}/> 
   ];
 
   const clickHandler = useContext(FunctionContext)['click'];
@@ -124,14 +127,14 @@ function TextOptionBox(props) {
     if (props.isCorrect === true) {
       if (animation === "") {
         setCorrectFound(true);
-        audioMixer.src = "./sounds/correct.mp3";
+        audioMixer.src = "correct.mp3";
         utils.playAndCatchError(audioMixer, errorMessage);
         setAnimation("correct-answer");
         setNumStyle("correct-number");
         handleTimeouts({
           'sound': setTimeout(() => {
             props.animateImg();
-            audioMixer.src = `./sounds/${props.word}.mp3`;
+            audioMixer.src = `${props.word}.mp3`;
             utils.playAndCatchError(audioMixer, errorMessage);
             }, 1000),
           'click': setTimeout(() =>
@@ -141,7 +144,7 @@ function TextOptionBox(props) {
     } 
     else {
       if (animation === "") {
-          audioMixer.src = "./sounds/incorrect.mp3";
+          audioMixer.src = "incorrect.mp3";
           utils.playAndCatchError(audioMixer, errorMessage);
           setAnimation("incorrect-answer");
           setNumStyle("incorrect-number");
@@ -240,14 +243,14 @@ function ImageOptionBox(props) {
     if (props.isCorrect === true) {
       if (animation === "") {
         setCorrectFound(true);
-        audioMixer.src = "./sounds/correct.mp3";
+        audioMixer.src = "correct.mp3";
         utils.playAndCatchError(audioMixer, errorMessage);
         setAnimation("correct-answer");
         setNumStyle("correct-image-number");
         handleTimeouts({
           'sound': setTimeout(() => {
             animateText('emphasize');
-            audioMixer.src = `./sounds/${props.word}.mp3`;
+            audioMixer.src = `${props.word}.mp3`;
             utils.playAndCatchError(audioMixer, errorMessage);
             }, 1000),
           'click': setTimeout(() =>
@@ -257,7 +260,7 @@ function ImageOptionBox(props) {
     } 
     else {
       if (animation === "") {
-          audioMixer.src = "./sounds/incorrect.mp3";
+          audioMixer.src = "incorrect.mp3";
           utils.playAndCatchError(audioMixer, errorMessage);
           setAnimation("incorrect-answer");
           setNumStyle("incorrect-image-number");
@@ -268,7 +271,7 @@ function ImageOptionBox(props) {
     }
   }
 
-  const imgLink = `./images/${props.word}.png`;
+  const imgLink = `${props.word}.png`;
   return (
     <div className={`image-option-box ${animation}`} onClick={handleClick} >
       <img id={props.id} className="image-option" src={imgLink} alt={props.word} />
@@ -336,6 +339,9 @@ function QuestionPage(props) {
       setPage(cPage => cPage + 1);
       setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
       setProgress(parseInt(((page + 1) * 110) / pages.length) + 5);
+      if (page === pages.length - 1) {
+        renderMain(ProfilePage);
+      }
     }
   }
 
@@ -343,6 +349,9 @@ function QuestionPage(props) {
     setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
     setPage(cPage => cPage + 1);
     setProgress(parseInt((page * 110) / pages.length) + 5);
+    if (page === pages.length - 1) {
+      renderMain(ProfilePage);
+    }
   }
 
   function handleIncorrect(Component) {

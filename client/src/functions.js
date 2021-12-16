@@ -83,3 +83,13 @@ export function generate_pages(words) {
   pages = disperse_questions(pages);
   return [...pages];
 }
+
+export function generate_decks(deckObject, DeckComponent, userName) {
+  let decks = [];
+  Object.keys(deckObject).forEach(
+    (deck, index) => decks.push(
+      <DeckComponent words={deckObject[deck].split(',')}
+      key={`deck-${index + 1}`} deckName={deck} user={userName} />
+    ));
+  return [...decks];
+  }

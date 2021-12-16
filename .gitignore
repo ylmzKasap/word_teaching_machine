@@ -1,7 +1,9 @@
 # dependencies
-/images
+/media
 /node_modules
+/client/node_modules
 /.pnp
+/data/decks/db.js
 .pnp.js
 
 # testing
@@ -16,9 +18,6 @@
 .env.development.local
 .env.test.local
 .env.production.local
-README.md
-/public/images
-/public/sounds
 
 npm-debug.log*
 yarn-debug.log*
