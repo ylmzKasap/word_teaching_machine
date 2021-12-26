@@ -3,7 +3,8 @@
 /node_modules
 /client/node_modules
 /.pnp
-/data/decks/db.js
+/data/db_info.js
+/data/info.sql
 .pnp.js
 
 # testing

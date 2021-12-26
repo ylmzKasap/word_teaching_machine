@@ -1,0 +1,133 @@
+.fa-exclamation-circle {
+    margin-right: auto;
+    margin-left: 15px;
+    width: 30px;
+    transform: scale(2);
+    color: red;
+    left: 20px;
+    top: 1em;
+    &:hover {
+      transform: scale(2);
+    }
+  }
+
+.deck-input-overlay {
+    @include flexit();
+    background-color: rgba(204, 204, 204, 0.582);
+    position: fixed;
+    height: 100vh;
+    width: 100%;
+    margin: 0px;
+    inset: 0px;
+  }
+  
+  .create-deck-info {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    height: 35em;
+    width: 50%;
+    box-shadow: rgb(155, 155, 155) -1px 1px 5px 1px;
+  }
+  
+  .input-label {
+    display: flex;
+    flex-direction: column;
+    line-height: 2.5em;
+    margin: 2% 6% 3% 6%;
+    > .input-info {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 1%;
+    }
+    > .text-input {
+      padding: 0 0 0 2%;
+      border-radius: 5px;
+    }
+    > .word-input {
+      padding: 2% 2% 0 2%;
+      border-radius: 5px;
+      line-height: 1.2em;
+      height: 12em;
+      resize: none;
+    }
+  }
+  
+  .input-error {
+    font-style: italic;
+    color: rgb(153, 153, 153);
+  }
+  
+  .forbidden-input {
+    border: solid rgb(235, 11, 11) 2px;
+    outline: none;
+  }
+  
+  .submit-deck {
+    display: flex;
+    justify-content: space-between;
+    height: 10%;
+    margin: 2% 6% 3% 6%;
+    > .submit-deck-button {
+      height: 100%;
+      flex-basis: 25%;
+      padding: 5px;
+      background-color: rgb(86, 194, 226);
+      color: white;
+      &:hover {
+        background-color: rgb(60, 202, 119);
+        border-color: rgb(60, 202, 119);
+      }
+      &:active {
+        background-color: rgb(54, 163, 100);
+        color: rgb(238, 238, 238);
+      }
+    }
+    > .error-field {
+      @include flexit();
+      height: 100%;
+      flex-basis: 70%;
+      text-align: center;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    > .invalid-form {
+      border: solid rgb(189, 15, 166);
+    }
+  }
+  
+  .error-description {
+    padding-left: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: auto;
+  }
+  
+  .overlay-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 10%;
+    background-color: rgb(56, 56, 56);
+    padding-left: 3%;
+    color: white;
+    > .exit-button {
+      background-color: rgb(56, 56, 56);
+      height: 100%;
+      width: 10%;
+      font-weight: bold;
+      border-left: solid rgb(233, 233, 233);
+      border-width: 0px 0px 0px 3px;
+      color: white;
+      &:hover {
+        background-color: rgb(236, 76, 18);
+        border-color: rgb(236, 76, 18);
+      }
+      &:active {
+        color: rgb(233, 233, 233);
+        background-color: rgb(209, 69, 18);
+        border-color: rgb(209, 69, 18);
+      }
+    }
+  }

@@ -1,106 +1,132 @@
 const express = require('express');
 const app = express();
 
-var serveStatic = require('serve-static')
 const path = require('path')
 const cors = require('cors');
-const pool = require('./data/decks/db');
 const fs = require('fs');
+
+const db_utils = require('./data/db_functions');
+const db_tests = require('./data/db_tests');
+
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve User Info.
-app.get('/u/:username/:userInfo?', async (req, res) => {
-  const { username, userInfo } = req.params;
-  const decks = await pool.query(
-    `SELECT * FROM user_info WHERE username = '${username}'`
-  ).catch(err => console.log(err));
+// Serve media files.
+app.use("/media", express.static(path.join(__dirname, 'media/images')));
+app.use("/media", express.static(path.join(__dirname, 'media/sounds')));
 
-  const user = decks.rows[0]; 
-  
-  if (user) {
+
+
+// Serve User Info.
+app.get('/u/:username/:directory_id?', async (req, res, next) => {
+    const { username, directory_id } = req.params;
+    const userInfo = await db_utils.getUserInfo(username);
+    
     if (userInfo) {
-      if (user.hasOwnProperty(userInfo)) {
-        res.status(200).send(user[userInfo]);
-      } else {
-        res.status(404).send('Not Found')
-      }
+        if (directory_id) {
+            const directory = await db_utils.getDirectory(username, directory_id);
+            if (directory) {
+                res.status(200).send(directory);
+            } else {
+                res.status(404).send('Not Found')
+            }
+        } else {
+            res.status(200).send(userInfo)
+        }
     } else {
-      res.status(200).send(user);
+        res.status(404).send('Not Found')
     }
-  } else {
-    res.status(404).send('Not Found')
-  }
 });
+
 
 // Handle deck creation.
-app.post("/u/:username/:userInfo?", async (req, res) => {
-  const { username } = req.params;
-  const deckInfo = req.body;
+app.post("/u/:username/:create_deck", async (req, res, next) => {
+    const { username } = req.params;
+    const { deckName, cards, parent_id } = req.body;
+    
+    // Locate image files.
+    const imageExtensions = ['.jpg', '.png', '.PNG', '.jpeg', '.webp'];
+    const [missingFiles, foundFiles] = findFiles(
+        "media\\images\\", cards.split(','), imageExtensions);
 
-  const getDecks = await pool.query(
-    `SELECT * FROM user_info WHERE username = '${username}'`
-  ).catch(err => console.log(err));
-
-  const currentDecks = getDecks.rows[0]['user_decks'];
-
-  if (currentDecks.hasOwnProperty(deckInfo['deckName'])) {
-    res.status(409).send(`Deck '${deckInfo['deckName']}' already exists.`)
-  }
-
-  currentDecks[deckInfo['deckName']] = deckInfo['cards'];
-  const updateDecks =  await pool.query(
-    `UPDATE user_info SET user_decks = '${JSON.stringify(currentDecks)}' WHERE username = '${username}';`
-  ).catch(err => console.log(err));
-  res.status(200).send('Created the deck.')
-});
-
-// Delete decks.
-app.delete("/u/:username/:userInfo?", async (req, res) => {
-  const { username } = req.params;
-  const deckInfo = req.body;
-
-  const getDecks = await pool.query(
-    `SELECT * FROM user_info WHERE username = '${username}'`
-  ).catch(err => console.log(err));
-
-  const currentDecks = getDecks.rows[0]['user_decks'];
-  delete currentDecks[deckInfo['deck']];
-
-  const updateDecks =  await pool.query(
-    `UPDATE user_info SET user_decks = '${JSON.stringify(currentDecks)}' WHERE username = '${username}';`
-  ).catch(err => console.log(err));
-  res.status(200).send('Deleted the deck.');
+    if (missingFiles.length > 0) {
+        return res.status(417).send(`Images not found: ${missingFiles.join(', ')}.`);
+    }
+    
+    // Create deck
+    const newDeck = await db_utils.addItem({
+        'name': deckName,
+        'owner': username,
+        'item_type': 'file',
+        'parent': parent_id,
+        'content': foundFiles
+    })
+    .then(() => res.end())
+    .catch(err => {
+        const description = db_utils.handleError(err.code);
+        return res.status(400).send(
+            description == 'Unique Violation' ? `Deck '${deckName}' already exists.` : description);
+    });
 });
 
 
-const findFiles = (directory, wordArray, extensions) => {
-  // Directory -> `${process.cwd()}\\media\\images\\`
-  let missingFiles = [];
-  let foundFiles = [];
-  for (let word of wordArray) {
-    let fileFound = false;
-    for (let extension of extensions) {
-      if (fs.existsSync(directory + word + extension)) {
-        foundFiles.push(directory + word + extension);
-        fileFound = true;
-        break;
-      }
+// Delete deck.
+app.delete("/u/:username/:delete_deck", async (req, res) => {
+    const { username } = req.params;
+    const { deckName, parent_id } = req.body;
+
+    await db_utils.deleteFolder(username, deckName, parent_id)
+    .then(() => res.end()).catch(res.status(400).send('Something went wrong...'));
+});
+
+
+// Set directory to child folder.
+app.get('/subdir/:username/:folder_name/:parent_id', async (req, res) => {
+    const { username, folder_name, parent_id } = req.params;
+
+    const childDirectoryId = await db_utils.getItemId(username, folder_name, parent_id);
+
+    if (childDirectoryId) {
+        res.status(200).send(childDirectoryId)
+    } else {
+        res.status(400).send('Folder not found.')
     }
-    if (!fileFound) {
-      missingFiles.push(word);
+});
+
+// Set directory to parent folder.
+app.get('/updir/:username/:parent_id', async (req, res) => {
+    const { username, parent_id } = req.params;
+
+    const grandparent_id = await db_utils.getGrandparent(username, parent_id);
+
+    if (grandparent_id) {
+        res.status(200).send(grandparent_id.toString());
+    } else {
+        res.status(400).send('Something went horribly wrong.');
     }
-  };
+});
+
+function findFiles (directory, wordArray, extensions) {
+    // Directory -> `${process.cwd()}\\media\\images\\`
+    let missingFiles = [];
+    let foundFiles = [];
+    for (let word of wordArray) {
+        let fileFound = false;
+        for (let extension of extensions) {
+            if (fs.existsSync(directory + word + extension)) {
+                foundFiles.push(word + extension);
+                fileFound = true;
+                break;
+            }
+        }
+        if (!fileFound) {
+            missingFiles.push(word);
+        }
+    };
+    return [missingFiles, foundFiles];
 };
-
-
-// findFiles(`${process.cwd()}\\media\\images\\`, ['curtain', 'egoo', 'coffee table', 'hm', 'cof'], ['.jpg', '.png', '.jpeg', '.webp']);
-
-// Serve media files.
-app.use(serveStatic(path.join(__dirname, 'media/images')))
-app.use(serveStatic(path.join(__dirname, 'media/sounds')))
 
 
 const port = process.env.PORT || 3001;
