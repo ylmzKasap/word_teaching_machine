@@ -4,6 +4,7 @@ import axios from 'axios';
 import { userName } from "..";
 import { generate_decks } from "./common/functions";
 import { CreateDeckOverlay } from "./CreateDeckOverlay";
+import { CreateFolderOverlay } from "./CreateFolderOverlay";
 
 
 export const ProfileContext = createContext();
@@ -55,7 +56,8 @@ export const ProfilePage = (props) => {
 function ProfileNavBar() {
     // Component of ProfilePage.
 
-    const [overlayDisplay, setOverlayDisplay] = useState({"display": "none"});
+    const [deckDisplay, setDeckDisplay] = useState({"display": "none"});
+    const [folderDisplay, setFolderDisplay] = useState({"display": "none"});
     const [backDisplay, setBackDisplay] = useState({"display": "none"});
   
     const directory = useContext(ProfileContext)['directory'];
@@ -75,16 +77,21 @@ function ProfileNavBar() {
     }
   
     const addCard = () => {
-        setOverlayDisplay(view => view["display"] === "none" ? {"display": "flex"} : {"display": "none"});
+        setDeckDisplay(view => view["display"] === "none" ? {"display": "flex"} : {"display": "none"});
+    }
+
+    const addFolder = () => {
+        setFolderDisplay(view => view["display"] === "none" ? {"display": "flex"} : {"display": "none"});
     }
     
     // Children: CreateDeckOverlay
     return (
         <div className="profile-navbar sticky-top navbar-dark bg-dark">
             <i className="fas fa-arrow-left arrow" style={backDisplay} onClick={handleBackClick}></i>
-            <i className="fas fa-folder-plus"></i>
+            <i className="fas fa-folder-plus" onClick={addFolder}></i>
             <i className="fas fa-plus-circle" onClick={addCard}></i>
-            <CreateDeckOverlay display={overlayDisplay} setDisplay={addCard} />
+            <CreateDeckOverlay display={deckDisplay} setDisplay={addCard} />
+            <CreateFolderOverlay display={folderDisplay} setDisplay={addFolder} />
         </div>
     )
 }

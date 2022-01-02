@@ -1,7 +1,7 @@
 // AskFromPicture -> TextOptions -> TextOptionBox -> NumberBox | IntroImage
 
 import { useState, useContext, useEffect } from 'react';
-import { IntroImage, NumberBox } from './common/shared';
+import { IntroImage, NumberBox } from './common/components';
 import { playAndCatchError, getRandomOptions } from './common/functions';
 import { audioMixer, FunctionContext } from './QuestionPage';
 

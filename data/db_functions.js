@@ -34,7 +34,7 @@ async function createItemTable(name) {
         owner VARCHAR(30) REFERENCES users (username)
         ON DELETE CASCADE,
         content VARCHAR(1000),
-        CONSTRAINT ${name}_unique_files UNIQUE (item_name, parent_id, owner)
+        CONSTRAINT ${name}_unique_files UNIQUE (item_type, item_name, parent_id, owner)
     );`).catch(err => console.log(err));
 }
 
@@ -113,22 +113,25 @@ async function getGrandparent(owner, parent_id) {
     return grandparent_id.rows[0].parent_id;
 }
 
-async function deleteFolder(owner, folder, parent_id) {
+async function deleteItem(owner, name, parent_id, item_type) {
     await pool.query(`
-        DELETE FROM ${owner}_table WHERE (parent_id = ${parent_id} AND item_name = '${folder}');
+        DELETE FROM ${owner}_table WHERE 
+        (parent_id = ${parent_id} AND item_name = '${name}' AND item_type = '${item_type}');
         `).catch(err => console.log(err));
     return true;
 }
 
 module.exports = {
+    createUsersTable,
     addUser,
     deleteUser,
     getUserInfo,
-    addItem,
     getDirectory,
     getFiles,
     getGrandparent,
     getItemId,
-    deleteFolder,
-    handleError
+    addItem,
+    deleteItem,
+    handleError,
+    dropTable
 }

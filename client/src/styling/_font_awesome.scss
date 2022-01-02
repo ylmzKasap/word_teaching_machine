@@ -1,0 +1,44 @@
+.fas {
+  color: white;
+  cursor: pointer;
+  margin: 0 5px 0 15px;
+  &:hover {
+    transform: scale(1.2);
+  }
+  &:active {
+    transform: scale(1);
+    color: gray;
+  }
+  &.fa-fingerprint {
+    color: gray;
+  }
+}
+
+.fa-exclamation-circle {
+  margin-right: auto;
+  margin-left: 15px;
+  width: 30px;
+  transform: scale(2);
+  color: red;
+  left: 20px;
+  top: 1em;
+  &:hover {
+    transform: scale(2);
+  }
+}
+
+.fa-home {
+  @extend .fas;
+  transform: scale(1.2);
+  &:hover {
+    transform: scale(1.4);
+  }
+  &:active {
+    transform: scale(1.2);
+  }
+}
+
+.fa-trash-alt {
+  @include flexit();
+  color: black;
+}

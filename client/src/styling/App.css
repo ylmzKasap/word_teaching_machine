@@ -1,25 +1,59 @@
 @import url("https://fonts.googleapis.com/css2?family=Taviraj&display=swap");
-.navbar, .profile-navbar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  justify-content: space-between;
-  padding-left: 1.2%;
-  padding-right: 1.2%;
-  height: 7vh;
+@keyframes shakeIt {
+  25% {
+    transform: rotate(3deg);
+  }
+  55% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
 }
-
-.profile-navbar > .fa-folder-plus {
-  margin-left: auto;
+@keyframes lightIt {
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    color: white;
+    background-color: #21df21;
+    transform: scale(1);
+  }
 }
-
-#progress-bar {
-  background-color: #fc6028 !important;
-  max-width: 100%;
-  height: 3px;
-  transition: 1s;
+@keyframes onlyLightIt {
+  100% {
+    color: white;
+    background-color: #21df21;
+  }
 }
-
+@keyframes emphasis {
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes slideLeftIn {
+  0% {
+    margin-left: -1%;
+    opacity: 0.1;
+  }
+  100% {
+    margin-left: 0%;
+    opacity: 1;
+  }
+}
+@keyframes slideRightIn {
+  0% {
+    margin-left: 1%;
+    opacity: 0.1;
+  }
+  100% {
+    margin-left: 0%;
+    opacity: 1;
+  }
+}
 .fas, .fa-home {
   color: white;
   cursor: pointer;
@@ -31,6 +65,22 @@
 .fas:active, .fa-home:active {
   transform: scale(1);
   color: gray;
+}
+.fas.fa-fingerprint, .fa-fingerprint.fa-home {
+  color: gray;
+}
+
+.fa-exclamation-circle {
+  margin-right: auto;
+  margin-left: 15px;
+  width: 30px;
+  transform: scale(2);
+  color: red;
+  left: 20px;
+  top: 1em;
+}
+.fa-exclamation-circle:hover {
+  transform: scale(2);
 }
 
 .fa-home {
@@ -48,6 +98,10 @@
   justify-content: center;
   align-items: center;
   color: black;
+}
+
+.profile-navbar > .fa-folder-plus {
+  margin-left: auto;
 }
 
 .deck-footer {
@@ -138,6 +192,79 @@
 .folder-img {
   height: auto;
   max-width: 100%;
+}
+
+.drag-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 300px);
+  align-items: flex-start;
+  column-gap: 2%;
+  height: 100%;
+  width: 100%;
+}
+
+.drag-group {
+  color: white;
+  background-color: gray;
+  padding: 3%;
+  display: grid;
+  align-content: flex-start;
+  height: auto;
+  width: 300px;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.drag-item-container {
+  flex-direction: column;
+}
+
+.drag-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e6962f;
+  height: 70px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.drag-filler {
+  height: 15px;
+  width: 100%;
+  background-color: gray;
+}
+
+.drag-item-clone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #8e2fe6;
+  background-color: #e6962f;
+  color: white;
+  font-size: 1.4rem;
+  position: fixed;
+  width: 282px;
+  height: 70px;
+  cursor: pointer;
+}
+
+.navbar, .profile-navbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1.2%;
+  padding-right: 1.2%;
+  height: 7vh;
+}
+
+#progress-bar {
+  background-color: #fc6028 !important;
+  max-width: 100%;
+  height: 3px;
+  transition: 1s;
 }
 
 .intro-word, .ask-from-picture {
@@ -355,6 +482,131 @@
   animation-duration: 0.7s;
 }
 
+.input-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(204, 204, 204, 0.582);
+  position: fixed;
+  height: 100vh;
+  width: 100%;
+  margin: 0px;
+  inset: 0px;
+}
+
+.create-item-info {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  height: 35em;
+  width: 50%;
+  box-shadow: #9b9b9b -1px 1px 5px 1px;
+}
+
+.input-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 2.5em;
+  margin: 2% 6% 3% 6%;
+}
+.input-label > .input-info {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1%;
+}
+.input-label > .text-input {
+  padding: 0 0 0 2%;
+  border-radius: 5px;
+}
+.input-label > .word-input {
+  padding: 2% 2% 0 2%;
+  border-radius: 5px;
+  line-height: 1.2em;
+  height: 12em;
+  resize: none;
+}
+
+.input-error {
+  font-style: italic;
+  color: #999999;
+}
+
+.forbidden-input {
+  border: solid #eb0b0b 2px;
+  outline: none;
+}
+
+.submit-form {
+  display: flex;
+  justify-content: space-between;
+  height: 10%;
+  margin: 2% 6% 3% 6%;
+}
+.submit-form > .submit-form-button {
+  height: 100%;
+  flex-basis: 25%;
+  padding: 5px;
+  background-color: #56c2e2;
+  color: white;
+}
+.submit-form > .submit-form-button:hover {
+  background-color: #3cca77;
+  border-color: #3cca77;
+}
+.submit-form > .submit-form-button:active {
+  background-color: #36a364;
+  color: #eeeeee;
+}
+.submit-form > .error-field {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  flex-basis: 70%;
+  text-align: center;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.submit-form > .invalid-form {
+  border: solid #bd0fa6;
+}
+
+.error-description {
+  padding-left: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: auto;
+}
+
+.overlay-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 10%;
+  background-color: #383838;
+  padding-left: 3%;
+  color: white;
+}
+.overlay-nav > .exit-button {
+  background-color: #383838;
+  height: 100%;
+  width: 10%;
+  font-weight: bold;
+  border-left: solid #e9e9e9;
+  border-width: 0px 0px 0px 3px;
+  color: white;
+}
+.overlay-nav > .exit-button:hover {
+  background-color: #ec4c12;
+  border-color: #ec4c12;
+}
+.overlay-nav > .exit-button:active {
+  color: #e9e9e9;
+  background-color: #d14512;
+  border-color: #d14512;
+}
+
 @media (max-height: 600px) {
   .ask-from-text {
     margin-top: 4vh;
@@ -508,198 +760,6 @@
     height: 100%;
     width: 100%;
   }
-}
-@keyframes shakeIt {
-  25% {
-    transform: rotate(3deg);
-  }
-  55% {
-    transform: rotate(-2deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-@keyframes lightIt {
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    color: white;
-    background-color: #21df21;
-    transform: scale(1);
-  }
-}
-@keyframes onlyLightIt {
-  100% {
-    color: white;
-    background-color: #21df21;
-  }
-}
-@keyframes emphasis {
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-@keyframes slideLeftIn {
-  0% {
-    margin-left: -1%;
-    opacity: 0.1;
-  }
-  100% {
-    margin-left: 0%;
-    opacity: 1;
-  }
-}
-@keyframes slideRightIn {
-  0% {
-    margin-left: 1%;
-    opacity: 0.1;
-  }
-  100% {
-    margin-left: 0%;
-    opacity: 1;
-  }
-}
-.fa-exclamation-circle {
-  margin-right: auto;
-  margin-left: 15px;
-  width: 30px;
-  transform: scale(2);
-  color: red;
-  left: 20px;
-  top: 1em;
-}
-.fa-exclamation-circle:hover {
-  transform: scale(2);
-}
-
-.deck-input-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(204, 204, 204, 0.582);
-  position: fixed;
-  height: 100vh;
-  width: 100%;
-  margin: 0px;
-  inset: 0px;
-}
-
-.create-deck-info {
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  height: 35em;
-  width: 50%;
-  box-shadow: #9b9b9b -1px 1px 5px 1px;
-}
-
-.input-label {
-  display: flex;
-  flex-direction: column;
-  line-height: 2.5em;
-  margin: 2% 6% 3% 6%;
-}
-.input-label > .input-info {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 1%;
-}
-.input-label > .text-input {
-  padding: 0 0 0 2%;
-  border-radius: 5px;
-}
-.input-label > .word-input {
-  padding: 2% 2% 0 2%;
-  border-radius: 5px;
-  line-height: 1.2em;
-  height: 12em;
-  resize: none;
-}
-
-.input-error {
-  font-style: italic;
-  color: #999999;
-}
-
-.forbidden-input {
-  border: solid #eb0b0b 2px;
-  outline: none;
-}
-
-.submit-deck {
-  display: flex;
-  justify-content: space-between;
-  height: 10%;
-  margin: 2% 6% 3% 6%;
-}
-.submit-deck > .submit-deck-button {
-  height: 100%;
-  flex-basis: 25%;
-  padding: 5px;
-  background-color: #56c2e2;
-  color: white;
-}
-.submit-deck > .submit-deck-button:hover {
-  background-color: #3cca77;
-  border-color: #3cca77;
-}
-.submit-deck > .submit-deck-button:active {
-  background-color: #36a364;
-  color: #eeeeee;
-}
-.submit-deck > .error-field {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  flex-basis: 70%;
-  text-align: center;
-  border-radius: 5px;
-  overflow: hidden;
-}
-.submit-deck > .invalid-form {
-  border: solid #bd0fa6;
-}
-
-.error-description {
-  padding-left: 20px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: auto;
-}
-
-.overlay-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 10%;
-  background-color: #383838;
-  padding-left: 3%;
-  color: white;
-}
-.overlay-nav > .exit-button {
-  background-color: #383838;
-  height: 100%;
-  width: 10%;
-  font-weight: bold;
-  border-left: solid #e9e9e9;
-  border-width: 0px 0px 0px 3px;
-  color: white;
-}
-.overlay-nav > .exit-button:hover {
-  background-color: #ec4c12;
-  border-color: #ec4c12;
-}
-.overlay-nav > .exit-button:active {
-  color: #e9e9e9;
-  background-color: #d14512;
-  border-color: #d14512;
 }
 
 /*# sourceMappingURL=App.css.map */

@@ -1,0 +1,219 @@
+.navbar {
+  @include flexit();
+  justify-content: space-between;
+  padding-left: 1.2%;
+  padding-right: 1.2%;
+  height: 7vh;
+}
+
+#progress-bar {
+  background-color: rgb(252, 96, 40) !important;
+  max-width: 100%;
+  height: 3px;
+  transition: 1s;
+}
+
+.intro-word {
+  @include flexit();
+  height: 90vh;
+  background-color: #ffffff;
+  justify-content: space-around;
+  flex-direction: row;
+}
+
+.intro-text {
+  @include flexit();
+  font-size: 200%;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  height: 15vh;
+  width: 40vw;
+  border: solid rgb(62, 162, 255);
+  min-height: 60px;
+  border-radius: 20px;
+  transition: 0.3s;
+  cursor: pointer;
+  &:hover {
+    border-color: rgb(213, 224, 110);
+    transition: 0.15s;
+    > .text-number-box {
+      background-color: rgb(213, 224, 110);
+      transition: 0.2s;
+    }
+  }
+}
+
+.text-intro-box {
+  @include flexit();
+  flex-direction: column;
+}
+
+.continue {
+  color: gray;
+  opacity: 0.7;
+  margin-top: 3%;
+}
+
+.continue-icon {
+  margin-right: 5px;
+}
+
+.intro-img-box {
+  @include flexit();
+  position: relative;
+  border-radius: 10px;
+  min-height: 150px;
+  min-width: 100px;
+  height: 80vh;
+  width: 50vw;
+}
+
+.intro-img {
+  height: 100%;
+  width: 100%;
+  padding: 10px;
+  border-radius: 50px;
+}
+
+.ask-from-picture {
+  @extend .intro-word;
+}
+
+.text-option {
+  @extend .intro-text;
+  margin-bottom: 25px;
+  position: relative;
+  top: 1vh;
+  border-radius: 1vh;
+}
+
+.text-number-box {
+  @include flexit();
+  color: white;
+  background-color: rgb(62, 162, 255);
+  height: 100%;
+  width: 8%;
+  padding: 5px;
+  position: absolute;
+  left: 0px;
+  font-size: 90%;
+  border-radius: 3px 1px 1px 3px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.option-text {
+  font-size: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-height: 125%;
+  line-height: 1.4em;
+  margin-left: 6vw;
+  margin-right: 3vw;
+}
+
+.ask-from-text-box {
+  @include flexit();
+  flex-direction: column;
+  justify-content: space-between;
+  height: 90vh;
+}
+
+.ask-from-text {
+  @extend .intro-text;
+  margin-top: 9vh;
+  border-color: gray;
+}
+
+.image-options {
+  @include flexit();
+  margin: 0px 30px 20px 30px;
+  border-radius: 15px;
+}
+
+.image-option-box {
+  @include flexit();
+  flex-direction: column;
+  margin: 5px;
+  box-shadow: -1px 1px 5px rgb(161, 160, 160);
+  border-radius: 25px;
+  &:hover {
+    transform: scale(1.03);
+  }
+  cursor: pointer;
+}
+
+.image-option {
+  min-height: 150px;
+  max-width: 100%;
+  width: 25vw;
+  height: 45vh;
+  border-radius: 25px 25px 0px 0px;
+  box-shadow: 0px 1px 1px rgb(197, 197, 197);
+}
+
+.image-number-box {
+  @include flexit();
+  font-family: 'Taviraj', serif;
+  font-size: 140%;
+  font-weight: bold;
+  color: black;
+  height: 7vh;
+  width: 100%;
+  border-radius: 0px 0px 25px 25px;
+  cursor: pointer;
+}
+
+.incorrect-answer {
+  opacity: 0.2;
+  background-color: #DDD;
+  animation-name: shakeIt;
+  animation-fill-mode: forwards;
+  animation-duration: 0.6s;
+  border-color: rgb(62, 162, 255) !important;
+  cursor: default;
+}
+
+.correct-answer {
+  animation-name: lightIt;
+  animation-fill-mode: forwards;
+  animation-duration: 0.5s;
+  border-color: black !important;
+}
+
+.correct-number {
+  color: white;
+  background-color: black !important;
+}
+
+.incorrect-number {
+  background-color: rgb(62, 162, 255) !important;
+  cursor: default;
+}
+
+.correct-image-number {
+  @extend .correct-answer;
+  animation-name: onlyLightIt;
+}
+
+.incorrect-image-number {
+  background-color: rgb(228, 228, 228) !important;
+  cursor: default;
+}
+
+.load-page {
+  animation-name: slideLeftIn;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-out;
+}
+
+.load-page-2 {
+  animation-name: slideRightIn;
+  @extend .load-page;
+}
+
+.emphasize {
+  animation-name: emphasis;
+  animation-duration: 0.7s;
+}

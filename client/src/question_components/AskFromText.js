@@ -1,7 +1,7 @@
 // AskFromText -> IntroText | ImageOptions -> ImageOptionBox -> NumberBox
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { IntroText, NumberBox } from "./common/shared";
+import { IntroText, NumberBox } from "./common/components";
 import { getRandomOptions, playAndCatchError } from "./common/functions";
 import { audioMixer, FunctionContext } from "./QuestionPage";
 

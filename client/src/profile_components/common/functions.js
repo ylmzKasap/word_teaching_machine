@@ -10,11 +10,11 @@ export function generate_decks(items, userName) {
 		(item, index) => {
 			let itemName = item.item_name;
 			if (item.item_type === 'folder') {
-				decks.push(<Folder key={`folder-${index + 1}`} folderName={itemName} />)
+				decks.push(<Folder key={`folder-${index + 1}`} name={itemName} type={'folder'} />)
 			} else {
 				decks.push(
 					<Deck allPaths={item.content.split(',')}
-					key={`deck-${index + 1}`} deckName={itemName} user={userName} />
+					key={`deck-${index + 1}`} name={itemName} user={userName} type={'file'} />
 				)
 			}
 		}  

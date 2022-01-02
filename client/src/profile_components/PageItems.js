@@ -15,25 +15,28 @@ export const Folder = (props) => {
     const setDirectory = useContext(ProfileContext)['setDirectory'];
   
     const handleDoubleClick = () => {
-        axios.get(`/subdir/${userName}/${props.folderName}/${currentDirectory}`)
+        axios.get(`/subdir/${userName}/${props.name}/${currentDirectory}`)
             .then(response => {
                 setDirectory(response.data);
         });
     }
   
     const selfDestruct = () => {
-        if (window.confirm("Delete the folder?")) {
-            axios.delete(`http://localhost:3001/u/${userName}/user_decks`, 
-            {data: {"item": props.folderName}})
-                .then(renderContext(x => !x))
-                .catch(err => console.log(err));
+        if (window.confirm("Delete the folder and all of its content?")) {
+            axios.delete(`http://localhost:3001/u/${userName}/delete_item`, {data: {
+                name: props.name,
+                parent_id: currentDirectory,
+                item_type: props.type}}
+            )
+            .then(renderContext(x => !x))
+            .catch(err => console.log(err));
         }
     }
 
     return (
-        <div className="folder" onDoubleClick={handleDoubleClick}>
+        <div className="folder" onDoubleClick={handleDoubleClick} onTouchCancel={handleDoubleClick} draggable="true" >
             <img className="folder-img" src="media\\profile\\yellowFolder.svg" alt="folder-icon" />
-            <p>{props.folderName}</p>
+            <p>{props.name}</p>
             <div className="deck-footer">
                 <i className="fas fa-trash-alt" onClick={selfDestruct}></i>
             </div>
@@ -48,21 +51,21 @@ export const Deck = (props) => {
 
     const [style, setStyle] = useState({});
   
-    const dir = useContext(ProfileContext)['directory'];
+    const currentDirectory = useContext(ProfileContext)['directory'];
+    const renderContext = useContext(ProfileContext)['render'];
   
     const render = (elem) => {
         if (elem.target.className === "deck") {
-            renderMain(QuestionPage, {allPaths: props.allPaths, directory: dir});
+            renderMain(QuestionPage, {allPaths: props.allPaths, directory: currentDirectory});
         }
     }
   
-    const renderContext = useContext(ProfileContext)['render'];
-  
     const selfDestruct = () => {
         if (window.confirm("Delete the deck?")) {
-            axios.delete(`http://localhost:3001/u/${userName}/delete_deck`, {data: {
-                deckName: props.deckName,
-                parent_id: dir}}
+            axios.delete(`http://localhost:3001/u/${userName}/delete_item`, {data: {
+                name: props.name,
+                parent_id: currentDirectory,
+                item_type: props.type}}
             )
             .then(renderContext(x => !x))
             .catch(err => console.log(err));
@@ -95,7 +98,8 @@ export const Deck = (props) => {
   
     return (
         <div className="deck" onClick={render} style={style} draggable="true"
-            onDragStart={handleDrag} onDragEnd={handleDrag}>{props.deckName}
+            onDragStart={handleDrag} onDragEnd={handleDrag}>{props.name}
+            {/* {createThumbnail()} */}
             <div className="deck-footer">
                 <i className="fas fa-trash-alt" onClick={selfDestruct}></i>
             </div>

@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { IntroImage, IntroText } from "./common/shared";
+import { IntroImage, IntroText } from "./common/components";
 import { FunctionContext } from "./QuestionPage";
 
 

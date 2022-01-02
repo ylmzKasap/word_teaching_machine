@@ -42,7 +42,7 @@ app.get('/u/:username/:directory_id?', async (req, res, next) => {
 
 
 // Handle deck creation.
-app.post("/u/:username/:create_deck", async (req, res, next) => {
+app.post("/u/:username/create_deck", async (req, res) => {
     const { username } = req.params;
     const { deckName, cards, parent_id } = req.body;
     
@@ -72,13 +72,33 @@ app.post("/u/:username/:create_deck", async (req, res, next) => {
 });
 
 
-// Delete deck.
-app.delete("/u/:username/:delete_deck", async (req, res) => {
+app.post("/u/:username/create_folder", async (req, res) => {
     const { username } = req.params;
-    const { deckName, parent_id } = req.body;
+    const { folderName, parent_id } = req.body;
 
-    await db_utils.deleteFolder(username, deckName, parent_id)
-    .then(() => res.end()).catch(res.status(400).send('Something went wrong...'));
+    // Create folder
+    const newFolder = await db_utils.addItem({
+        'name': folderName,
+        'owner': username,
+        'item_type': 'folder',
+        'parent': parent_id,
+    })
+    .then(() => res.end())
+    .catch(err => {
+        const description = db_utils.handleError(err.code);
+        return res.status(400).send(
+            description == 'Unique Violation' ? `Folder '${folderName}' already exists.` : description);
+    });
+})
+
+
+// Delete File or Folder.
+app.delete("/u/:username/delete_item", async (req, res) => {
+    const { username } = req.params;
+    const { name, parent_id, item_type } = req.body;
+
+    await db_utils.deleteItem(username, name, parent_id, item_type)
+    .then(() => res.end()).catch(() => res.status(400).send('Something went wrong...'));
 });
 
 
@@ -128,6 +148,10 @@ function findFiles (directory, wordArray, extensions) {
     return [missingFiles, foundFiles];
 };
 
+
+async function main() {
+    db_tests.setUp();
+}
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));

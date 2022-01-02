@@ -1,25 +1,26 @@
+
 @keyframes shakeIt {
-    25% {
-      transform: rotate(3deg);
-    }
-    55% {
-      transform: rotate(-2deg);
-    }
-    100% {
-      transform: rotate(0deg);
-    }
+  25% {
+    transform: rotate(3deg);
   }
+  55% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
 
 @keyframes lightIt {
-    50% {
-      transform: scale(1.1);
-    }
-    100% {
-      color: white;
-      background-color: rgb(33, 223, 33);
-      transform: scale(1.0);
-    }
+  50% {
+    transform: scale(1.1);
   }
+  100% {
+    color: white;
+    background-color: rgb(33, 223, 33);
+    transform: scale(1.0);
+  }
+}
 
 @keyframes onlyLightIt {
   100% {
@@ -38,23 +39,23 @@
 }
 
 @keyframes slideLeftIn {
-0% {
+  0% {
     margin-left: -1%;
     opacity: 0.1;
-}
-100% {
+  }
+  100% {
     margin-left: 0%;
     opacity: 1;
-}
+  }
 }
 
 @keyframes slideRightIn {
-0% {
+  0% {
     margin-left: 1%;
     opacity: 0.1;
-}
-100% {
+  }
+  100% {
     margin-left: 0%;
     opacity: 1;
-}
+  }
 }

@@ -1,0 +1,148 @@
+.profile-navbar {
+  @extend .navbar;
+  > .fa-folder-plus {
+    margin-left: auto;
+  }
+}
+
+.deck-footer {
+  @include flexit();
+  height: 30px;
+  width: 100%;
+  background-color: rgb(231, 231, 231);
+  position: absolute;
+  bottom: 0px;
+}
+
+.profile-content {
+  height: auto;
+  overflow: auto;
+  min-height: 93vh;
+  display: flex;
+  flex-direction: row;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20%;
+  min-width: 200px;
+  height: auto;
+  min-height: 100%;
+  margin: 0;
+  box-shadow: gainsboro 2px -1px 2px;
+  background: linear-gradient(-180deg, rgb(255, 238, 82), white);
+}
+
+.user-image {
+  max-width: 50%;
+  height: auto;
+  border-radius: 20%;
+  margin: 5% 0 5% 0;
+}
+
+.username {
+  font-family: Taviraj, Cambria;
+  text-align: center;
+  line-height: 3em;
+  font-size: 120%;
+  height: 3em;
+  width: 100%;
+  background-color: rgb(255, 231, 17);
+  border: solid black;
+  border-width: 2px 0 2px 0;
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill , minmax(150px, 250px));
+  column-gap: 30px;
+  row-gap: 30px;
+  grid-template-rows: repeat(auto-fill, minmax(200px, 300px));
+  height: auto;
+  width: 80%;
+  padding: 50px 0 0 20px;
+  justify-content: center;
+}
+
+.deck {
+  @include flexit();
+  position: relative;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  min-width: 150px;
+  min-height: 200px;
+  margin: 0 10px 30px 0;
+  border-radius: 10%;
+  overflow: hidden;
+  box-shadow:rgb(223, 223, 223) 0px 0px 5px 1px;
+  cursor: pointer;
+}
+
+.deck-thumbnail {
+  width: 50%;
+  height: 50%;
+}
+
+.folder {
+  @extend .deck;
+}
+
+.folder-img {
+  height: auto;
+  max-width: 100%;
+}
+
+.drag-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 300px);
+  align-items: flex-start;
+  column-gap: 2%;
+  height: 100%;
+  width: 100%;
+}
+
+.drag-group {
+  color: white;
+  background-color: gray;
+  padding: 3%;
+  display: grid;
+  align-content: flex-start;
+  height: auto;
+  width: 300px;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.drag-item-container {
+  flex-direction: column
+}
+
+.drag-item {
+  @include flexit();
+  background-color: rgb(230, 150, 47);
+  height: 70px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.drag-filler {
+  height: 15px;
+  width: 100%;
+  background-color: gray;
+}
+
+.drag-item-clone {
+  @include flexit();
+  background-color: rgb(142, 47, 230);
+  background-color: rgb(230, 150, 47);
+  color: white;
+  font-size: 1.4rem;
+  position: fixed;
+  width: 282px;
+  height: 70px;
+  cursor: pointer;
+}
