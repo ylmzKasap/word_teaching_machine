@@ -26,8 +26,7 @@ export function CreateDeck(props) {
     const [wordError, setWordError] = useState({errorClass: "", description: ""});
     const [formError, setFormError] = useState({display: {"display": "none"}, errorClass: "", description: ""});
     
-    const directory = useContext(ProfileContext)['directory'];
-    const renderContext = useContext(ProfileContext)['render'];
+    const { directory, setReRender } = useContext(ProfileContext);
   
     const handleNameChange = (event) => {
         const [itemName, itemNameError, generalError] = handlers.handleItemName(event);
@@ -50,7 +49,8 @@ export function CreateDeck(props) {
     }
   
     const handleSubmit = (event) => {
-        event.preventDefault();
+       event.preventDefault();
+
         let allWords = 
             words.split("\n")
             .filter(word => word !== '')
@@ -64,6 +64,10 @@ export function CreateDeck(props) {
         else if (allWords.length === 0) {
             setFormError({errorClass: "invalid-form", description: "Enter at least one word."});
         }
+
+        else if (words === "") {
+            setFormError({errorClass: "invalid-form", description: "Enter a deck name."});
+        }
     
         else {
             axios.post(`http://localhost:3001/u/${userName}/create_deck`, {
@@ -71,10 +75,10 @@ export function CreateDeck(props) {
                 cards: allWords,
                 parent_id: directory}
             ).then(() => {
-                props.setDisplay();
-                renderContext(x => !x);
                 setDeckName(""); setWords("");
                 setFormError({display: {"display": "none"}, errorClass: "", description: ""});
+                setReRender(x => !x);
+                props.setDisplay(false);
                 }).catch(err =>
                     setFormError({errorClass: "invalid-form", description: err.response.data}));
         }

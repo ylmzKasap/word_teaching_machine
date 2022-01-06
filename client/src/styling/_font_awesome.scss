@@ -40,5 +40,10 @@
 
 .fa-trash-alt {
   @include flexit();
-  color: black;
+  color: white;
+}
+
+.fa-long-arrow-alt-left {
+  transform: scale(2);
+  pointer-events: none;
 }

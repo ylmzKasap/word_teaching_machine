@@ -1,9 +1,9 @@
 export const OverlayNavbar = (props) => {
-    // Component of CreateDeck.
+    // Component of CreateDeck, CreateFolder.
 
     const handleExit = (event) => {
         event.preventDefault();
-        props.setDisplay({"display": "none"});
+        props.setDisplay(false);
     }
     
     return (

@@ -24,8 +24,7 @@ export function CreateFolder(props) {
     const [nameError, setNameError] = useState({errorClass: "", description: ""});
     const [formError, setFormError] = useState({display: {"display": "none"}, errorClass: "", description: ""});
 
-    const directory = useContext(ProfileContext)['directory'];
-    const renderContext = useContext(ProfileContext)['render'];
+    const { directory, setReRender } = useContext(ProfileContext);
 
     const handleNameChange = (event) => {
         const [itemName, itemNameError, generalError] = handlers.handleItemName(event);
@@ -35,9 +34,19 @@ export function CreateFolder(props) {
     };
 
     const handleSubmit = (event) => {
+        if (event.type === 'keydown') {
+            if (event.code !== 'Enter') {
+                return
+            }
+        }
+
         event.preventDefault();
 
-        if (nameError.errorClass !== "") {
+        if (folderName === "") {
+            setFormError({errorClass: "invalid-form", description: "Enter a folder name."});
+        }
+        
+        else if (nameError.errorClass !== "") {
             setFormError({errorClass: "invalid-form", description: "Fix the problem above."});
         }
     
@@ -46,17 +55,17 @@ export function CreateFolder(props) {
                 folderName: folderName,
                 parent_id: directory}
             ).then(() => {
-                props.setDisplay();
-                renderContext(x => !x);
                 setfolderName("");
                 setFormError({display: {"display": "none"}, errorClass: "", description: ""});
+                setReRender(x => !x);
+                props.setDisplay(false);
                 }).catch(err =>
                     setFormError({errorClass: "invalid-form", description: err.response.data}));
         }
     } 
 
     return (
-        <form className="create-item-info" onSubmit={handleSubmit}>
+        <form className="create-item-info" onSubmit={handleSubmit} onKeyDown={handleSubmit}>
             <components.OverlayNavbar setDisplay={props.setDisplay} description="Create a new folder" />
             {/* Folder name */}
             <components.InputField 

@@ -1,86 +1,104 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from 'axios';
 
 import { userName, renderMain } from "..";
 import { ProfileContext } from "./ProfilePage";
 import { QuestionPage } from "../question_components/QuestionPage";
+import * as handlers from "./common/handlers";
 
 
-export const Folder = (props) => {
+export const PageItem = (props) => {
     // Component of ProfilePage.
     // Deployed by './common/functions' -> generate_decks.
 
-    const renderContext = useContext(ProfileContext)['render'];
-    const currentDirectory = useContext(ProfileContext)['directory'];
-    const setDirectory = useContext(ProfileContext)['setDirectory'];
+    const [selfStyle, setSelfStyle] = useState({"order": props.order});
+    const [fillerClass, setFillerClass] = useState("");
+    const { draggedElement, setDraggedElement, directory, setDirectory, setReRender,
+        isDragging, cloneTimeout, resetDrag } = useContext(ProfileContext);
+    
+
+    // Set the opacity of dragged element while dragging.
+    useEffect(() => {
+        if (isDragging && props.name === draggedElement.name) {
+            setSelfStyle({"opacity": 0.6, "transition": "opacity .3s", "order": props.order});
+        } else {
+            setSelfStyle({"order": props.order});
+        }
+    }, [isDragging, draggedElement, props.name]);
+
   
+    // Change directory after double clicking on a folder.
     const handleDoubleClick = () => {
-        axios.get(`/subdir/${userName}/${props.name}/${currentDirectory}`)
-            .then(response => {
-                setDirectory(response.data);
-        });
-    }
-  
-    const selfDestruct = () => {
-        if (window.confirm("Delete the folder and all of its content?")) {
-            axios.delete(`http://localhost:3001/u/${userName}/delete_item`, {data: {
-                name: props.name,
-                parent_id: currentDirectory,
-                item_type: props.type}}
-            )
-            .then(renderContext(x => !x))
-            .catch(err => console.log(err));
+        if (props.type === 'folder') {
+            axios.get(`/subdir/${userName}/${props.name}/${directory}`)
+            .then(response => 
+                setDirectory(response.data)
+            );
         }
     }
 
-    return (
-        <div className="folder" onDoubleClick={handleDoubleClick} onTouchCancel={handleDoubleClick} draggable="true" >
-            <img className="folder-img" src="media\\profile\\yellowFolder.svg" alt="folder-icon" />
-            <p>{props.name}</p>
-            <div className="deck-footer">
-                <i className="fas fa-trash-alt" onClick={selfDestruct}></i>
-            </div>
-        </div>
-    )
-}
+    // Set the properties of the 'to be dragged' element on mouse click.
+    const handleMouseDown = (event) => {
+        // Only left click
+        if (event.nativeEvent.which !== 1) {return};
 
+        let targetElem = event.target;
+        if (targetElem.className !== props.type) {
+            targetElem = event.target.closest(`.${props.type}`);
+        }
+        const draggedElement = handlers.handleDownOnDragged(targetElem, props, cloneTimeout);
+        setDraggedElement(draggedElement);
+    }
 
-export const Deck = (props) => {
-    // Component of ProfilePage.
-    // Deployed by './common/functions' -> generate_decks.
+    const handleMouseUp = (event) => {
+        // Only left click
+        if (event.nativeEvent.which !== 1) {return};
 
-    const [style, setStyle] = useState({});
-  
-    const currentDirectory = useContext(ProfileContext)['directory'];
-    const renderContext = useContext(ProfileContext)['render'];
-  
-    const render = (elem) => {
-        if (elem.target.className === "deck") {
-            renderMain(QuestionPage, {allPaths: props.allPaths, directory: currentDirectory});
+        if (event.target.className === "file" && !isDragging) {
+            renderMain(QuestionPage, {allPaths: props.allPaths, directory: directory});
+        }
+
+        let targetElem = event.target.className;
+        if (!(['file', 'folder'].includes(handleMouseUp))) {
+            targetElem = event.target.closest(`.${props.type}`)
+        }
+
+        if (
+            targetElem.className === 'file'
+            ||
+            draggedElement.name === targetElem.innerText
+            ) {
+                resetDrag(true);
+                return
+        }
+        
+        if (isDragging) {
+            axios.put(`/updatedir/${userName}`, {
+                'parent_id': directory,
+                'item_name': draggedElement.name,
+                'item_type': draggedElement.type,
+                'parent_name': targetElem.innerText,
+            }).then(() => {
+                setReRender(r => !r);
+            }).catch(err => console.log(err.response.data));
+        }
+        resetDrag();    
+    }
+
+    // Style the filler on hovering.
+    const handleFillerHover = (event) => {
+        const siblingName = event.target.nextElementSibling.innerText;
+        if (siblingName !== draggedElement.name) {
+            if (isDragging && !cloneTimeout.exists) {
+                if (event.type === 'mouseover') {
+                    setFillerClass('filler-hovered');
+                } else {
+                    setFillerClass('');
+                }   
+            }
         }
     }
-  
-    const selfDestruct = () => {
-        if (window.confirm("Delete the deck?")) {
-            axios.delete(`http://localhost:3001/u/${userName}/delete_item`, {data: {
-                name: props.name,
-                parent_id: currentDirectory,
-                item_type: props.type}}
-            )
-            .then(renderContext(x => !x))
-            .catch(err => console.log(err));
-        }
-    }
-  
-    const handleDrag = (event) => {
-        if (event.type === 'dragstart') {
-            setStyle({"opacity": "1", "backgroundColor": "#888", "color": "white"});
-            setTimeout(() => setStyle({"opacity": "0.4", "backgroundColor": "#EEE"}), 1)
-        } else if (event.type === 'dragend') {
-            setStyle({"opacity": "1"});
-        }
-    }
-  
+
     const createThumbnail = () => {
         let thumbnail = [];
         props.allPaths.forEach((imgPath, index) => {
@@ -95,13 +113,21 @@ export const Deck = (props) => {
         });
         return thumbnail;
     }
-  
+
     return (
-        <div className="deck" onClick={render} style={style} draggable="true"
-            onDragStart={handleDrag} onDragEnd={handleDrag}>{props.name}
-            {/* {createThumbnail()} */}
-            <div className="deck-footer">
-                <i className="fas fa-trash-alt" onClick={selfDestruct}></i>
+        <div className="item-with-filler" style={selfStyle}>
+            <div className={`filler ${fillerClass}`} onMouseOver={handleFillerHover} onMouseLeave={handleFillerHover} />
+            <div 
+                className={props.type}
+                onDoubleClick={handleDoubleClick}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                >{props.type === 'folder' &&
+                    <img className="folder-img" src="media\\profile\\yellowFolder.svg" alt="folder-icon" draggable="false" />
+                }
+                <p>{props.name}</p>
+                <div className="item-footer">
+                </div>
             </div>
         </div>
     )

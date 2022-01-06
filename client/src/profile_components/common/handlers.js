@@ -1,4 +1,6 @@
 export function handleItemName(synthEvent) {
+    // Used by CreateDeckOverlay and CreateFolderOverlay.
+
     const itemNameFilter = /[.,\\'"]/;
     const itemName = synthEvent.target.value;
     const generalError = {display: {"display": "none"}, errorClass: "", description: ""};
@@ -22,4 +24,18 @@ export function handleItemName(synthEvent) {
     };
 
     return [itemName, itemNameError, generalError];
+}
+
+
+export function handleDownOnDragged(targetElem, props, cloneTimeout) {
+    // Used by PageItem component.
+
+    if (!cloneTimeout.exists) {
+        const elementDimensions = targetElem.getBoundingClientRect();
+        const draggedElement = {
+            'name': props.name, 'type': props.type, 'clonedStyle': elementDimensions}
+        return draggedElement;
+    } else {
+        return {}
+    }
 }

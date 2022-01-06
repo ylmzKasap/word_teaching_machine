@@ -18,7 +18,6 @@ app.use("/media", express.static(path.join(__dirname, 'media/images')));
 app.use("/media", express.static(path.join(__dirname, 'media/sounds')));
 
 
-
 // Serve User Info.
 app.get('/u/:username/:directory_id?', async (req, res, next) => {
     const { username, directory_id } = req.params;
@@ -26,12 +25,9 @@ app.get('/u/:username/:directory_id?', async (req, res, next) => {
     
     if (userInfo) {
         if (directory_id) {
-            const directory = await db_utils.getDirectory(username, directory_id);
-            if (directory) {
-                res.status(200).send(directory);
-            } else {
-                res.status(404).send('Not Found')
-            }
+            await db_utils.getDirectory(username, directory_id)
+            .then(directory => res.status(200).send(directory))
+            .catch(() => res.status(404).send('Not Found'));
         } else {
             res.status(200).send(userInfo)
         }
@@ -72,6 +68,7 @@ app.post("/u/:username/create_deck", async (req, res) => {
 });
 
 
+// Handle folder creation.
 app.post("/u/:username/create_folder", async (req, res) => {
     const { username } = req.params;
     const { folderName, parent_id } = req.body;
@@ -128,6 +125,25 @@ app.get('/updir/:username/:parent_id', async (req, res) => {
     }
 });
 
+
+app.put('/updatedir/:username', async (req, res) => {
+    const { username } = req.params;
+    const { parent_id, item_name, item_type, parent_name } = req.body;
+
+    await db_utils.updateDirectory(
+        username, parent_id, item_name, item_type, parent_name)
+        .then(() => res.end())
+        .catch(err => {
+            const description = db_utils.handleError(err.code);
+            return res.status(400).send(
+                description == 'Unique Violation'
+                ? 
+                `Item '${item_name}' already exists in ${parent_name ? parent_name : 'parent folder'}.`
+                :
+                description);
+        })
+})
+
 function findFiles (directory, wordArray, extensions) {
     // Directory -> `${process.cwd()}\\media\\images\\`
     let missingFiles = [];
@@ -150,8 +166,10 @@ function findFiles (directory, wordArray, extensions) {
 
 
 async function main() {
-    db_tests.setUp();
+    await db_utils.updateColumnValue('hayri', 3, 'item_order', '2.5').catch(err => console.log(err.code));
 }
+
+main()
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));

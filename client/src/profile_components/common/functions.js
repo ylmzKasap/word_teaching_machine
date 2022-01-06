@@ -1,23 +1,34 @@
-import { Deck, Folder } from '../PageItems';
+import { PageItem } from '../PageItems';
 
 
-export function generate_decks(items, userName) {
+export function generate_directory(items, userName) {
     // Used by ProfilePage.
     // Creates folders and decks with database items.
 
-	let decks = [];
+	let directory = [];
+	let folderCount = 0; let fileCount = 0;
 	items.forEach(
-		(item, index) => {
+		(item) => {
 			let itemName = item.item_name;
+			let order = item.item_order;
 			if (item.item_type === 'folder') {
-				decks.push(<Folder key={`folder-${index + 1}`} name={itemName} type={'folder'} />)
-			} else {
-				decks.push(
-					<Deck allPaths={item.content.split(',')}
-					key={`deck-${index + 1}`} name={itemName} user={userName} type={'file'} />
+				directory.push(
+				<PageItem key={`folder-${folderCount + 1}`} name={itemName}
+						type={'folder'} order={order} />
 				)
+				folderCount += 1;
+			} else {
+				directory.push(
+					<PageItem key={`deck-${fileCount + 1}`} name={itemName} type={'file'}
+					allPaths={item.content.split(',')} user={userName} order={order} />
+				)
+				fileCount += 1;
 			}
 		}  
 	);
-	return [...decks];
+	return [...directory];
+}
+
+export function hasKeys(anyObject) {
+	return Object.keys(anyObject).length > 0;
 }
