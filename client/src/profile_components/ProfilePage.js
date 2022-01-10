@@ -1,11 +1,10 @@
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, useReducer, createContext, useContext } from "react";
 import axios from 'axios';
 
 import { userName } from "..";
 import { generate_directory, hasKeys } from "./common/functions";
 import { CreateDeckOverlay } from "./CreateDeckOverlay";
 import { CreateFolderOverlay } from "./CreateFolderOverlay";
-
 
 
 export const ProfileContext = createContext();
@@ -17,7 +16,8 @@ export const ProfilePage = (props) => {
     const [userPicture, setUserPicture] = useState("no_pic.png");
     const [directory, setDirectory] = useState(props.dir);
     const [items, setItems] = useState([]);
-    const [reRender, setReRender] = useState(false);
+    const [reRender, setReRender] = useReducer(x => x + 1, 0);
+    const [scrolling, setScrolling] = useState({'exists': false, 'direction': null});
 
     // Dragging related states.
     const [cloneElement, setCloneElement] = useState("");
@@ -26,7 +26,6 @@ export const ProfilePage = (props) => {
     const [draggedElement, setDraggedElement] = useState({});
     const [dragCount, setDragCount] = useState(0);
     const [isDragging, setDrag] = useState(false);
-  
     
     // Load user picture.
     useEffect(() => {
@@ -42,7 +41,7 @@ export const ProfilePage = (props) => {
     useEffect(() => {
         axios.get(`/u/${userName}/${directory}`)
         .then(response =>  {
-            setItems(response.data);
+            setItems(generate_directory(response.data, userName));
             }
         )
         return (() => {
@@ -58,6 +57,17 @@ export const ProfilePage = (props) => {
             setCloneElement(<DragClone item={draggedElement.name} cloneStyle={cloneStyle} />)
         }
     }, [cloneStyle, draggedElement, isDragging])
+
+
+    useEffect(() => {
+        if (scrolling.exists && scrolling.element) {
+            const scrollAmount = scrolling.direction === 'down' ? 200 : -200;
+            scrolling.element.scrollBy({
+                top: scrollAmount,
+                behavior: 'smooth'
+            })
+        }  
+    }, [scrolling])
 
 
     // Reset all drag related state.
@@ -104,6 +114,16 @@ export const ProfilePage = (props) => {
                 });
                 setDrag(true);
                 setCloneElement(<DragClone item={draggedElement.name} cloneStyle={cloneStyle} />)
+                if (event.target.closest('.bottom-drag-bar') === null) {
+                    const scrolledElement = event.target.closest('.card-container');
+                    if (window.innerHeight - 80 < event.clientY) {
+                        setScrolling({'exists': true, 'direction': 'down', 'element': scrolledElement});  
+                    } else if (event.clientY < 60) {
+                        setScrolling({'exists': true, 'direction': 'up', 'element': scrolledElement}); 
+                    } else {
+                        setScrolling({'exists': false}); 
+                    }
+                }    
             } 
         }
     }
@@ -127,14 +147,16 @@ export const ProfilePage = (props) => {
             "setDraggedElement": setDraggedElement,
             "isDragging": isDragging,
             "cloneTimeout": cloneTimeout,
-            "resetDrag": resetDrag}
+            "resetDrag": resetDrag,
+            "items": items}
             }>
-            <div className="profile-page" onMouseMove={handleMouseAction} onMouseUp={handleMouseUp}>
+            <div className="profile-page"
+                onMouseMove={handleMouseAction} onMouseUp={handleMouseUp}>
                 <ProfileNavBar user={userName} />
                 <div className="profile-content">
                     <SideBar user={userName} userPicture={userPicture} />
                     <div className="card-container">
-                        {generate_directory(items, userName)}
+                        {items}
                         <BottomDragBar />
                     </div>
                 </div>
@@ -185,6 +207,7 @@ const ProfileNavBar = () => {
             <i className="fas fa-plus-circle" type="deck" onClick={addItem}></i>
             {deckDisplay && <CreateDeckOverlay setDisplay={setDeckDisplay} />}
             {folderDisplay && <CreateFolderOverlay setDisplay={setFolderDisplay} />}
+
         </div>
     )
 }
@@ -226,7 +249,7 @@ const BottomDragBar = () => {
                     item_type: draggedElement.type}}
                 )
                 .then(() => {
-                    setReRender(x => !x);
+                    setReRender();
                 })
                 .catch(err => console.log(err));
             } else {
@@ -238,11 +261,12 @@ const BottomDragBar = () => {
     const sendBack = () => {
         // Move dragged item to parent folder.
         axios.put(`/updatedir/${userName}`, {
-            'parent_id': directory,
+            'item_id': draggedElement.id,
             'item_name': draggedElement.name,
-            'item_type': draggedElement.type,
+            'parent_id': directory,
+            'direction': 'parent'
         }).then(() => {
-            setReRender(r => !r);
+            setReRender();
         }).catch(err => console.log(err.response.data));
         resetDrag();
     }

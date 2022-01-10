@@ -33,7 +33,10 @@ export function handleDownOnDragged(targetElem, props, cloneTimeout) {
     if (!cloneTimeout.exists) {
         const elementDimensions = targetElem.getBoundingClientRect();
         const draggedElement = {
-            'name': props.name, 'type': props.type, 'clonedStyle': elementDimensions}
+            'id': props.id,
+            'name': props.name,
+            'type': props.type,
+            'clonedStyle': elementDimensions}
         return draggedElement;
     } else {
         return {}

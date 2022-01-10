@@ -5,6 +5,7 @@ import { userName, renderMain } from "..";
 import { ProfileContext } from "./ProfilePage";
 import { QuestionPage } from "../question_components/QuestionPage";
 import * as handlers from "./common/handlers";
+import { Filler } from "./common/components";
 
 
 export const PageItem = (props) => {
@@ -13,35 +14,33 @@ export const PageItem = (props) => {
 
     const [selfStyle, setSelfStyle] = useState({"order": props.order});
     const [fillerClass, setFillerClass] = useState("");
+    const [lastFillerClass, setLastFillerClass] = useState("");
     const { draggedElement, setDraggedElement, directory, setDirectory, setReRender,
-        isDragging, cloneTimeout, resetDrag } = useContext(ProfileContext);
+        isDragging, cloneTimeout, resetDrag, items } = useContext(ProfileContext);
     
 
     // Set the opacity of dragged element while dragging.
     useEffect(() => {
-        if (isDragging && props.name === draggedElement.name) {
+        if (isDragging && props.name === draggedElement.name && props.type === draggedElement.type) {
             setSelfStyle({"opacity": 0.6, "transition": "opacity .3s", "order": props.order});
         } else {
             setSelfStyle({"order": props.order});
         }
-    }, [isDragging, draggedElement, props.name]);
+    }, [isDragging, draggedElement, props.name, props.order]);
 
   
     // Change directory after double clicking on a folder.
-    const handleDoubleClick = () => {
+    const handleDoubleClick = (event) => {
         if (props.type === 'folder') {
-            axios.get(`/subdir/${userName}/${props.name}/${directory}`)
-            .then(response => 
-                setDirectory(response.data)
-            );
+            setDirectory(props.id);
         }
     }
 
     // Set the properties of the 'to be dragged' element on mouse click.
     const handleMouseDown = (event) => {
         // Only left click
-        if (event.nativeEvent.which !== 1) {return};
-
+        if (event.nativeEvent.which !== 1 || isDragging) {return};
+        
         let targetElem = event.target;
         if (targetElem.className !== props.type) {
             targetElem = event.target.closest(`.${props.type}`);
@@ -55,7 +54,7 @@ export const PageItem = (props) => {
         if (event.nativeEvent.which !== 1) {return};
 
         if (event.target.className === "file" && !isDragging) {
-            renderMain(QuestionPage, {allPaths: props.allPaths, directory: directory});
+            renderMain(QuestionPage, {allPaths: props.content, directory: directory});
         }
 
         let targetElem = event.target.className;
@@ -65,8 +64,10 @@ export const PageItem = (props) => {
 
         if (
             targetElem.className === 'file'
-            ||
-            draggedElement.name === targetElem.innerText
+                ||
+            (draggedElement.name === targetElem.innerText
+                &&
+            draggedElement.type === targetElem.attributes.class.value)
             ) {
                 resetDrag(true);
                 return
@@ -74,34 +75,22 @@ export const PageItem = (props) => {
         
         if (isDragging) {
             axios.put(`/updatedir/${userName}`, {
-                'parent_id': directory,
+                'item_id': draggedElement.id,
                 'item_name': draggedElement.name,
-                'item_type': draggedElement.type,
+                'target_id': targetElem.id,
                 'parent_name': targetElem.innerText,
-            }).then(() => {
-                setReRender(r => !r);
-            }).catch(err => console.log(err.response.data));
+                'parent_id': directory,
+                'direction': 'subfolder'
+            })
+            .then(() => setReRender())
+            .catch(err => console.log(err.response.data));
         }
         resetDrag();    
     }
 
-    // Style the filler on hovering.
-    const handleFillerHover = (event) => {
-        const siblingName = event.target.nextElementSibling.innerText;
-        if (siblingName !== draggedElement.name) {
-            if (isDragging && !cloneTimeout.exists) {
-                if (event.type === 'mouseover') {
-                    setFillerClass('filler-hovered');
-                } else {
-                    setFillerClass('');
-                }   
-            }
-        }
-    }
-
     const createThumbnail = () => {
         let thumbnail = [];
-        props.allPaths.forEach((imgPath, index) => {
+        props.content.forEach((imgPath, index) => {
             let wordStem = imgPath.split(".")[0];
             if (thumbnail.length >= 4) {
                 return
@@ -116,19 +105,29 @@ export const PageItem = (props) => {
 
     return (
         <div className="item-with-filler" style={selfStyle}>
-            <div className={`filler ${fillerClass}`} onMouseOver={handleFillerHover} onMouseLeave={handleFillerHover} />
+            <Filler 
+                fillerClass={fillerClass}
+                setFillerClass={setFillerClass}
+                order={{}} type="regular" />
             <div 
+                id={props.id}
                 className={props.type}
                 onDoubleClick={handleDoubleClick}
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
-                >{props.type === 'folder' &&
-                    <img className="folder-img" src="media\\profile\\yellowFolder.svg" alt="folder-icon" draggable="false" />
+                > {props.type === 'folder' &&
+                     <img className="folder-img" src="media\\profile\\yellowFolder.svg" alt="folder-icon" draggable="false" />
                 }
                 <p>{props.name}</p>
                 <div className="item-footer">
                 </div>
             </div>
+            {items.length === parseInt(props.order) &&
+                <Filler 
+                fillerClass={lastFillerClass}
+                setFillerClass={setLastFillerClass}
+                siblingType={props.type}
+                order={items.length + 1} type="last"/>}
         </div>
     )
 }

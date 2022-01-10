@@ -6,24 +6,25 @@ export function generate_directory(items, userName) {
     // Creates folders and decks with database items.
 
 	let directory = [];
-	let folderCount = 0; let fileCount = 0;
 	items.forEach(
 		(item) => {
-			let itemName = item.item_name;
-			let order = item.item_order;
-			if (item.item_type === 'folder') {
-				directory.push(
-				<PageItem key={`folder-${folderCount + 1}`} name={itemName}
-						type={'folder'} order={order} />
-				)
-				folderCount += 1;
-			} else {
-				directory.push(
-					<PageItem key={`deck-${fileCount + 1}`} name={itemName} type={'file'}
-					allPaths={item.content.split(',')} user={userName} order={order} />
-				)
-				fileCount += 1;
+			const { item_id, item_name, item_type, item_order, content } = item;
+
+			if (item_type === 'file') {
+				var item_content = content.split(',');
+			} else if (item_type === 'folder') {
+				var item_content = "";
 			}
+
+			directory.push(<PageItem
+				key={item_id}
+				id={item_id}
+				name={item_name}
+				type={item_type}
+				order={item_order}
+				content={item_content}
+				user={userName} />
+			)
 		}  
 	);
 	return [...directory];

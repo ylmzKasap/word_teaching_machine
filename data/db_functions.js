@@ -10,7 +10,7 @@ function handleError(errorCode) {
     if (errorCodes.hasOwnProperty(errorCode)) {
         return errorCodes[errorCode]
     } else {
-        return `Error code: ${errorCode}`
+        return errorCode
     }
 }
 
@@ -21,6 +21,7 @@ async function createUsersTable() {
         user_picture VARCHAR(200)
     );`).catch(err => console.log(err));
 }
+
 
 async function dropTable(table) {
     await pool.query(`DROP TABLE ${table};`).catch(err => console.log(err));
@@ -33,7 +34,7 @@ async function createItemTable(name) {
         item_name VARCHAR(40) NOT NULL,
         parent_id INT REFERENCES ${name}_table (item_id)
         ON DELETE CASCADE,
-        item_order BIGINT NOT NULL,
+        item_order DECIMAL NOT NULL,
         content VARCHAR(1000),
         CONSTRAINT ${name}_unique_files UNIQUE (item_type, item_name, parent_id)
     );`).catch(err => console.log(err));
@@ -106,11 +107,10 @@ async function updateColumnValue(owner, item_id, column_name, new_value) {
     `)
 }
 
-async function updateDirectory(
-    owner, parent_id, item_name, item_type, parent_name) {
-        if (parent_name) {
+async function updateDirectory(owner, item_id, parent_id, target_id, direction) {
+        if (direction === 'subfolder') {
             // Moving item into a subfolder.
-            var new_parent_id = await getItemId(owner, parent_name, parent_id);
+            var new_parent_id = target_id;
         } else {
             // Moving item back to the parent.
             var new_parent_id = await getGrandparent(owner, parent_id);
@@ -122,22 +122,39 @@ async function updateDirectory(
             SET 
             parent_id = ${new_parent_id},
             item_order = (SELECT count(*) + 1 from ${owner}_table WHERE parent_id = ${new_parent_id})
-            WHERE item_name = '${item_name}' AND item_type = '${item_type}' AND parent_id = ${parent_id};
+            WHERE item_id = ${item_id};
         `)
 
         // Fix the order of remeaning items.
-        const directory = await getDirectory(owner, parent_id, 'item_order')
-        for (let i = 0; i < directory.length; i++) {
-            await updateColumnValue(owner, directory[i].item_id, 'item_order', i + 1);
-        }
+        await reorderDirectory(owner, parent_id);
         return true;
 }
 
-async function getItemId(owner, folder_name, parent_id) {
-    const item_id = await pool.query(`
-        SELECT item_id FROM ${owner}_table WHERE item_name = '${folder_name}' AND parent_id = ${parent_id};
-    `).catch(err => console.log(err));
-    return item_id.rows[0].item_id;
+async function reorderDirectory(owner, directory_id) {
+    await pool.query(`
+        UPDATE 
+            ${owner}_table
+        SET
+            item_order = T2.row_number
+        FROM 
+            (SELECT item_id, item_order, row_number()
+                OVER (ORDER BY item_order)
+                FROM ${owner}_table
+                WHERE parent_id = ${directory_id})
+            AS T2
+        WHERE T2.item_id = ${owner}_table.item_id;
+    `)
+}
+
+async function updateItemOrder(owner, item_id, new_order, direction, parent_id) {
+    if (direction === 'before') {
+        await updateColumnValue(owner, item_id, 'item_order', new_order - 0.1);
+    } else if (direction === 'after') {
+        await updateColumnValue(owner, item_id, 'item_order', new_order + 0.1);
+    }
+
+    await reorderDirectory(owner, parent_id);
+    return true;    
 }
 
 async function getGrandparent(owner, parent_id) {
@@ -152,6 +169,7 @@ async function deleteItem(owner, name, parent_id, item_type) {
         DELETE FROM ${owner}_table WHERE 
         (parent_id = ${parent_id} AND item_name = '${name}' AND item_type = '${item_type}');
         `).catch(err => console.log(err));
+    await reorderDirectory(owner, parent_id);
     return true;
 }
 
@@ -164,10 +182,10 @@ module.exports = {
     getDirectory,
     updateDirectory,
     updateColumnValue,
+    updateItemOrder,
     getGrandparent,
-    getItemId,
     addItem,
     deleteItem,
     handleError,
-    dropTable
+    dropTable,
 }

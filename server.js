@@ -7,6 +7,7 @@ const fs = require('fs');
 
 const db_utils = require('./data/db_functions');
 const db_tests = require('./data/db_tests');
+const pool = require('./data/db_info');
 
 
 // Middleware
@@ -99,19 +100,6 @@ app.delete("/u/:username/delete_item", async (req, res) => {
 });
 
 
-// Set directory to child folder.
-app.get('/subdir/:username/:folder_name/:parent_id', async (req, res) => {
-    const { username, folder_name, parent_id } = req.params;
-
-    const childDirectoryId = await db_utils.getItemId(username, folder_name, parent_id);
-
-    if (childDirectoryId) {
-        res.status(200).send(childDirectoryId)
-    } else {
-        res.status(400).send('Folder not found.')
-    }
-});
-
 // Set directory to parent folder.
 app.get('/updir/:username/:parent_id', async (req, res) => {
     const { username, parent_id } = req.params;
@@ -125,23 +113,31 @@ app.get('/updir/:username/:parent_id', async (req, res) => {
     }
 });
 
-
+// Send an item to a specific folder.
 app.put('/updatedir/:username', async (req, res) => {
     const { username } = req.params;
-    const { parent_id, item_name, item_type, parent_name } = req.body;
+    const { item_id, parent_id, target_id, direction, item_name, parent_name } = req.body;
 
-    await db_utils.updateDirectory(
-        username, parent_id, item_name, item_type, parent_name)
+    await db_utils.updateDirectory(username, item_id, parent_id, target_id, direction)
         .then(() => res.end())
         .catch(err => {
+            console.log(err);
             const description = db_utils.handleError(err.code);
             return res.status(400).send(
                 description == 'Unique Violation'
                 ? 
                 `Item '${item_name}' already exists in ${parent_name ? parent_name : 'parent folder'}.`
-                :
-                description);
+                : description ? description : err);
         })
+})
+
+app.put('/updateorder/:username', async (req, res) => {
+    const { username } = req.params;
+    const { item_id, new_order, direction, parent_id } = req.body;
+    
+    await db_utils.updateItemOrder(username, item_id, new_order, direction, parent_id)
+        .then(() => res.send())
+        .catch(err => console.log(err));
 })
 
 function findFiles (directory, wordArray, extensions) {
@@ -166,10 +162,9 @@ function findFiles (directory, wordArray, extensions) {
 
 
 async function main() {
-    await db_utils.updateColumnValue('hayri', 3, 'item_order', '2.5').catch(err => console.log(err.code));
+    await db_tests.setUp();
 }
 
-main()
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));

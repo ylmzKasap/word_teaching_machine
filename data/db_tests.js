@@ -1,5 +1,6 @@
 const db_utils = require('./db_functions');
 
+
 async function setUp() {
     await db_utils.createUsersTable();
     await db_utils.addUser('hayri');

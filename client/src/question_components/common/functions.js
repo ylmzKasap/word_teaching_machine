@@ -1,7 +1,6 @@
 import { IntroduceWord } from '../IntroduceWord';
 import { AskFromText } from '../AskFromText';
 import { AskFromPicture } from '../AskFromPicture';
-import { Folder, Deck } from '../../index';
 
 
 export function shuffle(array) {

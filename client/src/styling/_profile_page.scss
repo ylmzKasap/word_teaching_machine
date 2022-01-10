@@ -1,3 +1,7 @@
+body {
+  overflow: hidden;
+}
+
 .profile-navbar {
   @extend .navbar;
   > .fa-folder-plus {
@@ -16,7 +20,6 @@
 
 .profile-content {
   height: auto;
-  overflow: auto;
   min-height: 93vh;
   display: flex;
   flex-direction: row;
@@ -65,10 +68,12 @@
   grid-template-columns: repeat(auto-fill, 280px);
   row-gap: 30px;
   grid-template-rows: repeat(auto-fill, 285px);
-  height: auto;
+  height: 93vh;
   width: 90%;
+  margin-bottom: 1200px;
   padding: 3% 3% 0px 1%;
   justify-content: center;
+  overflow-y: scroll;
 }
 
 .file {
@@ -91,11 +96,17 @@
   @include flexit();
   flex-direction: row;
   width: 100%;
+  position: relative;
 }
 
 .filler {
-  width: 15%;
+  width: 30px;
   height: 100%;
+}
+
+.last-filler {
+  position: absolute;
+  right: -30px;
 }
 
 .filler-hovered {
@@ -175,6 +186,7 @@
 .drag-item-clone {
   @include flexit();
   background-color: rgb(142, 47, 230);
+  overflow: hidden;
   color: white;
   font-size: 1.4rem;
   position: fixed;
