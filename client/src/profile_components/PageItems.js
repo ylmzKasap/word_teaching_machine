@@ -69,7 +69,8 @@ export const PageItem = (props) => {
                 &&
             draggedElement.type === targetElem.attributes.class.value)
             ) {
-                resetDrag(true);
+                const scrollAmount = document.querySelector('.card-container').scrollTop;
+                resetDrag(true, scrollAmount);
                 return
         }
         

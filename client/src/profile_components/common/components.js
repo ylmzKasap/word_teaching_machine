@@ -78,7 +78,8 @@ export const Filler = (props) => {
         if (props.type === 'regular') {
             let nextElement = event.target.nextElementSibling;
             if (nextElement.id === draggedElement.id) {
-                resetDrag(true);
+                const scrollAmount = document.querySelector('.card-container').scrollTop;
+                resetDrag(true, scrollAmount);
                 return
             }
             var insertOrder = event.target.closest('.item-with-filler').style.order;

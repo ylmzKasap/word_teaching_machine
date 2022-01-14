@@ -26,7 +26,7 @@ def read_time(timedeltaObject):
         minutes, seconds = divmod(minutes, 60)
         return (
             (f'{hours} hours' if hours > 1 else f'{hours} hour')
-            + (f' {minutes} minutes' if minutes > 1 else f'{minutes} minute')
+            + (f' {minutes} minutes' if minutes > 1 else f' {minutes} minute')
             )
 
 # scssFile = sys.argv[1]  For command line
@@ -45,9 +45,15 @@ lastCompileTime = compileTime = 0
 while True:
     if partialImports:
         for partial in partialImports:
-            lastModifyTime = os.path.getmtime('_' + partial + '.scss')
-            if lastModifyTime > compileTime:
-                compileTime = lastModifyTime
+            try:
+                partialModifyTime = os.path.getmtime('_' + partial + '.scss')
+                if partialModifyTime > compileTime:
+                    compileTime = partialModifyTime
+            except FileNotFoundError:
+                print(f"\nCould not locate the partial named '{partial}'")
+                print("Remove it from main scss file if not needed.")
+                input('> ')
+                sys.exit()
 
     mainModifyTime = os.path.getmtime(scssFile)
     if mainModifyTime > compileTime:
@@ -62,7 +68,8 @@ while True:
         lastCompileTime = compileTime
 
     os.system('cls')
-    print(f"\nWatching changes on {scssFile}:")
+    print(f"\nWatching changes on {scssFile}"
+          + f"{' and ' + str(len(partialImports)) + ' partials' if partialImports else ''}:")
     print("\nLast compile time:")
     readableTime = datetime.datetime.fromtimestamp(compileTime)
     print(readableTime.strftime('%H:%M:%S | %d.%m.%Y'))

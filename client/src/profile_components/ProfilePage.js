@@ -2,7 +2,7 @@ import { useState, useEffect, useReducer, createContext, useContext } from "reac
 import axios from 'axios';
 
 import { userName } from "..";
-import { generate_directory, hasKeys } from "./common/functions";
+import { generate_directory, hasKeys, scroll_div } from "./common/functions";
 import { CreateDeckOverlay } from "./CreateDeckOverlay";
 import { CreateFolderOverlay } from "./CreateFolderOverlay";
 
@@ -17,7 +17,10 @@ export const ProfilePage = (props) => {
     const [directory, setDirectory] = useState(props.dir);
     const [items, setItems] = useState([]);
     const [reRender, setReRender] = useReducer(x => x + 1, 0);
+
+    // Scrolling related states.
     const [scrolling, setScrolling] = useState({'exists': false, 'direction': null});
+    const [scrollStart, setScrollStart] = useState(0);
 
     // Dragging related states.
     const [cloneElement, setCloneElement] = useState("");
@@ -58,20 +61,17 @@ export const ProfilePage = (props) => {
         }
     }, [cloneStyle, draggedElement, isDragging])
 
-
+    // Cancel scrolling when item is no longer dragged.
     useEffect(() => {
-        if (scrolling.exists && scrolling.element) {
-            const scrollAmount = scrolling.direction === 'down' ? 200 : -200;
-            scrolling.element.scrollBy({
-                top: scrollAmount,
-                behavior: 'smooth'
-            })
-        }  
-    }, [scrolling])
+        if (scrolling.exists) {
+            clearInterval(scrolling.interval);
+            setScrolling({'exists': false}); 
+        }
+    }, [isDragging])
 
 
     // Reset all drag related state.
-    const resetDrag = (timeout = false) => {
+    const resetDrag = (timeout=false, scroll=0) => {
         if (timeout && hasKeys(draggedElement)) {
             const { top, left, width } = draggedElement.clonedStyle;
             setDragCount(0);
@@ -82,7 +82,7 @@ export const ProfilePage = (props) => {
                 "borderRadius": "10%",
                 "backgroundColor": "white",
                 "left": `${left}px`,
-                "top": `${top}px`,
+                "top": `${top + (scrollStart - scroll)}px`,
                 "transition": ".3s"
             });
             setCloneTimeout({
@@ -96,13 +96,13 @@ export const ProfilePage = (props) => {
             setDraggedElement({});
             setDrag(false);
             setCloneTimeout({'exists': false, 'timeouts': ""});
+            setScrollStart(0);
         }  
     }
 
     // Set 'isDragging' value to true when mouse moves.
     const handleMouseAction = (event) => {
         if (hasKeys(draggedElement) && !cloneTimeout.exists) {
-            setDragCount(count => count + 1);
             if (dragCount > 12) {
                 setCloneStyle({
                     "width": "150px",
@@ -112,19 +112,16 @@ export const ProfilePage = (props) => {
                     "boxShadow": "0px 3px 6px black",
                     "transition": "width .3s, background-color .3s"
                 });
-                setDrag(true);
-                setCloneElement(<DragClone item={draggedElement.name} cloneStyle={cloneStyle} />)
-                if (event.target.closest('.bottom-drag-bar') === null) {
-                    const scrolledElement = event.target.closest('.card-container');
-                    if (window.innerHeight - 80 < event.clientY) {
-                        setScrolling({'exists': true, 'direction': 'down', 'element': scrolledElement});  
-                    } else if (event.clientY < 60) {
-                        setScrolling({'exists': true, 'direction': 'up', 'element': scrolledElement}); 
-                    } else {
-                        setScrolling({'exists': false}); 
-                    }
-                }    
-            } 
+                if (!isDragging) {
+                    setDrag(true);
+                    setScrollStart(document.querySelector('.card-container').scrollTop);
+                    setCloneElement(<DragClone item={draggedElement.name} cloneStyle={cloneStyle} />)
+                };
+                scroll_div(event, window, document, scrolling, setScrolling,
+                    ['drag-button', 'sidebar-container', 'user-info', 'user-image']);
+            } else {
+                setDragCount(count => count + 1);
+            }
         }
     }
 
@@ -133,7 +130,8 @@ export const ProfilePage = (props) => {
         if (hasKeys(draggedElement) 
         && 
         !['file', 'folder', 'folder-img', 'filler', 'drag-button'].includes(specialClass)) {
-            resetDrag(true);
+            const scrollAmount = document.querySelector('.card-container').scrollTop;
+            resetDrag(true, scrollAmount);
         }
     }
   
@@ -211,7 +209,6 @@ const ProfileNavBar = () => {
         </div>
     )
 }
-
 
 
 const SideBar = (props) => {
