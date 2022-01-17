@@ -164,13 +164,45 @@ async function getGrandparent(owner, parent_id) {
     return grandparent_id.rows[0].parent_id;
 }
 
-async function deleteItem(owner, name, parent_id, item_type) {
+async function deleteItem(owner, item_id, parent_id) {
     await pool.query(`
-        DELETE FROM ${owner}_table WHERE 
-        (parent_id = ${parent_id} AND item_name = '${name}' AND item_type = '${item_type}');
+        DELETE FROM ${owner}_table WHERE item_id = ${item_id};
         `).catch(err => console.log(err));
     await reorderDirectory(owner, parent_id);
     return true;
+}
+
+async function recursive_tree(owner, item_id) {
+    const tree = await pool.query(`
+        WITH RECURSIVE item_tree AS (
+            SELECT
+                t1.item_id,
+                t1.item_type,
+                t1.item_name,
+                t1.parent_id,
+                t1.item_order,
+                t1.content,
+                1 as depth,
+                t1.item_id::VARCHAR as path
+            FROM ${owner}_table t1
+            WHERE parent_id = ${item_id}
+
+            UNION ALL
+
+            SELECT
+                t2.item_id,
+                t2.item_type,
+                t2.item_name,
+                t2.parent_id,
+                t2.item_order,
+                t2.content,
+                depth + 1,
+                path::VARCHAR || '/' || t2.item_id::VARCHAR
+            FROM ${owner}_table t2
+            JOIN item_tree ht ON ht.item_id = t2.parent_id
+        ) SELECT * FROM item_tree;
+    `)
+    return tree.rows;
 }
 
 
@@ -188,4 +220,5 @@ module.exports = {
     deleteItem,
     handleError,
     dropTable,
+    recursive_tree
 }

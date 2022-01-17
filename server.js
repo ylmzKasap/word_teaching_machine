@@ -93,9 +93,9 @@ app.post("/u/:username/create_folder", async (req, res) => {
 // Delete File or Folder.
 app.delete("/u/:username/delete_item", async (req, res) => {
     const { username } = req.params;
-    const { name, parent_id, item_type } = req.body;
+    const { item_id, parent_id } = req.body;
 
-    await db_utils.deleteItem(username, name, parent_id, item_type)
+    await db_utils.deleteItem(username, item_id, parent_id)
     .then(() => res.end()).catch(() => res.status(400).send('Something went wrong...'));
 });
 
@@ -121,7 +121,6 @@ app.put('/updatedir/:username', async (req, res) => {
     await db_utils.updateDirectory(username, item_id, parent_id, target_id, direction)
         .then(() => res.end())
         .catch(err => {
-            console.log(err);
             const description = db_utils.handleError(err.code);
             return res.status(400).send(
                 description == 'Unique Violation'
@@ -129,6 +128,50 @@ app.put('/updatedir/:username', async (req, res) => {
                 `Item '${item_name}' already exists in ${parent_name ? parent_name : 'parent folder'}.`
                 : description ? description : err);
         })
+})
+
+app.put('/paste/:username', async (req, res) => {
+    const { username } = req.params;
+    const { item_id, old_parent, new_parent, action } = req.body;
+
+    if (item_id === undefined || action === undefined) {
+        return res.status(400).send('Clipboard is empty.')};
+
+    // Get copied item.
+    let item = await pool.query(`SELECT * FROM ${username}_table WHERE item_id = ${item_id}`);
+    item = item.rows[0];
+    
+    // Check whether a folder is copied into its own subdirectory.
+    if (item.item_type === 'folder') {
+        var subtree = await db_utils.recursive_tree(username, item_id);
+        const subIds = subtree.map(item => parseInt(item.item_id));
+        if (subIds.includes(parseInt(new_parent)) || parseInt(item_id) === parseInt(new_parent)) {
+            res.status(400).send('Target directory is a subdirectory of the copied folder.');
+            return res.end();
+        } 
+    }
+
+    // Insert copied item.
+    if (action === 'copy') {
+        await db_utils.addItem({
+            'name': item.item_name, 'item_type': item.item_type, 'owner': username,
+            'parent': new_parent, 'content': item.content
+        }).catch(() => res.status(400).send(
+            `${item.item_type} '${item.item_name}' already exists in the directory.`));
+        return res.end();
+    }
+
+    // Update the directory of cut item.
+    else if (action === 'cut') {
+        await db_utils.updateDirectory(username, item_id, old_parent, new_parent, 'subfolder')
+        .catch(() => res.status(400).send(
+            `${item.item_type} '${item.item_name}' already exists in the directory.`));
+        return res.end();
+    }
+
+    else {
+        return res.end()
+    }
 })
 
 app.put('/updateorder/:username', async (req, res) => {
@@ -162,9 +205,9 @@ function findFiles (directory, wordArray, extensions) {
 
 
 async function main() {
-    await db_tests.setUp();
+    const xxx = await db_utils.recursive_tree('hayri', 116);
+    console.log(xxx.rows.map(x => x.item_id))
 }
-
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));

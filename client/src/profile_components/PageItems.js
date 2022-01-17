@@ -13,20 +13,25 @@ export const PageItem = (props) => {
     // Deployed by './common/functions' -> generate_decks.
 
     const [selfStyle, setSelfStyle] = useState({"order": props.order});
+    const [itemStyle, setItemStyle] = useState({});
+    const [folderStyle, setFolderStyle] = useState("");
     const [fillerClass, setFillerClass] = useState("");
     const [lastFillerClass, setLastFillerClass] = useState("");
+
     const { draggedElement, setDraggedElement, directory, setDirectory, setReRender,
         isDragging, cloneTimeout, resetDrag, items } = useContext(ProfileContext);
     
 
     // Set the opacity of dragged element while dragging.
     useEffect(() => {
-        if (isDragging && props.name === draggedElement.name && props.type === draggedElement.type) {
-            setSelfStyle({"opacity": 0.6, "transition": "opacity .3s", "order": props.order});
+        if (isDragging && draggedElement.id === props.id) {
+            setSelfStyle({"opacity": 0.5, "transition": "opacity .3s", "order": props.order});
+            setFolderStyle('dragged-folder');
         } else {
             setSelfStyle({"order": props.order});
+            setFolderStyle("");
         }
-    }, [isDragging, draggedElement, props.name, props.order]);
+    }, [isDragging, draggedElement, props.name, props.order, props.id]);
 
   
     // Change directory after double clicking on a folder.
@@ -53,26 +58,23 @@ export const PageItem = (props) => {
         // Only left click
         if (event.nativeEvent.which !== 1) {return};
 
-        if (event.target.className === "file" && !isDragging) {
-            renderMain(QuestionPage, {allPaths: props.content, directory: directory});
-        }
-
         let targetElem = event.target.className;
         if (!(['file', 'folder'].includes(handleMouseUp))) {
             targetElem = event.target.closest(`.${props.type}`)
         }
 
-        if (
-            targetElem.className === 'file'
-                ||
-            (draggedElement.name === targetElem.innerText
-                &&
-            draggedElement.type === targetElem.attributes.class.value)
-            ) {
-                const scrollAmount = document.querySelector('.card-container').scrollTop;
-                resetDrag(true, scrollAmount);
-                return
+        if (targetElem.className === "file" && !isDragging) {
+            renderMain(QuestionPage, {allPaths: props.content, directory: directory});
+        } 
+
+        if (targetElem.className === 'file' || (draggedElement.id === targetElem.id)) {
+            const scrollAmount = document.querySelector('.card-container').scrollTop;
+            resetDrag(true, scrollAmount);
+            return
         }
+
+        setItemStyle({});
+        setFolderStyle("");
         
         if (isDragging) {
             axios.put(`/updatedir/${userName}`, {
@@ -89,23 +91,42 @@ export const PageItem = (props) => {
         resetDrag();    
     }
 
+    const handleHover = (event) => {
+        if (!isDragging || cloneTimeout.exists) { return };
+
+        const targeted = event.target.closest('div');
+        if (targeted.id === draggedElement.id) { return };
+        if (targeted.className !== 'folder') { return };
+
+        if (event.type === 'mouseover') {
+            setItemStyle({"boxShadow": "rgb(211, 210, 210) 0px 0px 5px 3px"});
+            setFolderStyle("drag-hover-folder");
+        } else if (event.type === 'mouseout') {
+            setItemStyle({});
+            setFolderStyle("");
+        }
+    }
+
     const createThumbnail = () => {
         let thumbnail = [];
-        props.content.forEach((imgPath, index) => {
-            let wordStem = imgPath.split(".")[0];
+        for (let i = 0; i < props.content.length; i++) {
+            let wordPath = props.content[i];
+            let wordStem = wordPath.split('.')[0];
             if (thumbnail.length >= 4) {
-                return
+                break
+            } else {
+                thumbnail.push(
+                    <img className={`deck-thumbnail${props.content.length < 4 ? ' n-1' : ''}`}
+                    src={`media\\${wordPath}`} key={`${wordStem}-${i}`}
+                    alt={`${wordStem}-${i}`} draggable='false'/>)
             }
-            thumbnail.push(
-                <img className="deck-thumbnail"
-                src={`media\\${imgPath}`} key={`${wordStem}-${index}`} alt={`${wordStem}-${index}`} />
-            )
-        });
+            if (props.content.length < 4) { break };
+        }
         return thumbnail;
     }
 
     return (
-        <div className="item-with-filler" style={selfStyle}>
+        <div className="item-with-filler" style={selfStyle} draggable="false">
             <Filler 
                 fillerClass={fillerClass}
                 setFillerClass={setFillerClass}
@@ -113,15 +134,23 @@ export const PageItem = (props) => {
             <div 
                 id={props.id}
                 className={props.type}
+                type="item"
+                style={itemStyle}
+                tabIndex={props.order}
                 onDoubleClick={handleDoubleClick}
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
+                onMouseOver={handleHover}
+                onMouseOut={handleHover}
                 > {props.type === 'folder' &&
-                     <img className="folder-img" src="media\\profile\\yellowFolder.svg" alt="folder-icon" draggable="false" />
+                    <i className={`fas fa-folder fa-9x ${folderStyle}`}></i>
                 }
-                <p>{props.name}</p>
-                <div className="item-footer">
-                </div>
+                {props.type === 'file' && 
+                    <span className='thumbnail-container'>
+                        <span className="image-overlay" />
+                        {createThumbnail()}
+                    </span>}
+                <p className={`${props.type}-description`}>{props.name}</p>
             </div>
             {items.length === parseInt(props.order) &&
                 <Filler 

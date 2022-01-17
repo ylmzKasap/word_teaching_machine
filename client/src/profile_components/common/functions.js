@@ -1,4 +1,5 @@
 import { PageItem } from '../PageItems';
+import axios from 'axios';
 
 
 export function generate_directory(items, userName) {
@@ -10,11 +11,9 @@ export function generate_directory(items, userName) {
 		(item) => {
 			const { item_id, item_name, item_type, item_order, content } = item;
 
-			if (item_type === 'file') {
-				var item_content = content.split(',');
-			} else if (item_type === 'folder') {
-				var item_content = "";
-			}
+			let item_content = (item_type === 'file')
+				? content.split(',')
+				: "";
 
 			directory.push(<PageItem
 				key={item_id}
@@ -89,5 +88,20 @@ export function scroll_div(evnt, win, doc, scrolling, setScrolling, constraints=
 			clearInterval(scrolling.interval);
 			setScrolling({'exists': false}); 
 		}
+	}
+}
+
+export function delete_item(itemObj, directory, username, setRender) {
+	// Used by './components/ItemContextMenu' and '../ProfilePage/BottomDragBar'.
+	const message = (
+		itemObj.type === 'folder' ? `Delete '${itemObj.name}' and all of its content?`
+		: `Delete '${itemObj.name}?'`)
+	if (window.confirm(message)) {
+		axios.delete(`http://localhost:3001/u/${username}/delete_item`, {data: {
+			item_id: itemObj.id,
+			parent_id: directory}}
+		)
+		.then(() => {setRender()})
+		.catch(err => console.log(err));
 	}
 }

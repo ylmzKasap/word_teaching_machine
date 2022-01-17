@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import axios from "axios";
 import { ProfileContext } from "../ProfilePage";
+import { delete_item } from "./functions";
 import { userName } from "../..";
 
 export const OverlayNavbar = (props) => {
@@ -49,17 +50,56 @@ export const SubmitForm = (props) => {
 }
 
 
+export const ItemContextMenu = (props) => {
+    const { directory, setReRender, contextOpenedElem, clipboard } = useContext(ProfileContext);
+
+    const handleClick = (event) => {
+        const action = event.target.title;
+        if (['cut', 'copy'].includes(action)) {
+            props.setClipboard({'action': action, 'id': contextOpenedElem.id, 'directory': directory});
+        } 
+        
+        else if (action === 'delete') {
+            delete_item(contextOpenedElem, directory, userName, setReRender);
+        } 
+        
+        else if (action === 'paste') {
+            axios.put(`/paste/${userName}`, {
+                'item_id': clipboard.id,
+                'old_parent': clipboard.directory,
+                'new_parent': directory,
+                'action': clipboard.action
+            })
+            .then(() => {
+                if (clipboard.action === 'cut') {
+                    props.setClipboard({});
+                }
+                setReRender();
+            }).catch(err => 
+                console.log(err.response.data));
+        }
+        props.resetContext();
+    }
+
+    return (
+        <div id="item-context-menu" className="context-menu" style={props.style}
+            onContextMenu={e => e.preventDefault()}
+            onClick={handleClick}>
+            {props.items.map(i => <menu title={i} key={i}></menu>)}
+        </div>
+    )
+}
+
+
 export const Filler = (props) => {
     const { isDragging, cloneTimeout, draggedElement,
             directory, resetDrag, setReRender } = useContext(ProfileContext);
 
     // Style the filler on hovering.
     const handleFillerHover = (event) => {
-        if (props.type === 'regular') {
-            var nextElement = event.target.nextElementSibling;
-        } else {
-            var nextElement = event.target.previousSibling
-        } 
+        let nextElement = (props.type === 'regular') 
+            ? event.target.nextElementSibling 
+            : event.target.previousSibling;
 
         if (isDragging && !cloneTimeout.exists) {
             if (nextElement.id !== draggedElement.id) {
@@ -73,7 +113,7 @@ export const Filler = (props) => {
     }
 
     const handleFillerUp = (event) => {
-        if (!isDragging) {return};
+        if (!isDragging) { return };
 
         if (props.type === 'regular') {
             let nextElement = event.target.nextElementSibling;
@@ -82,10 +122,11 @@ export const Filler = (props) => {
                 resetDrag(true, scrollAmount);
                 return
             }
-            var insertOrder = event.target.closest('.item-with-filler').style.order;
-        } else if (props.type === 'last') {
-            var insertOrder = props.order
         }
+
+        let insertOrder = (props.type === 'regular')
+            ? event.target.closest('.item-with-filler').style.order
+            : props.order;
 
         props.setFillerClass('');
         resetDrag();
@@ -102,7 +143,8 @@ export const Filler = (props) => {
 
     return (
         <div 
-            className={`filler ${props.fillerClass} ${props.type === 'last' ? 'last-filler' : ""}`}
+            className={
+                `filler${props.fillerClass ? ' ' + props.fillerClass : ''}${props.type === 'last' ? ' last-filler' : ''}`}
             style={{"order": props.order}}
             onMouseOver={handleFillerHover}
             onMouseLeave={handleFillerHover}

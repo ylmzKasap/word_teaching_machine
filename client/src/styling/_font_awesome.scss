@@ -41,9 +41,15 @@
 .fa-trash-alt {
   @include flexit();
   color: white;
+  pointer-events: none;
 }
 
 .fa-long-arrow-alt-left {
   transform: scale(2);
+  pointer-events: none;
+}
+
+.fa-folder {
+  color: rgb(20, 82, 175);
   pointer-events: none;
 }

@@ -2,7 +2,8 @@ import { useState, useEffect, useReducer, createContext, useContext } from "reac
 import axios from 'axios';
 
 import { userName } from "..";
-import { generate_directory, hasKeys, scroll_div } from "./common/functions";
+import { generate_directory, hasKeys, scroll_div, delete_item } from "./common/functions";
+import { ItemContextMenu } from "./common/components";
 import { CreateDeckOverlay } from "./CreateDeckOverlay";
 import { CreateFolderOverlay } from "./CreateFolderOverlay";
 
@@ -17,10 +18,14 @@ export const ProfilePage = (props) => {
     const [directory, setDirectory] = useState(props.dir);
     const [items, setItems] = useState([]);
     const [reRender, setReRender] = useReducer(x => x + 1, 0);
+    const [clipboard, setClipboard] = useState("");
 
-    // Scrolling related states.
-    const [scrolling, setScrolling] = useState({'exists': false, 'direction': null});
-    const [scrollStart, setScrollStart] = useState(0);
+    // Context menu related states.
+    const [contextMenu, setContextMenu] = useState(false);
+    const [contextOpenedElem, setContextOpenedElem] = useState({});
+    const [contextOptions, setContextOptions] = useState([]);
+    const [contextMenuStyle, setContextMenuStyle] = useState({});
+    const [contextMenuScroll, setContextMenuScroll] = useState({});
 
     // Dragging related states.
     const [cloneElement, setCloneElement] = useState("");
@@ -29,6 +34,8 @@ export const ProfilePage = (props) => {
     const [draggedElement, setDraggedElement] = useState({});
     const [dragCount, setDragCount] = useState(0);
     const [isDragging, setDrag] = useState(false);
+    const [scrolling, setScrolling] = useState({'exists': false, 'direction': null});
+    const [scrollStart, setScrollStart] = useState(0);
     
     // Load user picture.
     useEffect(() => {
@@ -69,15 +76,23 @@ export const ProfilePage = (props) => {
         }
     }, [isDragging])
 
+    // Reset all scroll related state.
+    const resetContext = () => {
+        setContextMenu(false);
+        setContextOptions([]);
+        setContextOpenedElem({});
+        setContextMenuScroll({});
+        setContextMenuStyle({});
+    }
 
     // Reset all drag related state.
-    const resetDrag = (timeout=false, scroll=0) => {
+    function resetDrag(timeout=false, scroll=0) {
         if (timeout && hasKeys(draggedElement)) {
             const { top, left, width } = draggedElement.clonedStyle;
             setDragCount(0);
             setCloneStyle({
                 "width": `${width}px`,
-                "height": "250px",
+                "height": "200px",
                 "opacity": "0.3",
                 "borderRadius": "10%",
                 "backgroundColor": "white",
@@ -105,8 +120,8 @@ export const ProfilePage = (props) => {
         if (hasKeys(draggedElement) && !cloneTimeout.exists) {
             if (dragCount > 12) {
                 setCloneStyle({
-                    "width": "150px",
-                    "backgroundColor": "rgb(142, 47, 230)",
+                    "width": "180px",
+                    "backgroundColor": "rgb(233, 171, 55)",
                     "left": `${event.clientX + 5}px`,
                     "top": `${event.clientY + 5}px`,
                     "boxShadow": "0px 3px 6px black",
@@ -129,10 +144,65 @@ export const ProfilePage = (props) => {
         const specialClass = event.target.className.split(' ')[0];
         if (hasKeys(draggedElement) 
         && 
-        !['file', 'folder', 'folder-img', 'filler', 'drag-button'].includes(specialClass)) {
+        !['file', 'folder', 'filler', 'drag-button'].includes(specialClass)) {
             const scrollAmount = document.querySelector('.card-container').scrollTop;
             resetDrag(true, scrollAmount);
         }
+    }
+
+    const handleMouseDown = (event) => {
+        if(event.target.tagName !== 'MENU') {
+            resetContext();
+        }        
+    }
+
+    const handleContextMenu = (event) => {
+        event.preventDefault();
+        if (isDragging) {return};
+        resetContext();
+
+        const container = document.querySelector('.card-container');
+        const closestDiv = event.target.closest('div');
+        const contextMenu = (
+            ['card-container', 'filler', 'item-with-filler', 'filler last-filler']
+            .includes(event.target.className)
+            ?
+            {"closest": event.target, "openedElem": {'type': container}, "ops": ['paste']}
+            :
+            {
+            "closest": closestDiv, 
+            "openedElem": {
+                'id': closestDiv.id,
+                'type': closestDiv.className,
+                'name': closestDiv.innerText},
+            "ops": (closestDiv.className === 'file') ? ['copy', 'cut', 'delete'] : ['cut', 'delete']}
+            )
+        
+        setContextOptions(contextMenu.ops);
+        let top = event.clientY;
+        let left = event.clientX;
+        if (contextMenu.closest) {
+            // Height of each menu should be 60px.
+            if (window.innerHeight - top < contextMenu.ops.length * 60) {
+                top -= contextMenu.ops.length * 60}
+            // Width of the context menu should be 200px.
+            if (window.innerWidth - left < 200) {
+                left -= 200;
+            }
+            setContextMenu(true);
+            setContextOpenedElem(contextMenu.openedElem);
+            setContextMenuScroll({"scroll": container.scrollTop, "top": top});
+            setContextMenuStyle({"top": top, "left": left});
+        }
+    }
+
+    const handleScroll = (event) => {
+        if (contextMenu) {
+            const scrollTop = event.target.scrollTop;
+            let scrollDiff = Math.abs(scrollTop - contextMenuScroll.scroll);
+            scrollDiff = scrollTop >= contextMenuScroll.scroll ? -scrollDiff : scrollDiff;
+            setContextMenuStyle(sc => ({"top": contextMenuScroll.top + scrollDiff, "left": sc.left}))      
+            }       
     }
   
     // Children: ProfileNavBar, SideBar | (Indirect) Folder, Deck
@@ -146,19 +216,25 @@ export const ProfilePage = (props) => {
             "isDragging": isDragging,
             "cloneTimeout": cloneTimeout,
             "resetDrag": resetDrag,
-            "items": items}
+            "items": items,
+            "contextOpenedElem": contextOpenedElem,
+            "clipboard": clipboard}
             }>
             <div className="profile-page"
-                onMouseMove={handleMouseAction} onMouseUp={handleMouseUp}>
+                onMouseMove={handleMouseAction} onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
                 <ProfileNavBar user={userName} />
                 <div className="profile-content">
                     <SideBar user={userName} userPicture={userPicture} />
-                    <div className="card-container">
+                    <div className="card-container" onContextMenu={handleContextMenu} onScroll={handleScroll}>
                         {items}
-                        <BottomDragBar />
+                        {isDragging && <BottomDragBar />}
                     </div>
                 </div>
                 {cloneElement}
+                {contextMenu && <ItemContextMenu 
+                    items={contextOptions} style={contextMenuStyle}
+                    setClipboard={setClipboard} resetContext={resetContext}
+                    contextOpenedElem={contextOpenedElem} />}
             </div>
         </ProfileContext.Provider>
     )
@@ -235,25 +311,11 @@ const BottomDragBar = () => {
         // Delete dragged the item.
         resetDrag();
         if (!cloneTimeout.exists) {
-            const message = (
-                draggedElement.type === 'folder' ? `Delete ${draggedElement.name} and all of its content?`
-                : draggedElement.type === 'file' ? `Delete ${draggedElement.name}?`
-                : 'Delete this item?')
-            if (window.confirm(message)) {
-                axios.delete(`http://localhost:3001/u/${userName}/delete_item`, {data: {
-                    name: draggedElement.name,
-                    parent_id: directory,
-                    item_type: draggedElement.type}}
-                )
-                .then(() => {
-                    setReRender();
-                })
-                .catch(err => console.log(err));
+            delete_item(draggedElement, directory, userName, setReRender);
             } else {
                 resetDrag();
             }
         }
-    }
 
     const sendBack = () => {
         // Move dragged item to parent folder.
@@ -262,9 +324,9 @@ const BottomDragBar = () => {
             'item_name': draggedElement.name,
             'parent_id': directory,
             'direction': 'parent'
-        }).then(() => {
-            setReRender();
-        }).catch(err => console.log(err.response.data));
+        })
+        .then(() => setReRender())
+        .catch(err => console.log(err.response.data));
         resetDrag();
     }
 
@@ -288,8 +350,11 @@ const DragClone = (props) => {
     // Component of ProfilePage.
 
     return (
-        <div className='drag-item-clone' style={props.cloneStyle}>
-            {props.item}
+        <div className='drag-item-clone' style={props.cloneStyle}
+        onContextMenu={e => e.preventDefault()}>
+            <div className="drag-description">
+                {props.item}
+            </div>
         </div>
     )
 }
