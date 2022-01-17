@@ -30,6 +30,17 @@ def read_time(timedeltaObject):
             + (f' {minutes} minutes' if minutes > 1 else f' {minutes} minute')
             )
 
+
+def get_import_name(file_path):
+    # Create Sass import names from relative paths.
+    if len(file_path.split('/')) > 1:
+        return (
+            './' + os.path.dirname(file_path)
+            + '/' + os.path.basename(file_path).lstrip("_").split('.')[0])
+    else:
+        return file_path.lstrip('_').split('.')[0]
+
+        
 # scssFile = sys.argv[1]  For command line
 scssFile = 'App.scss'
 cssFile = scssFile.strip('scss') + 'css'
@@ -47,7 +58,7 @@ partialImports = partialRegex.findall(scssText)
 availablePartialPaths = []
 for folderPath, subFolder, fileNames in os.walk(Path.cwd()):
     for file in fileNames:
-        if file.startswith('_'):
+        if file.startswith('_') and file.endswith('.scss'):
             availablePartialPaths.append(Path(folderPath, file))
 availablePartials = []
 for partial in availablePartialPaths:
@@ -93,17 +104,13 @@ if notImported:
     print("\nAdd the partials to the main scss file if they are necessary.")
     print("\nComplete import paths:\n")
     for p in intersectingPartials:
-        importName = p.strip('_').split('.')[0]
+        importName = get_import_name(p)
         print(f'@import "{importName}";')
-    print()
+    print("\nNot imported")
     for p in notImported:
         relativePath = str(p).split(str(Path.cwd()))[1].strip(os.sep).replace(os.sep, "/")
-        importName = relativePath.strip('_').split('.')[0]
-        if len(relativePath.split('/')) > 1:
-            importName = os.path.dirname(importName) + '/' + os.path.basename(importName).strip("_")
-            print(f'@import "./{importName}";')
-        else:
-            print(f'@import "{importName}";')
+        importName = get_import_name(relativePath)
+        print(f'@import "{importName}";')
     input()
 
 lastCompileTime = compileTime = 0
