@@ -36,6 +36,9 @@
   &:active {
     transform: scale(1.2);
   }
+  &:only-child {
+    margin: auto;
+  }
 }
 
 .fa-trash-alt {
@@ -52,4 +55,14 @@
 .fa-folder {
   color: rgb(20, 82, 175);
   pointer-events: none;
+}
+
+.fa-binoculars {
+  color:rgb(20, 82, 175);
+  pointer-events: none;
+  margin-bottom: 5%;
+}
+
+.fa-user-slash {
+  @extend .fa-binoculars;
 }

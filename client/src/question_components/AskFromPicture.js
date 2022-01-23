@@ -12,7 +12,7 @@ export function AskFromPicture(props) {
     const [imageAnimation, setImageAnimtion] = useState("");
     const [layout] = useState(Math.random());
   
-    const {allPaths, allWords, imgPath, word} = props;
+    const {allPaths, allWords, imgPath, word } = props;
     const pageItems = [
 
         <TextOptions
@@ -55,10 +55,7 @@ function TextOptionBox(props) {
     const [numStyle, setNumStyle] = useState("");
     const [timeouts, handleTimeouts] = useState({});
 
-    const incorrectHandler = useContext(FunctionContext)['incorrect'];
-    const clickHandler = useContext(FunctionContext)['click'];
-    const correctFound = useContext(FunctionContext)['correctFound'];
-    const setCorrectFound = useContext(FunctionContext)['setCorrectFound'];
+    const { clickHandler, handleIncorrect, correctFound, setCorrectFound } = useContext(FunctionContext);
 
     const useMountEffect = () => 
         useEffect(() => {
@@ -101,7 +98,7 @@ function TextOptionBox(props) {
                 setAnimation("incorrect-answer");
                 setNumStyle("incorrect-number");
                 if (!correctFound) {
-                    incorrectHandler(AskFromPicture);
+                    handleIncorrect();
                 }
             }
         }

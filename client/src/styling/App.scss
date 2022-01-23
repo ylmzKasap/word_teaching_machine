@@ -1,16 +1,29 @@
+// Imports
 @import url('https://fonts.googleapis.com/css2?family=Taviraj&display=swap');
 
+
+// Variables
+$mobile: 480px;
+$tablet: 768px;
+$small-screen: 1024px;
+
+
+// Mixins
 @mixin flexit() {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-@import "animations";
-@import "font_awesome";
-@import "media_queries";
+
+// Partials
 @import "overlay";
 @import "question_page";
+@import "animations";
+@import "font_awesome";
 @import "./profile_page/drag_profile_page";
 @import "./profile_page/item_profile_page";
 @import "./profile_page/profile_page";
+@import "./media_queries/media_queries";
+@import "./media_queries/profile_page";
+@import "./media_queries/question_page";

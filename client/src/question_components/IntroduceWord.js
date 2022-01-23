@@ -14,7 +14,7 @@ export function IntroduceWord(props) {
         <IntroImage imgPath={imgPath} word={word} key={word + '-image'}/> 
     ];
   
-    const clickHandler = useContext(FunctionContext)['click'];
+    const { clickHandler } = useContext(FunctionContext);
   
     function handleClick(elem) {
         if (!/^intro-text/.test(elem.target.className)) {

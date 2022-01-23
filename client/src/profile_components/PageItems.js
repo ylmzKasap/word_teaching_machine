@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from 'axios';
 
-import { userName, renderMain } from "..";
 import { ProfileContext } from "./ProfilePage";
-import { QuestionPage } from "../question_components/QuestionPage";
 import * as handlers from "./common/handlers";
 import { Filler } from "./common/components";
+import { useNavigate } from "react-router-dom";
+import { get_column_number } from "./common/functions";
+import { useWindowSize } from "./common/hooks";
 
 
 export const PageItem = (props) => {
     // Component of ProfilePage.
     // Deployed by './common/functions' -> generate_decks.
+
+    const navigate = useNavigate();
+    const [columnNumber] = useWindowSize();
 
     const [selfStyle, setSelfStyle] = useState({"order": props.order});
     const [itemStyle, setItemStyle] = useState({});
@@ -18,10 +22,9 @@ export const PageItem = (props) => {
     const [fillerClass, setFillerClass] = useState("");
     const [lastFillerClass, setLastFillerClass] = useState("");
 
-    const { draggedElement, setDraggedElement, directory, setDirectory, setReRender,
-        isDragging, cloneTimeout, resetDrag, items } = useContext(ProfileContext);
+    const { username, draggedElement, setDraggedElement, directory, setDirectory, setReRender,
+        isDragging, cloneTimeout, resetDrag, items, contentLoaded } = useContext(ProfileContext);
     
-
     // Set the opacity of dragged element while dragging.
     useEffect(() => {
         if (isDragging && draggedElement.id === props.id) {
@@ -33,7 +36,7 @@ export const PageItem = (props) => {
         }
     }, [isDragging, draggedElement, props.name, props.order, props.id]);
 
-  
+
     // Change directory after double clicking on a folder.
     const handleDoubleClick = (event) => {
         if (props.type === 'folder') {
@@ -64,7 +67,7 @@ export const PageItem = (props) => {
         }
 
         if (targetElem.className === "file" && !isDragging) {
-            renderMain(QuestionPage, {allPaths: props.content, directory: directory});
+            navigate(`deck/${targetElem.id}`, {state: {allPaths: props.content, directory: directory}});
         } 
 
         if (targetElem.className === 'file' || (draggedElement.id === targetElem.id)) {
@@ -77,7 +80,7 @@ export const PageItem = (props) => {
         setFolderStyle("");
         
         if (isDragging) {
-            axios.put(`/updatedir/${userName}`, {
+            axios.put(`/updatedir/${username}`, {
                 'item_id': draggedElement.id,
                 'item_name': draggedElement.name,
                 'target_id': targetElem.id,
@@ -130,7 +133,7 @@ export const PageItem = (props) => {
             <Filler 
                 fillerClass={fillerClass}
                 setFillerClass={setFillerClass}
-                order={{}} type="regular" />
+                order={props.order} type="regular" />
             <div 
                 id={props.id}
                 className={props.type}
@@ -152,12 +155,12 @@ export const PageItem = (props) => {
                     </span>}
                 <p className={`${props.type}-description`}>{props.name}</p>
             </div>
-            {items.length === parseInt(props.order) &&
+            {(items.length === props.order || props.order % columnNumber === 0) &&
                 <Filler 
                 fillerClass={lastFillerClass}
                 setFillerClass={setLastFillerClass}
                 siblingType={props.type}
-                order={items.length + 1} type="last"/>}
+                order={props.order} type="last"/>}
         </div>
     )
 }

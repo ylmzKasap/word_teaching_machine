@@ -1,23 +1,32 @@
 import './styling/App.css'
 import 'bootstrap/dist/css/bootstrap.css';
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { StrictMode } from 'react';
+import { render } from 'react-dom';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 import { ProfilePage } from './profile_components/ProfilePage';
+import { NotFound } from './profile_components/common/components';
+import { QuestionPage } from './question_components/QuestionPage';
 
-export const userName = "hayri";
 
-export function renderMain(Component, propObject) {
-    if (propObject === undefined) {
-        propObject = {};
-    }
-
-    ReactDOM.render(
-        <React.StrictMode>
-            <Component {...propObject} />
-        </React.StrictMode>,
-        document.getElementById("main-app")
-    );
+const App = () => {
+    return (
+        <Routes>
+            <Route path='user/:username' element={<ProfilePage dir={1}/>}>
+                <Route path='deck/:deckId' element={<QuestionPage />}/>
+            </Route>
+            <Route path='*' element={<NotFound category='page' />} />
+        </Routes>
+    )
 }
 
-renderMain(ProfilePage, {dir: 1});
+const rootElement = document.getElementById("main-app");
+render(
+    <StrictMode>
+        <Router>
+            <App />
+        </Router>    
+    </StrictMode>,
+    rootElement
+)

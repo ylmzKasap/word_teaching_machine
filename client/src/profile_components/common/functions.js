@@ -20,7 +20,7 @@ export function generate_directory(items, userName) {
 				id={`${item_id}`}
 				name={item_name}
 				type={item_type}
-				order={item_order}
+				order={parseInt(item_order)}
 				content={item_content}
 				user={userName} />
 			)
@@ -50,6 +50,8 @@ const setScroll = (setter, elem, cursor, move, timing) => {
 }
 
 export function scroll_div(evnt, win, doc, scrolling, setScrolling, constraints=[]) {
+	// Used by: ../ProfilePage -> HandleMouseAction event handler.
+	
 	if (!([...constraints].includes(evnt.target.className.split(" ")[0]))) {
 		const scrolledElement = doc.querySelector('.card-container');
 
@@ -97,7 +99,7 @@ export function delete_item(itemObj, directory, username, setRender) {
 		itemObj.type === 'folder' ? `Delete '${itemObj.name}' and all of its content?`
 		: `Delete '${itemObj.name}?'`)
 	if (window.confirm(message)) {
-		axios.delete(`http://localhost:3001/u/${username}/delete_item`, {data: {
+		axios.delete(`/u/${username}/delete_item`, {data: {
 			item_id: itemObj.id,
 			parent_id: directory}}
 		)
@@ -105,3 +107,10 @@ export function delete_item(itemObj, directory, username, setRender) {
 		.catch(err => console.log(err));
 	}
 }
+
+export function get_column_number(containerName, doc, win) {
+        const container = doc.querySelector(containerName);
+        const gridComputedStyle = win.getComputedStyle(container);
+        const gridColumnCount = gridComputedStyle.getPropertyValue("grid-template-columns").split(" ").length;
+        return [gridColumnCount];
+    }

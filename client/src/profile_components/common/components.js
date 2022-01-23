@@ -2,7 +2,6 @@ import { useContext } from "react";
 import axios from "axios";
 import { ProfileContext } from "../ProfilePage";
 import { delete_item } from "./functions";
-import { userName } from "../..";
 
 export const OverlayNavbar = (props) => {
     // Component of CreateDeck, CreateFolder.
@@ -50,21 +49,22 @@ export const SubmitForm = (props) => {
 }
 
 
-export const ItemContextMenu = (props) => {
-    const { directory, setReRender, contextOpenedElem, clipboard } = useContext(ProfileContext);
+export const ItemContextMenu = () => {
+    const { username, directory, setReRender, contextOpenedElem, clipboard,
+    contextOptions, contextMenuStyle, setClipboard, resetContext } = useContext(ProfileContext);
 
     const handleClick = (event) => {
         const action = event.target.title;
         if (['cut', 'copy'].includes(action)) {
-            props.setClipboard({'action': action, 'id': contextOpenedElem.id, 'directory': directory});
+            setClipboard({'action': action, 'id': contextOpenedElem.id, 'directory': directory});
         } 
         
         else if (action === 'delete') {
-            delete_item(contextOpenedElem, directory, userName, setReRender);
+            delete_item(contextOpenedElem, directory, username, setReRender);
         } 
         
         else if (action === 'paste') {
-            axios.put(`/paste/${userName}`, {
+            axios.put(`/paste/${username}`, {
                 'item_id': clipboard.id,
                 'old_parent': clipboard.directory,
                 'new_parent': directory,
@@ -72,27 +72,27 @@ export const ItemContextMenu = (props) => {
             })
             .then(() => {
                 if (clipboard.action === 'cut') {
-                    props.setClipboard({});
+                    setClipboard({});
                 }
                 setReRender();
             }).catch(err => 
                 console.log(err.response.data));
         }
-        props.resetContext();
+        resetContext();
     }
 
     return (
-        <div id="item-context-menu" className="context-menu" style={props.style}
+        <div id="item-context-menu" className="context-menu" style={contextMenuStyle}
             onContextMenu={e => e.preventDefault()}
             onClick={handleClick}>
-            {props.items.map(i => <menu title={i} key={i}></menu>)}
+            {contextOptions.map(i => <menu title={i} key={i}></menu>)}
         </div>
     )
 }
 
 
 export const Filler = (props) => {
-    const { isDragging, cloneTimeout, draggedElement,
+    const { username, isDragging, cloneTimeout, draggedElement,
             directory, resetDrag, setReRender } = useContext(ProfileContext);
 
     // Style the filler on hovering.
@@ -115,26 +115,28 @@ export const Filler = (props) => {
     const handleFillerUp = (event) => {
         if (!isDragging) { return };
 
+        const scrollAmount = document.querySelector('.card-container').scrollTop;
         if (props.type === 'regular') {
             let nextElement = event.target.nextElementSibling;
             if (nextElement.id === draggedElement.id) {
-                const scrollAmount = document.querySelector('.card-container').scrollTop;
+                resetDrag(true, scrollAmount);
+                return
+            }
+        } else if (props.type === 'last') {
+            let previousElement = event.target.previousSibling;
+            if (previousElement.id === draggedElement.id) {
                 resetDrag(true, scrollAmount);
                 return
             }
         }
 
-        let insertOrder = (props.type === 'regular')
-            ? event.target.closest('.item-with-filler').style.order
-            : props.order;
-
         props.setFillerClass('');
         resetDrag();
 
-        axios.put(`/updateorder/${userName}`, {
+        axios.put(`/updateorder/${username}`, {
             'item_id': draggedElement.id,
             'parent_id': directory,
-            'new_order': insertOrder,
+            'new_order': props.order,
             'direction': props.type === 'last' ? 'after' : 'before'
         })
         .then(() => setReRender())
@@ -145,9 +147,30 @@ export const Filler = (props) => {
         <div 
             className={
                 `filler${props.fillerClass ? ' ' + props.fillerClass : ''}${props.type === 'last' ? ' last-filler' : ''}`}
-            style={{"order": props.order}}
             onMouseOver={handleFillerHover}
             onMouseLeave={handleFillerHover}
             onMouseUp={handleFillerUp} />
+    )
+}
+
+
+export function NotFound(props) {
+
+    const message = 
+        (props.category === 'userError') 
+        ?  <h1>There is no user called <span className="what-not-found">{props.thing}</span>.</h1> :
+        (['deckError', 'deckSyntaxError'].includes(props.category)) 
+        ? <h1>Deck <span className="what-not-found">{props.thing}</span> does not exist.</h1>
+        :  <h1>Page does not exist.</h1>
+    
+    const icon = (props.category === 'userError') 
+        ? <i className="fas fa-user-slash fa-9x"></i>
+        : <i className="fas fa-binoculars fa-9x"></i>
+
+    return (
+        <div className="not-found">
+            {icon}
+            {message}
+        </div>
     )
 }

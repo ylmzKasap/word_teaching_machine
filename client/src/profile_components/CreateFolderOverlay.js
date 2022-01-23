@@ -1,7 +1,6 @@
 import { useState, useContext } from "react";
 import axios from "axios";
 
-import { userName } from "..";
 import { ProfileContext } from "./ProfilePage";
 import * as handlers from './common/handlers';
 import * as components from './common/components';
@@ -24,7 +23,7 @@ export function CreateFolder(props) {
     const [nameError, setNameError] = useState({errorClass: "", description: ""});
     const [formError, setFormError] = useState({display: {"display": "none"}, errorClass: "", description: ""});
 
-    const { directory, setReRender } = useContext(ProfileContext);
+    const { username, directory, setReRender } = useContext(ProfileContext);
 
     const handleNameChange = (event) => {
         const [itemName, itemNameError, generalError] = handlers.handleItemName(event);
@@ -51,7 +50,7 @@ export function CreateFolder(props) {
         }
     
         else {
-            axios.post(`http://localhost:3001/u/${userName}/create_folder`, {
+            axios.post(`/u/${username}/create_folder`, {
                 folderName: folderName,
                 parent_id: directory}
             ).then(() => {

@@ -1,9 +1,9 @@
 import { useState, useEffect, useReducer, createContext, useContext } from "react";
+import { useParams, useNavigate, Outlet } from "react-router-dom";
 import axios from 'axios';
 
-import { userName } from "..";
 import { generate_directory, hasKeys, scroll_div, delete_item } from "./common/functions";
-import { ItemContextMenu } from "./common/components";
+import { ItemContextMenu, NotFound } from "./common/components";
 import { CreateDeckOverlay } from "./CreateDeckOverlay";
 import { CreateFolderOverlay } from "./CreateFolderOverlay";
 
@@ -13,12 +13,20 @@ export const ProfileContext = createContext();
 
 export const ProfilePage = (props) => {
     // Rendered by main.
+    const params = useParams();
+    const username = params.username;
 
-    const [userPicture, setUserPicture] = useState("no_pic.png");
+    const [userPicture, setUserPicture] = useState("");
     const [directory, setDirectory] = useState(props.dir);
     const [items, setItems] = useState([]);
     const [reRender, setReRender] = useReducer(x => x + 1, 0);
     const [clipboard, setClipboard] = useState("");
+
+    // Content fetching related states.
+    const [pictureLoaded, setPictureLoaded] = useState(false);
+    const [directoryLoaded, setDirectoryLoaded] = useState(false);
+    const [contentLoaded, setContentLoaded] = useState(false);
+    const [fetchError, setFetchError] = useState(false);
 
     // Context menu related states.
     const [contextMenu, setContextMenu] = useState(false);
@@ -39,31 +47,47 @@ export const ProfilePage = (props) => {
     
     // Load user picture.
     useEffect(() => {
-        axios.get(`/u/${userName}`).then(
-            response =>  {
-                setUserPicture(response.data.user_picture);
-            }
-        )
+        axios.get(`/u/${username}`)
+            .then(response =>  {
+                const image = new Image();
+                image.src = `media/profile/${response.data.user_picture}`;
+                image.onload = () => {
+                    setUserPicture(image.src);
+                    setPictureLoaded(true);
+            }})
+            .catch(() =>
+                setFetchError(true))
     }, [userPicture]);
   
 
     // Render directory.
     useEffect(() => {
-        axios.get(`/u/${userName}/${directory}`)
-        .then(response =>  {
-            setItems(generate_directory(response.data, userName));
-            }
-        )
+        axios.get(`/u/${username}/${directory}`)
+            .then(response =>  {
+                setItems(generate_directory(response.data, username));
+                }
+            )
+            .then(() => setDirectoryLoaded(true)
+            )
+            .catch(() => 
+                setFetchError(true)
+            );
         return (() => {
             clearTimeout(cloneTimeout['timeouts']);
             resetDrag();
         });
     }, [directory, reRender]);
 
+    // Check whether content is loaded.
+    useEffect(() => {
+        if (pictureLoaded && directoryLoaded) {
+            setContentLoaded(true);
+        }
+    }, [pictureLoaded, directoryLoaded])
 
     // Update clone position.
     useEffect(() => {
-        if (hasKeys(draggedElement) && Object.keys(cloneStyle).length && isDragging) {
+        if (hasKeys(draggedElement) && hasKeys(cloneStyle) && isDragging) {
             setCloneElement(<DragClone item={draggedElement.name} cloneStyle={cloneStyle} />)
         }
     }, [cloneStyle, draggedElement, isDragging])
@@ -76,7 +100,7 @@ export const ProfilePage = (props) => {
         }
     }, [isDragging])
 
-    // Reset all scroll related state.
+    // Reset all context menu related state.
     const resetContext = () => {
         setContextMenu(false);
         setContextOptions([]);
@@ -118,7 +142,7 @@ export const ProfilePage = (props) => {
     // Set 'isDragging' value to true when mouse moves.
     const handleMouseAction = (event) => {
         if (hasKeys(draggedElement) && !cloneTimeout.exists) {
-            if (dragCount > 12) {
+            if (dragCount > 6) {
                 setCloneStyle({
                     "width": "180px",
                     "backgroundColor": "rgb(233, 171, 55)",
@@ -208,7 +232,8 @@ export const ProfilePage = (props) => {
     // Children: ProfileNavBar, SideBar | (Indirect) Folder, Deck
     return (
         <ProfileContext.Provider value={
-            {"setReRender": setReRender,
+            {"username": username,
+            "setReRender": setReRender,
             "directory": directory,
             "setDirectory": setDirectory,
             "draggedElement": draggedElement,
@@ -218,23 +243,32 @@ export const ProfilePage = (props) => {
             "resetDrag": resetDrag,
             "items": items,
             "contextOpenedElem": contextOpenedElem,
-            "clipboard": clipboard}
+            "clipboard": clipboard,
+            "contentLoaded": contentLoaded,
+            "contextOptions": contextOptions,
+            "contextMenuStyle": contextMenuStyle,
+            "setClipboard": setClipboard,
+            "resetContext": resetContext}
             }>
-            <div className="profile-page"
-                onMouseMove={handleMouseAction} onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
-                <ProfileNavBar user={userName} />
-                <div className="profile-content">
-                    <SideBar user={userName} userPicture={userPicture} />
-                    <div className="card-container" onContextMenu={handleContextMenu} onScroll={handleScroll}>
-                        {items}
-                        {isDragging && <BottomDragBar />}
+            <Outlet />
+            <div className="profile-page">
+                {!params.deckId &&
+                    <div className="profile-container"
+                        onMouseMove={handleMouseAction} onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
+                        <ProfileNavBar user={username} />
+                        {contentLoaded &&
+                            <div className="profile-content">
+                                <SideBar user={username} userPicture={userPicture} />
+                                <div className="card-container" 
+                                    onContextMenu={handleContextMenu} onScroll={handleScroll}
+                                    > {items} {isDragging && <BottomDragBar />}
+                                </div>
+                                {contextMenu && <ItemContextMenu />}
+                            </div>}
+                        {cloneElement}
+                        {fetchError && <NotFound category="userError" thing={username} />}
                     </div>
-                </div>
-                {cloneElement}
-                {contextMenu && <ItemContextMenu 
-                    items={contextOptions} style={contextMenuStyle}
-                    setClipboard={setClipboard} resetContext={resetContext}
-                    contextOpenedElem={contextOpenedElem} />}
+                }
             </div>
         </ProfileContext.Provider>
     )
@@ -249,7 +283,7 @@ const ProfileNavBar = () => {
     const [folderDisplay, setFolderDisplay] = useState(false);
     const [backDisplay, setBackDisplay] = useState(false);
   
-    const { directory, setDirectory } = useContext(ProfileContext);
+    const { username, directory, setDirectory, contentLoaded } = useContext(ProfileContext);
   
     useEffect(() => {
         if (directory > 1) {
@@ -260,7 +294,7 @@ const ProfileNavBar = () => {
     }, [directory])
   
     const handleBackClick = () => {
-        axios.get(`/updir/${userName}/${directory}`)
+        axios.get(`/updir/${username}/${directory}`)
             .then(response => setDirectory(response.data));
     }
   
@@ -277,8 +311,8 @@ const ProfileNavBar = () => {
     return (
         <div className="profile-navbar sticky-top navbar-dark bg-dark">
             {backDisplay && <i className="fas fa-arrow-left arrow" onClick={handleBackClick}></i>}
-            <i className="fas fa-folder-plus" type="folder" onClick={addItem}></i>
-            <i className="fas fa-plus-circle" type="deck" onClick={addItem}></i>
+            {contentLoaded && <i className="fas fa-folder-plus" type="folder" onClick={addItem}></i>}
+            {contentLoaded && <i className="fas fa-plus-circle" type="deck" onClick={addItem}></i>}
             {deckDisplay && <CreateDeckOverlay setDisplay={setDeckDisplay} />}
             {folderDisplay && <CreateFolderOverlay setDisplay={setFolderDisplay} />}
 
@@ -289,11 +323,13 @@ const ProfileNavBar = () => {
 
 const SideBar = (props) => {
     // Component of ProfilePage.
-    
+
     return (
         <div className="sidebar-container">
             <figure className="user-info">
-                <img className="user-image" src={`media/profile/${props.userPicture}`} alt={`${props.user}`} />
+                <div className="image-container">                  
+                    <img className="user-image" src={props.userPicture} alt={`${props.user}`} />
+                </div>
                 <figcaption className="username">{props.user}</figcaption>
             </figure>
         </div>
@@ -304,14 +340,14 @@ const SideBar = (props) => {
 const BottomDragBar = () => {
     // Component of ProfilePage.
     const { 
-        isDragging, directory, draggedElement,
+        username, isDragging, directory, draggedElement,
         setReRender, resetDrag, cloneTimeout } = useContext(ProfileContext);
 
     const destroyItem = () => {
         // Delete dragged the item.
         resetDrag();
         if (!cloneTimeout.exists) {
-            delete_item(draggedElement, directory, userName, setReRender);
+            delete_item(draggedElement, directory, username, setReRender);
             } else {
                 resetDrag();
             }
@@ -319,7 +355,7 @@ const BottomDragBar = () => {
 
     const sendBack = () => {
         // Move dragged item to parent folder.
-        axios.put(`/updatedir/${userName}`, {
+        axios.put(`/updatedir/${username}`, {
             'item_id': draggedElement.id,
             'item_name': draggedElement.name,
             'parent_id': directory,

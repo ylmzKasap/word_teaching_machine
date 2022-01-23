@@ -80,24 +80,44 @@ export function generate_pages(paths) {
 	function disperse_questions(array) {
 		let copyArray = [...array];
 		for (let i = 0; i < array.length; i++) {
-			let wordStem = paths[i].split('.')[0];
 			let randomRange = Math.random();
 			randomRange = (randomRange < .05) ? 1 : (randomRange < .20) ? 3 : 2;
 			copyArray.splice(
 				copyArray.indexOf(array[i]) + randomRange, 0, 
-				(i % 2 === 0) ? 
-				<AskFromText allPaths={paths} allWords={allWords} imgPath={paths[i]} word={wordStem} key={wordStem + '-question'} />
-				: <AskFromPicture allPaths={paths} allWords={allWords} imgPath={paths[i]} key={wordStem + '-question'} />);
+				(i % 2 === 0)
+				? {
+					'component': AskFromText,
+					type:'AskFromText',
+					path: paths[i],
+					order: i + 1}
+				: {
+					'component': AskFromPicture,
+					type:'AskFromPicture',
+					path: paths[i],
+					order: i + 1}
+				);
 		}
-		return copyArray;
+		return copyArray
 	}
-
-	let allWords = paths.map(p => p.split('.')[0]);
 	let pages = [];
 	for (let i = 0; i < paths.length; i++) {
-		let wordStem = paths[i].split('.')[0];
-		pages.push(<IntroduceWord imgPath={paths[i]} allWords={allWords} word={wordStem} key={wordStem + '-intro'} />);}
-
+		pages.push({
+			'component': IntroduceWord,
+			type:'IntroduceWord',
+			path: paths[i],
+			order: i + 1
+		});
+	}
 	pages = disperse_questions(pages);
 	return [...pages];
+}
+
+export function process_page_object(Obj, allPaths) {
+	const keyType = (Obj.type === 'IntroduceWord') ? '-intro-' : '-question-';
+	const wordStem = Obj.path.split('.')[0];
+
+	let allWords = allPaths.map(p => p.split('.')[0]);
+	return <Obj.component 
+		allPaths={allPaths} allWords={allWords} 
+		imgPath={Obj.path} word={wordStem} key={wordStem + keyType + String(Obj.order)} />
 }

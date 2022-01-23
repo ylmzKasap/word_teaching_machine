@@ -32,13 +32,21 @@ def read_time(timedeltaObject):
 
 
 def get_import_name(file_path):
-    # Create Sass import names from relative paths.
+    """Create Sass import names from relative paths."""
     if len(file_path.split('/')) > 1:
         return (
             './' + os.path.dirname(file_path)
             + '/' + os.path.basename(file_path).lstrip("_").split('.')[0])
     else:
         return file_path.lstrip('_').split('.')[0]
+
+
+def send_media_end(item):
+    """Helper function for sorting media queries."""
+    if 'media' in item:
+        return 1
+    else:
+        return 0
 
         
 # scssFile = sys.argv[1]  For command line
@@ -53,6 +61,15 @@ partialRegex = re.compile(r'(?<=@import ").*(?=")')
 with open(scssFile, 'r') as sass:
     scssText = sass.read()
 partialImports = partialRegex.findall(scssText)
+
+# Check duplicate imports.
+if (len(partialImports) != len(set(partialImports))):
+    duplicate = [i for i in partialImports if partialImports.count(i) > 1]
+    print("\nThere are duplicate imports in the main scss file:\n")
+    for i, dupe in enumerate(set(duplicate), 1):
+        print(f"{i}. {dupe}")
+    input("\nRemove the duplicates and restart the compiler.")
+    sys.exit()
 
 # Find paths of all partials.
 availablePartialPaths = []
@@ -81,7 +98,7 @@ if importedNotFound:
     print("\nSome partials are imported but they do not exist:\n")
     for i, partial in enumerate(importedNotFound, 1):
         print(f'{i}. {partial}')
-    print("\nDelete the partial from main scss file if not necessary.")
+    print("\nDelete the partial from main scss file to compile.")
     input()
     sys.exit()
 
@@ -96,21 +113,32 @@ for partial in availablePartialPaths:
     else:
         notImported.append(partial)
 
+# Get Sass import names for all files.
+intersectingImports = [get_import_name(p) for p in intersectingPartials]
+toBeImported = [
+    get_import_name(
+        str(p).split(str(Path.cwd()))[1].strip(os.sep).replace(os.sep, "/")) 
+        for p in notImported]
+allImports = [*intersectingImports, *toBeImported]
+
+# Send media queries to the end.
+toBeImported.sort(key=send_media_end)
+allImports.sort(key=send_media_end)
+
 # Notify the user for not imported partials.
 if notImported:
     print("\nSome partials exist within the directory but they are not imported:\n")
     for i, partial in enumerate(notImported, 1):
         print(f'{i}. {partial}')
-    print("\nAdd the partials to the main scss file if they are necessary.")
-    print("\nComplete import paths:\n")
-    for p in intersectingPartials:
-        importName = get_import_name(p)
-        print(f'@import "{importName}";')
-    print("\nNot imported")
-    for p in notImported:
-        relativePath = str(p).split(str(Path.cwd()))[1].strip(os.sep).replace(os.sep, "/")
-        importName = get_import_name(relativePath)
-        print(f'@import "{importName}";')
+    print("\nAdd the partials to the main scss file if they are necessary and restarts the compiler.")
+
+    print("\n\nPartials which are not imported:")
+    for i in toBeImported:
+        print(f'@import "{i}";')
+    
+    print("\nComplete import paths:")
+    for i in allImports:
+        print(f'@import "{i}";')
     input()
 
 lastCompileTime = compileTime = 0

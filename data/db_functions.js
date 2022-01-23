@@ -1,9 +1,12 @@
 const pool = require('./db_info')
 
 const errorCodes = {
+    42601: 'Syntax Error',
     23505: "Unique Violation",
     22001: "Input too long",
-    42703: "Column does not exist"
+    42703: "Column does not exist",
+    "42P01": "Table does not exist",
+    "22P02": "IntegerExpected"
 }
 
 function handleError(errorCode) {
@@ -85,6 +88,16 @@ async function getUserInfo(owner) {
         SELECT * FROM users WHERE username = '${owner}';
     `).catch(err => console.log(err));
     return userInfo.rows[0];
+}
+
+async function getItemInfo(owner, item_id, item_type) {
+    const itemInfo = await pool.query(`
+        SELECT * FROM ${owner}_table WHERE item_id = '${item_id}' AND item_type = '${item_type}';
+    `).catch((err) => {
+        return (err.code === "42P01") ? 'userError' 
+        : ["42601", "42703", "22P02"].includes(err.code) ? 'deckSyntaxError'
+        : []});
+    return (itemInfo === 'userError' || itemInfo === 'deckSyntaxError') ? itemInfo : itemInfo.rows;
 }
 
 async function getDirectory(owner, item_id, orderBy = "") {
@@ -211,6 +224,7 @@ module.exports = {
     addUser,
     deleteUser,
     getUserInfo,
+    getItemInfo,
     getDirectory,
     updateDirectory,
     updateColumnValue,

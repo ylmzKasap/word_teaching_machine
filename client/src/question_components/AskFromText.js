@@ -52,10 +52,7 @@ function ImageOptionBox(props) {
     const [numStyle, setNumStyle] = useState("");
     const [timeouts, handleTimeouts] = useState({});
   
-    const incorrectHandler = useContext(FunctionContext)['incorrect'];
-    const clickHandler = useContext(FunctionContext)['click'];
-    const correctFound = useContext(FunctionContext)['correctFound'];
-    const setCorrectFound = useContext(FunctionContext)['setCorrectFound'];
+    const { clickHandler, handleIncorrect, correctFound, setCorrectFound } = useContext(FunctionContext);
     const animateText = useContext(textAnimContext);
   
     const useMountEffect = () => 
@@ -99,7 +96,7 @@ function ImageOptionBox(props) {
                 setAnimation("incorrect-answer");
                 setNumStyle("incorrect-image-number");
                 if (!correctFound) {
-                    incorrectHandler(AskFromText);
+                    handleIncorrect();
                 }
             }
         }

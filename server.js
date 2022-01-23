@@ -20,7 +20,7 @@ app.use("/media", express.static(path.join(__dirname, 'media/sounds')));
 
 
 // Serve User Info.
-app.get('/u/:username/:directory_id?', async (req, res, next) => {
+app.get('/u/:username/:directory_id?', async (req, res) => {
     const { username, directory_id } = req.params;
     const userInfo = await db_utils.getUserInfo(username);
     
@@ -28,12 +28,26 @@ app.get('/u/:username/:directory_id?', async (req, res, next) => {
         if (directory_id) {
             await db_utils.getDirectory(username, directory_id)
             .then(directory => res.status(200).send(directory))
-            .catch(() => res.status(404).send('Not Found'));
+            .catch(() => res.status(404).send('User Not Found'));
         } else {
-            res.status(200).send(userInfo)
+            res.status(200).send(userInfo);
         }
     } else {
-        res.status(404).send('Not Found')
+        res.status(404).send('User Not Found');
+    }
+});
+
+// Serve Item Info.
+app.get('/u/:username/item/:item_id', async (req, res) => {
+    const { username, item_id } = req.params;
+    const itemInfo = await db_utils.getItemInfo(username, item_id, 'file');
+    
+    if (['userError', 'deckSyntaxError'].includes(itemInfo)) {
+        res.status(404).send(itemInfo);
+    } else if (itemInfo.length === 0) {
+        res.status(404).send('deckError');
+    } else {
+        res.status(200).send(itemInfo[0]);
     }
 });
 
