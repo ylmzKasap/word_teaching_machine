@@ -38,16 +38,20 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
 });
 
 // Serve Item Info.
-app.get('/u/:username/item/:item_id', async (req, res) => {
-    const { username, item_id } = req.params;
+app.get('/u/:username/:directory_id/item/:item_id', async (req, res) => {
+    const { username, directory_id, item_id } = req.params;
+    const dirExists = await db_utils.checkPath(username, item_id, directory_id);
+
+    if (!dirExists) {
+        return res.status(404).send("Directory does not exist.");
+    }
+
     const itemInfo = await db_utils.getItemInfo(username, item_id, 'file');
     
-    if (['userError', 'deckSyntaxError'].includes(itemInfo)) {
-        res.status(404).send(itemInfo);
-    } else if (itemInfo.length === 0) {
-        res.status(404).send('deckError');
+    if (itemInfo === null) {
+        return res.status(404).send(itemInfo);
     } else {
-        res.status(200).send(itemInfo[0]);
+        return res.status(200).send(itemInfo[0]);
     }
 });
 

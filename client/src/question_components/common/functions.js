@@ -112,12 +112,12 @@ export function generate_pages(paths) {
 	return [...pages];
 }
 
-export function process_page_object(Obj, allPaths) {
-	const keyType = (Obj.type === 'IntroduceWord') ? '-intro-' : '-question-';
-	const wordStem = Obj.path.split('.')[0];
+export function process_page_object(obj, allPaths) {
+	const keyType = (obj.type === 'IntroduceWord') ? '-intro-' : '-question-';
+	const wordStem = obj.path.split('.')[0];
 
 	let allWords = allPaths.map(p => p.split('.')[0]);
-	return <Obj.component 
+	return <obj.component 
 		allPaths={allPaths} allWords={allWords} 
-		imgPath={Obj.path} word={wordStem} key={wordStem + keyType + String(Obj.order)} />
+		imgPath={obj.path} word={wordStem} key={wordStem + keyType + String(obj.order)} />
 }

@@ -154,23 +154,11 @@ export const Filler = (props) => {
 }
 
 
-export function NotFound(props) {
-
-    const message = 
-        (props.category === 'userError') 
-        ?  <h1>There is no user called <span className="what-not-found">{props.thing}</span>.</h1> :
-        (['deckError', 'deckSyntaxError'].includes(props.category)) 
-        ? <h1>Deck <span className="what-not-found">{props.thing}</span> does not exist.</h1>
-        :  <h1>Page does not exist.</h1>
-    
-    const icon = (props.category === 'userError') 
-        ? <i className="fas fa-user-slash fa-9x"></i>
-        : <i className="fas fa-binoculars fa-9x"></i>
-
+export function NotFound() {
     return (
         <div className="not-found">
-            {icon}
-            {message}
+            <i className="fas fa-binoculars fa-9x"></i>
+            <h2> Page does not exist. </h2>
         </div>
     )
 }

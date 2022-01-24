@@ -29,6 +29,7 @@
 
 .fa-home {
   @extend .fas;
+  margin: auto;
   transform: scale(1.2);
   &:hover {
     transform: scale(1.4);
@@ -36,9 +37,16 @@
   &:active {
     transform: scale(1.2);
   }
-  &:only-child {
-    margin: auto;
-  }
+}
+
+.fa-arrow-left {
+  position: absolute;
+  left: 1%;
+}
+
+.fa-arrow-right {
+  position: absolute;
+  right: 1%;
 }
 
 .fa-trash-alt {

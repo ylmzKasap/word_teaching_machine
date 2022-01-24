@@ -12,7 +12,7 @@ export function AskFromPicture(props) {
     const [imageAnimation, setImageAnimtion] = useState("");
     const [layout] = useState(Math.random());
   
-    const {allPaths, allWords, imgPath, word } = props;
+    const {allPaths, allWords, imgPath, word} = props;
     const pageItems = [
 
         <TextOptions

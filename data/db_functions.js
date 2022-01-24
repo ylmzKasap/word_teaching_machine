@@ -93,17 +93,48 @@ async function getUserInfo(owner) {
 async function getItemInfo(owner, item_id, item_type) {
     const itemInfo = await pool.query(`
         SELECT * FROM ${owner}_table WHERE item_id = '${item_id}' AND item_type = '${item_type}';
-    `).catch((err) => {
-        return (err.code === "42P01") ? 'userError' 
-        : ["42601", "42703", "22P02"].includes(err.code) ? 'deckSyntaxError'
-        : []});
-    return (itemInfo === 'userError' || itemInfo === 'deckSyntaxError') ? itemInfo : itemInfo.rows;
+    `).catch(() => null);
+
+    return itemInfo ? itemInfo.rows : itemInfo;
 }
 
-async function getDirectory(owner, item_id, orderBy = "") {
-    const orderQuery = orderBy ? `ORDER BY ${orderBy}` : "";
+async function checkPath(owner, item_id, directory_id) {
+    const checkDir = await pool.query(`
+        SELECT * FROM ${owner}_table WHERE item_id = '${item_id}' AND parent_id = '${directory_id}';
+    `).catch(() => null);
+
+    if (checkDir === null) {
+        return false;
+    } else if (checkDir.rows.length === 0) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+async function checkDirectory(owner, item_id) {
+    const checkDir = await pool.query(`
+        SELECT * FROM ${owner}_table WHERE item_id = '${item_id}';
+    `).catch(() => null);
+
+    if (checkDir === null) {
+        return false;
+    } else if (checkDir.rows.length === 0) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+async function getDirectory(owner, item_id) {
+    const dirExists = await checkDirectory(owner, item_id);
+
+    if (!dirExists) {
+        return null;
+    }
+
     const directory = await pool.query(`
-        SELECT * FROM ${owner}_table WHERE parent_id = ${item_id}${orderQuery};
+        SELECT * FROM ${owner}_table WHERE parent_id = '${item_id}';
     `)
     return directory.rows;
 }
@@ -225,6 +256,8 @@ module.exports = {
     deleteUser,
     getUserInfo,
     getItemInfo,
+    checkPath,
+    checkDirectory,
     getDirectory,
     updateDirectory,
     updateColumnValue,

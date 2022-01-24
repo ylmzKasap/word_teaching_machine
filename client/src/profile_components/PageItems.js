@@ -4,8 +4,7 @@ import axios from 'axios';
 import { ProfileContext } from "./ProfilePage";
 import * as handlers from "./common/handlers";
 import { Filler } from "./common/components";
-import { useNavigate } from "react-router-dom";
-import { get_column_number } from "./common/functions";
+import { useNavigate, useParams } from "react-router-dom";
 import { useWindowSize } from "./common/hooks";
 
 
@@ -14,6 +13,7 @@ export const PageItem = (props) => {
     // Deployed by './common/functions' -> generate_decks.
 
     const navigate = useNavigate();
+    const params = useParams();
     const [columnNumber] = useWindowSize();
 
     const [selfStyle, setSelfStyle] = useState({"order": props.order});
@@ -22,9 +22,11 @@ export const PageItem = (props) => {
     const [fillerClass, setFillerClass] = useState("");
     const [lastFillerClass, setLastFillerClass] = useState("");
 
-    const { username, draggedElement, setDraggedElement, directory, setDirectory, setReRender,
-        isDragging, cloneTimeout, resetDrag, items, contentLoaded } = useContext(ProfileContext);
+    const { username, draggedElement, setDraggedElement, directory, setReRender,
+        isDragging, cloneTimeout, resetDrag, items } = useContext(ProfileContext);
     
+    const trueDirectory = params.dirId ? "" : `${directory}/`;
+
     // Set the opacity of dragged element while dragging.
     useEffect(() => {
         if (isDragging && draggedElement.id === props.id) {
@@ -38,9 +40,9 @@ export const PageItem = (props) => {
 
 
     // Change directory after double clicking on a folder.
-    const handleDoubleClick = (event) => {
+    const handleDoubleClick = () => {
         if (props.type === 'folder') {
-            setDirectory(props.id);
+            navigate(`/user/${username}/${props.id}`);
         }
     }
 
@@ -67,7 +69,7 @@ export const PageItem = (props) => {
         }
 
         if (targetElem.className === "file" && !isDragging) {
-            navigate(`deck/${targetElem.id}`, {state: {allPaths: props.content, directory: directory}});
+            navigate(`${trueDirectory}deck/${targetElem.id}`, {state: {allPaths: props.content, directory: directory}});
         } 
 
         if (targetElem.className === 'file' || (draggedElement.id === targetElem.id)) {

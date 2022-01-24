@@ -102,3 +102,12 @@
   border: solid rgb(255, 251, 251);
   border-width: 3px 0 3px 0;
 }
+
+.nothing-to-see {
+  @include flexit();
+  font-style: italic;
+  color: rgb(172, 172, 172);
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
