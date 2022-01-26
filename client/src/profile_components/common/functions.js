@@ -93,7 +93,7 @@ export function scroll_div(evnt, win, doc, scrolling, setScrolling, constraints=
 	}
 }
 
-export function delete_item(itemObj, directory, username, setRender) {
+export function delete_item(itemObj, directory, username, setRender, setRequestError) {
 	// Used by './components/ItemContextMenu' and '../ProfilePage/BottomDragBar'.
 	const message = (
 		itemObj.type === 'folder' ? `Delete '${itemObj.name}' and all of its content?`
@@ -104,7 +104,7 @@ export function delete_item(itemObj, directory, username, setRender) {
 			parent_id: directory}}
 		)
 		.then(() => {setRender()})
-		.catch(err => console.log(err));
+		.catch((err) => setRequestError({'exists': true, 'description':err.response.data}));
 	}
 }
 

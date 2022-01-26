@@ -32,6 +32,7 @@ export const ProfilePage = (props) => {
     const [directoryLoaded, setDirectoryLoaded] = useState(false);
     const [contentLoaded, setContentLoaded] = useState(false);
     const [fetchError, setFetchError] = useState(false);
+    const [requestError, setRequestError] = useState({'exists': false, 'description': ""});
 
     // Context menu related states.
     const [contextMenu, setContextMenu] = useState(false);
@@ -68,15 +69,19 @@ export const ProfilePage = (props) => {
     useEffect(() => {
         axios.get(`/u/${username}/${dirId ? dirId : props.dir}`)
             .then(response =>  {
-                setItems(generate_directory(response.data, username))
-                setDirectory(dirId ? dirId : props.dir);
+                setItems(generate_directory(response.data, username));
+                setDirectory(dirId ? parseInt(dirId) : props.dir);
             })
             .then(() => setDirectoryLoaded(true)
             )
-            .catch(() => 
-                setFetchError(true)
+            .catch(() => {
+                setDirectoryLoaded(false);
+                setContentLoaded(false);
+                setFetchError(true);
+                }      
             );
         return (() => {
+            setRequestError({'exists': false, 'description': ""});
             clearTimeout(cloneTimeout['timeouts']);
             resetDrag();
         });
@@ -87,7 +92,7 @@ export const ProfilePage = (props) => {
         if (pictureLoaded && directoryLoaded) {
             setContentLoaded(true);
         }
-    }, [pictureLoaded, directoryLoaded])
+    }, [pictureLoaded, directoryLoaded, dirId])
 
     // Update clone position.
     useEffect(() => {
@@ -192,7 +197,7 @@ export const ProfilePage = (props) => {
         const container = document.querySelector('.card-container');
         const closestDiv = event.target.closest('div');
         const contextMenu = (
-            ['card-container', 'filler', 'item-with-filler', 'filler last-filler']
+            ['card-container', 'filler', 'item-with-filler', 'filler last-filler', 'nothing-to-see']
             .includes(event.target.className)
             ?
             {"closest": event.target, "openedElem": {'type': container}, "ops": ['paste']}
@@ -239,7 +244,6 @@ export const ProfilePage = (props) => {
             {"username": username,
             "setReRender": setReRender,
             "directory": directory,
-            "setDirectory": setDirectory,
             "draggedElement": draggedElement,
             "setDraggedElement": setDraggedElement,
             "isDragging": isDragging,
@@ -255,7 +259,9 @@ export const ProfilePage = (props) => {
             "setClipboard": setClipboard,
             "resetContext": resetContext,
             "handleScroll": handleScroll,
-            "fetchError": fetchError}
+            "fetchError": fetchError,
+            "requestError": requestError,
+            "setRequestError": setRequestError}
             }>
             <div className="profile-page">
                 <div className="profile-container"
@@ -269,6 +275,7 @@ export const ProfilePage = (props) => {
                             {!params.dirId && <CardContainer />}
                         </div>}
                     {cloneElement}
+                    {requestError.exists && <ErrorInfo />}
                     {fetchError && <NotFound />}
                 </div>
             </div>
@@ -357,13 +364,13 @@ const BottomDragBar = () => {
     // Component of ProfilePage.
     const { 
         username, isDragging, directory, draggedElement,
-        setReRender, resetDrag, cloneTimeout } = useContext(ProfileContext);
+        setReRender, resetDrag, cloneTimeout, setRequestError } = useContext(ProfileContext);
 
     const destroyItem = () => {
         // Delete dragged the item.
         resetDrag();
         if (!cloneTimeout.exists) {
-            delete_item(draggedElement, directory, username, setReRender);
+            delete_item(draggedElement, directory, username, setReRender, setRequestError)
             } else {
                 resetDrag();
             }
@@ -378,7 +385,7 @@ const BottomDragBar = () => {
             'direction': 'parent'
         })
         .then(() => setReRender())
-        .catch(err => console.log(err.response.data));
+        .catch(err => setRequestError({'exists': true, 'description':err.response.data}));
         resetDrag();
     }
 
@@ -395,6 +402,22 @@ const BottomDragBar = () => {
                 </div> 
             }
         </div>
+    )
+}
+
+
+const ErrorInfo = () => {
+    const { requestError, setRequestError } = useContext(ProfileContext);
+
+    const handleExit = () => {
+        setRequestError({'exists': false, 'description': ""});
+    }
+
+    return (
+        <label className="profile-error-box">
+            <div className="profile-error-text"><h5>{requestError.description}</h5></div>
+            <div className="error-exit-button" onClick={handleExit}>X</div>
+        </label>
     )
 }
 

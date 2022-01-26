@@ -106,8 +106,10 @@
 .nothing-to-see {
   @include flexit();
   font-style: italic;
+  font-weight: normal;
   color: rgb(172, 172, 172);
   position: absolute;
+  bottom: 10%;
   height: 100%;
   width: 100%;
 }

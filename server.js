@@ -7,7 +7,6 @@ const fs = require('fs');
 
 const db_utils = require('./data/db_functions');
 const db_tests = require('./data/db_tests');
-const pool = require('./data/db_info');
 
 
 // Middleware
@@ -19,16 +18,23 @@ app.use("/media", express.static(path.join(__dirname, 'media/images')));
 app.use("/media", express.static(path.join(__dirname, 'media/sounds')));
 
 
+
 // Serve User Info.
 app.get('/u/:username/:directory_id?', async (req, res) => {
     const { username, directory_id } = req.params;
-    const userInfo = await db_utils.getUserInfo(username);
+    const info = await db_utils.getUserInfo(username);
     
-    if (userInfo) {
+    if (info) {
+        const userInfo = info.rows[0]
         if (directory_id) {
-            await db_utils.getDirectory(username, directory_id)
-            .then(directory => res.status(200).send(directory))
-            .catch(() => res.status(404).send('User Not Found'));
+            const directory = await db_utils.getDirectory(username, directory_id);
+
+            if (directory) {
+                return res.status(200).send(directory);
+            } else {
+                return res.status(404).send('Directory Not Found.')
+            }
+
         } else {
             res.status(200).send(userInfo);
         }
@@ -36,6 +42,8 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
         res.status(404).send('User Not Found');
     }
 });
+
+
 
 // Serve Item Info.
 app.get('/u/:username/:directory_id/item/:item_id', async (req, res) => {
@@ -46,14 +54,15 @@ app.get('/u/:username/:directory_id/item/:item_id', async (req, res) => {
         return res.status(404).send("Directory does not exist.");
     }
 
-    const itemInfo = await db_utils.getItemInfo(username, item_id, 'file');
+    const itemInfo = await db_utils.getItemInfo(username, item_id);
     
     if (itemInfo === null) {
-        return res.status(404).send(itemInfo);
+        return res.status(404).send('Deck does not exist.');
     } else {
-        return res.status(200).send(itemInfo[0]);
+        return res.status(200).send(itemInfo);
     }
 });
+
 
 
 // Handle deck creation.
@@ -71,7 +80,7 @@ app.post("/u/:username/create_deck", async (req, res) => {
     }
     
     // Create deck
-    const newDeck = await db_utils.addItem({
+    await db_utils.addItem({
         'name': deckName,
         'owner': username,
         'item_type': 'file',
@@ -87,13 +96,14 @@ app.post("/u/:username/create_deck", async (req, res) => {
 });
 
 
+
 // Handle folder creation.
 app.post("/u/:username/create_folder", async (req, res) => {
     const { username } = req.params;
     const { folderName, parent_id } = req.body;
 
     // Create folder
-    const newFolder = await db_utils.addItem({
+    await db_utils.addItem({
         'name': folderName,
         'owner': username,
         'item_type': 'folder',
@@ -108,14 +118,21 @@ app.post("/u/:username/create_folder", async (req, res) => {
 })
 
 
+
 // Delete File or Folder.
 app.delete("/u/:username/delete_item", async (req, res) => {
     const { username } = req.params;
     const { item_id, parent_id } = req.body;
 
-    await db_utils.deleteItem(username, item_id, parent_id)
-    .then(() => res.end()).catch(() => res.status(400).send('Something went wrong...'));
+    const deleteStatus = await db_utils.deleteItem(username, item_id, parent_id);
+
+    if (deleteStatus) {
+        return res.end();
+    } else {
+        return res.status(400).send('Something went wrong...');
+    }
 });
+
 
 
 // Set directory to parent folder.
@@ -124,30 +141,43 @@ app.get('/updir/:username/:parent_id', async (req, res) => {
 
     const grandparent_id = await db_utils.getGrandparent(username, parent_id);
 
+    // Redirect to root the folder if parent is somehow deleted.
+    if (!grandparent_id) {
+        return res.status(200).send(String(1));
+    }
+
     if (grandparent_id) {
-        res.status(200).send(grandparent_id.toString());
+        return res.status(200).send(String(grandparent_id));
     } else {
-        res.status(400).send('Something went horribly wrong.');
+        return res.status(400).send('Something went horribly wrong.');
     }
 });
+
+
 
 // Send an item to a specific folder.
 app.put('/updatedir/:username', async (req, res) => {
     const { username } = req.params;
     const { item_id, parent_id, target_id, direction, item_name, parent_name } = req.body;
 
-    await db_utils.updateDirectory(username, item_id, parent_id, target_id, direction)
-        .then(() => res.end())
-        .catch(err => {
-            const description = db_utils.handleError(err.code);
-            return res.status(400).send(
-                description == 'Unique Violation'
-                ? 
-                `Item '${item_name}' already exists in ${parent_name ? parent_name : 'parent folder'}.`
-                : description ? description : err);
-        })
+    const updateStatus = await db_utils.updateDirectory(
+        username, item_id, parent_id, target_id, direction);
+
+    if (!updateStatus.exists) {
+        return res.end()
+    } else {
+        const description = db_utils.handleError(updateStatus.code);
+        return res.status(400).send(
+            description == 'Unique Violation' ? 
+            `'${item_name}' already exists in ${parent_name ? `folder '${parent_name}'` : 'the parent folder'}.`
+            :
+            description ?
+            description : `Error: ${err.code}, sorry.`);
+    }
 })
 
+
+// Copy & paste stuff.
 app.put('/paste/:username', async (req, res) => {
     const { username } = req.params;
     const { item_id, old_parent, new_parent, action } = req.body;
@@ -156,41 +186,48 @@ app.put('/paste/:username', async (req, res) => {
         return res.status(400).send('Clipboard is empty.')};
 
     // Get copied item.
-    let item = await pool.query(`SELECT * FROM ${username}_table WHERE item_id = ${item_id}`);
-    item = item.rows[0];
+    let item = await db_utils.getItemInfo(username, item_id);
+    if (!item) {
+        return res.status(404).send('Item does not exist anymore.')
+    }
     
     // Check whether a folder is copied into its own subdirectory.
     if (item.item_type === 'folder') {
         var subtree = await db_utils.recursive_tree(username, item_id);
         const subIds = subtree.map(item => parseInt(item.item_id));
         if (subIds.includes(parseInt(new_parent)) || parseInt(item_id) === parseInt(new_parent)) {
-            res.status(400).send('Target directory is a subdirectory of the copied folder.');
+            res.status(400).send(`This directory is a subdirectory of '${item.item_name}'.`);
             return res.end();
         } 
     }
 
+    const titleType = item.item_type.charAt(0).toUpperCase() + item.item_type.slice(1);
     // Insert copied item.
     if (action === 'copy') {
         await db_utils.addItem({
             'name': item.item_name, 'item_type': item.item_type, 'owner': username,
             'parent': new_parent, 'content': item.content
         }).catch(() => res.status(400).send(
-            `${item.item_type} '${item.item_name}' already exists in the directory.`));
+            `${titleType} '${item.item_name}' already exists in the directory.`));
         return res.end();
     }
-
     // Update the directory of cut item.
     else if (action === 'cut') {
-        await db_utils.updateDirectory(username, item_id, old_parent, new_parent, 'subfolder')
-        .catch(() => res.status(400).send(
-            `${item.item_type} '${item.item_name}' already exists in the directory.`));
+        const updateStatus = await db_utils.updateDirectory(
+            username, item_id, old_parent, new_parent, 'subfolder')
+
+        if (updateStatus.exists) {
+            return res.status(400).send(
+                `${titleType} '${item.item_name}' already exists in the directory.`)
+        }
         return res.end();
     }
-
     else {
         return res.end()
     }
 })
+
+
 
 app.put('/updateorder/:username', async (req, res) => {
     const { username } = req.params;
@@ -200,6 +237,8 @@ app.put('/updateorder/:username', async (req, res) => {
         .then(() => res.send())
         .catch(err => console.log(err));
 })
+
+
 
 function findFiles (directory, wordArray, extensions) {
     // Directory -> `${process.cwd()}\\media\\images\\`

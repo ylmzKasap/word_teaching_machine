@@ -5,9 +5,11 @@ const errorCodes = {
     23505: "Unique Violation",
     22001: "Input too long",
     42703: "Column does not exist",
+    23503: "Directory does not exist anymore.", // Foreign key violation.
     "42P01": "Table does not exist",
     "22P02": "IntegerExpected"
 }
+
 
 function handleError(errorCode) {
     if (errorCodes.hasOwnProperty(errorCode)) {
@@ -16,6 +18,7 @@ function handleError(errorCode) {
         return errorCode
     }
 }
+
 
 async function createUsersTable() {
     await pool.query(`CREATE TABLE users (
@@ -30,6 +33,7 @@ async function dropTable(table) {
     await pool.query(`DROP TABLE ${table};`).catch(err => console.log(err));
 }
 
+
 async function createItemTable(name) {
     await pool.query(`CREATE TABLE ${name}_table (
         item_id BIGSERIAL PRIMARY KEY NOT NULL,
@@ -43,6 +47,7 @@ async function createItemTable(name) {
     );`).catch(err => console.log(err));
 }
 
+
 async function addUser(name) {
     await pool.query(`INSERT INTO users (username, user_picture) VALUES ('${name}', 'no_pic.png');`)
         .then(() => createItemTable(name)
@@ -54,11 +59,13 @@ async function addUser(name) {
     return true;
 }
 
+
 async function deleteUser(name) {
     await dropTable(`${name}_table`)
         .then(() => pool.query(`DELETE FROM users WHERE username = '${name}'`))
         .catch(err => console.log(err));
 }
+
 
 async function addItem(infObj) {
     const { name, item_type, owner, parent, content } = infObj;
@@ -83,20 +90,29 @@ async function addItem(infObj) {
     }
 }
 
+
 async function getUserInfo(owner) {
     const userInfo = await pool.query(`
         SELECT * FROM users WHERE username = '${owner}';
-    `).catch(err => console.log(err));
-    return userInfo.rows[0];
-}
-
-async function getItemInfo(owner, item_id, item_type) {
-    const itemInfo = await pool.query(`
-        SELECT * FROM ${owner}_table WHERE item_id = '${item_id}' AND item_type = '${item_type}';
     `).catch(() => null);
-
-    return itemInfo ? itemInfo.rows : itemInfo;
+    return userInfo;
 }
+
+
+async function getItemInfo(owner, item_id) {
+    const itemInfo = await pool.query(`
+        SELECT * FROM ${owner}_table WHERE item_id = '${item_id}';
+    `).catch(() => null);
+    
+    if (itemInfo === null) {
+        return false;
+    } else if (itemInfo.rows.length === 0) {
+        return false;
+    } else {
+        return itemInfo.rows[0];
+    }
+}
+
 
 async function checkPath(owner, item_id, directory_id) {
     const checkDir = await pool.query(`
@@ -112,6 +128,7 @@ async function checkPath(owner, item_id, directory_id) {
     }
 }
 
+
 async function checkDirectory(owner, item_id) {
     const checkDir = await pool.query(`
         SELECT * FROM ${owner}_table WHERE item_id = '${item_id}';
@@ -126,6 +143,7 @@ async function checkDirectory(owner, item_id) {
     }
 }
 
+
 async function getDirectory(owner, item_id) {
     const dirExists = await checkDirectory(owner, item_id);
 
@@ -139,6 +157,7 @@ async function getDirectory(owner, item_id) {
     return directory.rows;
 }
 
+
 async function updateColumnValue(owner, item_id, column_name, new_value) {
     if (isNaN(new_value)) {
         new_value = `'${new_value}'`}
@@ -151,28 +170,43 @@ async function updateColumnValue(owner, item_id, column_name, new_value) {
     `)
 }
 
+
 async function updateDirectory(owner, item_id, parent_id, target_id, direction) {
-        if (direction === 'subfolder') {
-            // Moving item into a subfolder.
-            var new_parent_id = target_id;
-        } else {
-            // Moving item back to the parent.
-            var new_parent_id = await getGrandparent(owner, parent_id);
+    if (direction === 'subfolder') {
+        // Moving item into a subfolder.
+        var new_parent_id = target_id;
+    } else {
+        // Moving item back to the parent.
+        var new_parent_id = await getGrandparent(owner, parent_id);
+
+        if (!new_parent_id) {
+            return {'exists': true, 'code': 23503}
         }
+    }
 
-        // Move the item.
-        await pool.query(`
-            UPDATE ${owner}_table 
-            SET 
-            parent_id = ${new_parent_id},
-            item_order = (SELECT count(*) + 1 from ${owner}_table WHERE parent_id = ${new_parent_id})
-            WHERE item_id = ${item_id};
-        `)
+    // Move the item.
+    const moveStatus = await pool.query(`
+        UPDATE ${owner}_table 
+        SET 
+        parent_id = ${new_parent_id},
+        item_order = (SELECT count(*) + 1 from ${owner}_table WHERE parent_id = ${new_parent_id})
+        WHERE item_id = ${item_id};
+    `)
+    .then(() => ({'exists': false}))
+    .catch((err) => ({'exists': true, 'code': err.code}));
 
-        // Fix the order of remeaning items.
-        await reorderDirectory(owner, parent_id);
-        return true;
+    if (moveStatus.exists) {
+        return moveStatus;
+    }
+
+    // Fix the order of remeaning items.
+    const orderStatus = await reorderDirectory(owner, parent_id)
+    .then(() => ({'exists': false}))
+    .catch((err) => ({'exists': true, 'code': err.code}));
+
+    return orderStatus;
 }
+
 
 async function reorderDirectory(owner, directory_id) {
     await pool.query(`
@@ -188,7 +222,9 @@ async function reorderDirectory(owner, directory_id) {
             AS T2
         WHERE T2.item_id = ${owner}_table.item_id;
     `)
+    return true;
 }
+
 
 async function updateItemOrder(owner, item_id, new_order, direction, parent_id) {
     if (direction === 'before') {
@@ -201,20 +237,33 @@ async function updateItemOrder(owner, item_id, new_order, direction, parent_id) 
     return true;    
 }
 
+
 async function getGrandparent(owner, parent_id) {
     const grandparent_id = await pool.query(`
         SELECT parent_id FROM ${owner}_table WHERE item_id = ${parent_id}
-    `).catch(err => console.log(err));
-    return grandparent_id.rows[0].parent_id;
+    `).catch(() => false);
+
+    if (!grandparent_id || grandparent_id.rows.length === 0) {
+        return false;
+    } else {
+        return grandparent_id.rows[0].parent_id;
+    }
 }
 
+
 async function deleteItem(owner, item_id, parent_id) {
-    await pool.query(`
+    const deleteStatus = await pool.query(`
         DELETE FROM ${owner}_table WHERE item_id = ${item_id};
-        `).catch(err => console.log(err));
+        `).catch(() => false);
+    
+    if (!deleteStatus) {
+        return false;
+    }
+
     await reorderDirectory(owner, parent_id);
     return true;
 }
+
 
 async function recursive_tree(owner, item_id) {
     const tree = await pool.query(`

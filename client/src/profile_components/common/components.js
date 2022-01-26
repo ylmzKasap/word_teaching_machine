@@ -51,7 +51,7 @@ export const SubmitForm = (props) => {
 
 export const ItemContextMenu = () => {
     const { username, directory, setReRender, contextOpenedElem, clipboard,
-    contextOptions, contextMenuStyle, setClipboard, resetContext } = useContext(ProfileContext);
+    contextOptions, contextMenuStyle, setClipboard, resetContext, setRequestError } = useContext(ProfileContext);
 
     const handleClick = (event) => {
         const action = event.target.title;
@@ -60,7 +60,7 @@ export const ItemContextMenu = () => {
         } 
         
         else if (action === 'delete') {
-            delete_item(contextOpenedElem, directory, username, setReRender);
+            delete_item(contextOpenedElem, directory, username, setReRender, setRequestError);
         } 
         
         else if (action === 'paste') {
@@ -76,7 +76,8 @@ export const ItemContextMenu = () => {
                 }
                 setReRender();
             }).catch(err => 
-                console.log(err.response.data));
+                setRequestError({'exists': true, 'description': err.response.data}
+                ));
         }
         resetContext();
     }

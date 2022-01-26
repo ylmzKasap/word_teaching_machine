@@ -133,3 +133,39 @@ menu {
 .what-not-found {
   color: rgb(216, 68, 0);
 }
+
+.profile-error-box {
+  display: flex;
+  position: fixed;
+  bottom: 15%;
+  right: 2%;
+  min-height: 50px;
+  width: 30%;
+  text-align: center;
+  overflow: hidden;
+  background-color: rgb(255, 255, 79);
+  border: solid black;
+  border-radius: 7px;
+}
+
+.profile-error-text {
+  width: 93%;
+  height: inherit;
+  padding: 2%;
+}
+
+.error-exit-button {
+  @include flexit();
+  margin-left: auto;
+  width: 9%;
+  height: inherit;
+  font-weight: bold;
+  color: white;
+  background-color: black;
+  border-left: solid black;
+  cursor: pointer;
+  &:hover {
+    background-color: rgb(236, 76, 18);
+    border-color: red;
+  }
+}

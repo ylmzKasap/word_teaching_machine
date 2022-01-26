@@ -23,7 +23,7 @@ export const PageItem = (props) => {
     const [lastFillerClass, setLastFillerClass] = useState("");
 
     const { username, draggedElement, setDraggedElement, directory, setReRender,
-        isDragging, cloneTimeout, resetDrag, items } = useContext(ProfileContext);
+        isDragging, cloneTimeout, resetDrag, items, setRequestError } = useContext(ProfileContext);
     
     const trueDirectory = params.dirId ? "" : `${directory}/`;
 
@@ -69,7 +69,8 @@ export const PageItem = (props) => {
         }
 
         if (targetElem.className === "file" && !isDragging) {
-            navigate(`${trueDirectory}deck/${targetElem.id}`, {state: {allPaths: props.content, directory: directory}});
+            navigate(`${trueDirectory}deck/${targetElem.id}`, 
+            {state: {allPaths: props.content, directory: directory}});
         } 
 
         if (targetElem.className === 'file' || (draggedElement.id === targetElem.id)) {
@@ -91,7 +92,7 @@ export const PageItem = (props) => {
                 'direction': 'subfolder'
             })
             .then(() => setReRender())
-            .catch(err => console.log(err.response.data));
+            .catch((err) => setRequestError({'exists': true, 'description':err.response.data}));
         }
         resetDrag();    
     }
