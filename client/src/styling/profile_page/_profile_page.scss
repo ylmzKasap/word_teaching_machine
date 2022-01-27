@@ -89,7 +89,7 @@ body {
   @include flexit();
   flex-direction: column;
   position: absolute;
-  box-shadow:rgb(180, 180, 180) 0px 0px 5px 1px;
+  box-shadow:rgb(255, 255, 255) 0px 0px 3px 1px;
   border-radius: 10px;
   overflow: hidden;
   top: 0px;
@@ -101,7 +101,8 @@ body {
 
 menu {
   @include flexit();
-  background-color: white;
+  color: white;
+  background-color: rgb(63, 63, 63);
   border-width: 2px 2px 0px 2px;
   width: 100%;
   height: 60px;
@@ -110,11 +111,21 @@ menu {
   cursor: pointer;
 
   &:hover {
-    background-color: rgb(231, 228, 228);
+    background-color: rgb(165, 165, 165);
   }
 
   &[title]:before {
     content:attr(title);
+  }
+}
+
+.disabled-context {
+  cursor: auto;
+  font-style: italic;
+  background-color: rgb(63, 63, 63);
+  color: rgb(214, 214, 214);
+  &:hover {
+    background-color: rgb(63, 63, 63);
   }
 }
 
@@ -151,7 +162,7 @@ menu {
 .profile-error-text {
   width: 93%;
   height: inherit;
-  padding: 2%;
+  padding: 3% 2% 2% 2%;
 }
 
 .error-exit-button {

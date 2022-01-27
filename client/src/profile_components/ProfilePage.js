@@ -109,6 +109,12 @@ export const ProfilePage = (props) => {
         }
     }, [isDragging])
 
+    // Reset request error when something is copied to the clipboard.
+    useEffect(() => {
+      setRequestError({'exists': false, 'description': ""});
+    }, [clipboard]);
+
+
     // Reset all context menu related state.
     const resetContext = () => {
         setContextMenu(false);

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import axios from "axios";
 import { ProfileContext } from "../ProfilePage";
-import { delete_item } from "./functions";
+import { delete_item, hasKeys } from "./functions";
 
 export const OverlayNavbar = (props) => {
     // Component of CreateDeck, CreateFolder.
@@ -53,7 +53,13 @@ export const ItemContextMenu = () => {
     const { username, directory, setReRender, contextOpenedElem, clipboard,
     contextOptions, contextMenuStyle, setClipboard, resetContext, setRequestError } = useContext(ProfileContext);
 
+    const restrictions = {'paste': hasKeys(clipboard)};
+
     const handleClick = (event) => {
+        if (event.target.className === 'disabled-context') {
+            setRequestError({'exists': true, 'description': 'Clipboard is empty.'});
+            return;
+        }
         const action = event.target.title;
         if (['cut', 'copy'].includes(action)) {
             setClipboard({'action': action, 'id': contextOpenedElem.id, 'directory': directory});
@@ -86,7 +92,14 @@ export const ItemContextMenu = () => {
         <div id="item-context-menu" className="context-menu" style={contextMenuStyle}
             onContextMenu={e => e.preventDefault()}
             onClick={handleClick}>
-            {contextOptions.map(i => <menu title={i} key={i}></menu>)}
+            {contextOptions.map(menuItem => {
+                const menuClass = (
+                    menuItem in restrictions && !restrictions[menuItem])
+                    ?
+                    "disabled-context"
+                    : "context-item";
+                return <menu className={menuClass} title={menuItem} key={menuItem}></menu>
+            })}
         </div>
     )
 }
