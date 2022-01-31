@@ -9,10 +9,10 @@ export function generate_directory(items, userName) {
 	let directory = [];
 	items.forEach(
 		(item) => {
-			const { item_id, item_name, item_type, item_order, content } = item;
+			const { item_id, item_name, item_type, item_order, words } = item;
 
 			let item_content = (item_type === 'file')
-				? content.split(',')
+				? words.split(',')
 				: "";
 
 			directory.push(<PageItem

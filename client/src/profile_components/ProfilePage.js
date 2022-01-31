@@ -20,6 +20,7 @@ export const ProfilePage = (props) => {
     const dirId = params.dirId;
 
     const [userPicture, setUserPicture] = useState("");
+    const [rootDirectory, setRootDirectory] = useState("");
     const [directory, setDirectory] = useState(() => {
         return dirId ? dirId : props.dir
     });
@@ -55,6 +56,8 @@ export const ProfilePage = (props) => {
     useEffect(() => {
         axios.get(`/u/${username}`)
             .then(response =>  {
+                setRootDirectory(response.data.root_id);
+                setDirectory(dirId ? parseInt(dirId) : rootDirectory);
                 const image = new Image();
                 image.src = `media/profile/${response.data.user_picture}`;
                 image.onload = () => {
@@ -62,15 +65,18 @@ export const ProfilePage = (props) => {
                     setPictureLoaded(true);
             }})
             .catch(() =>
-                setFetchError(true))
+                setFetchError(true));
     }, [userPicture]);
+
 
     // Render directory.
     useEffect(() => {
         axios.get(`/u/${username}/${dirId ? dirId : props.dir}`)
             .then(response =>  {
                 setItems(generate_directory(response.data, username));
-                setDirectory(dirId ? parseInt(dirId) : props.dir);
+                if (rootDirectory) {
+                    setDirectory(dirId ? parseInt(dirId) : rootDirectory);
+                }
             })
             .then(() => setDirectoryLoaded(true)
             )
@@ -78,14 +84,15 @@ export const ProfilePage = (props) => {
                 setDirectoryLoaded(false);
                 setContentLoaded(false);
                 setFetchError(true);
-                }      
+                }
             );
         return (() => {
             setRequestError({'exists': false, 'description': ""});
             clearTimeout(cloneTimeout['timeouts']);
+            setFetchError(false);
             resetDrag();
         });
-    }, [dirId, reRender])
+    }, [dirId, reRender, rootDirectory])
 
     // Check whether content is loaded.
     useEffect(() => {
@@ -250,6 +257,7 @@ export const ProfilePage = (props) => {
             {"username": username,
             "setReRender": setReRender,
             "directory": directory,
+            "rootDirectory": rootDirectory,
             "draggedElement": draggedElement,
             "setDraggedElement": setDraggedElement,
             "isDragging": isDragging,
@@ -298,20 +306,20 @@ const ProfileNavBar = (props) => {
     const [folderDisplay, setFolderDisplay] = useState(false);
     const [backDisplay, setBackDisplay] = useState(false);
   
-    const { username, directory, contentLoaded, fetchError } = useContext(ProfileContext);
+    const { username, directory, contentLoaded, fetchError, rootDirectory } = useContext(ProfileContext);
   
     useEffect(() => {
-        if (directory > 1 && !fetchError) {
+        if (![rootDirectory, 'home', ''].includes(directory) && !fetchError && contentLoaded) {
             setBackDisplay(true);
         } else {
             setBackDisplay(false);
         }
-    }, [directory, fetchError])
+    }, [directory, fetchError, contentLoaded])
   
     const handleBackClick = () => {
         axios.get(`/updir/${username}/${directory}`)
             .then(response => props.navigate(
-                `/user/${username}${response.data === 1 ? "" : `/${response.data}`}`));
+                `/user/${username}${response.data === rootDirectory ? "" : `/${response.data}`}`));
     }
   
     const addItem = (event) => {

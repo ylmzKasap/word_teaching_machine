@@ -16,6 +16,7 @@ export function QuestionPage() {
     const navigate = useNavigate();
     
     const [directory] = useState(state ? state.directory : params.dirId);
+    const [rootDirectory, setRootDirectory] = useState("");
     const [words, setWords] = useState(null);
     const [pages, setPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(0);
@@ -28,14 +29,17 @@ export function QuestionPage() {
     useEffect(() => {
         if (state) {
             setWords(state.allPaths);
+            setRootDirectory(state.rootDirectory);
         } else { 
             var { username } = params;
             let deck_id = params.deckId;
             axios.get(`/u/${username}/${directory}/item/${deck_id}`)
-                .then(response => setWords(response.data.content.split(',')))
+                .then(response => setWords(response.data.words.split(',')))
                 .catch(() => setFetchError(true));
-            }
-    }, []); 
+            axios.get(`/u/${username}`)
+                .then(response => setRootDirectory(response.data.root_id))
+                .catch(() => setFetchError(true))
+            }}, []); 
     
     // Generate pages from words.
     useEffect(() => {
@@ -53,7 +57,7 @@ export function QuestionPage() {
     }
 
     function goForward() {
-        const dirToGo = (parseInt(directory) === 1 || fetchError) ? "" : `/${directory}`;
+        const dirToGo = (parseInt(directory) === rootDirectory || fetchError) ? "" : `/${directory}`;
         if (pageNumber < pages.length) {
             setPageNumber(pageN => pageN + 1);
             setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
@@ -65,7 +69,7 @@ export function QuestionPage() {
     }
 
     function handleClick() {
-        const dirToGo = (parseInt(directory) === 1 || fetchError) ? "" : `/${directory}`;
+        const dirToGo = (parseInt(directory) === rootDirectory || fetchError) ? "" : `/${directory}`;
         if (pageNumber < pages.length) {
             setPageNumber(pageN => pageN + 1);
             setChildAnimtion(cAnim => (cAnim === 'load-page') ? 'load-page-2' : 'load-page');
@@ -104,8 +108,8 @@ export function QuestionPage() {
     // Children: NavBar, ProgressBar, QuestionBody.
     return (
         <div className="question-page">
-            <NavBar goBack={goBack} goForward={goForward} directory={directory} pageNumber={pageNumber}
-                user={params.username} navigate={navigate} fetchError={fetchError} />
+            <NavBar goBack={goBack} goForward={goForward} directory={directory} root={rootDirectory}
+                pageNumber={pageNumber} user={params.username} navigate={navigate} fetchError={fetchError} />
             <ProgressBar width={progress} />
             {/* Context consumed by AskFromPicture, AskFromText, IntroduceWord */}
             <FunctionContext.Provider value={
@@ -126,7 +130,7 @@ export function QuestionPage() {
 
 function NavBar(props) {
     // Component of QuestionPage.
-    const directory = (parseInt(props.directory) === 1 || props.fetchError) ? "" : `/${props.directory}`;
+    const directory = (parseInt(props.directory) === props.root || props.fetchError) ? "" : `/${props.directory}`;
 
     return (
         <div className="navbar sticky-top navbar-dark bg-dark">

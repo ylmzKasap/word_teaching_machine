@@ -23,7 +23,7 @@ export const PageItem = (props) => {
     const [lastFillerClass, setLastFillerClass] = useState("");
 
     const { username, draggedElement, setDraggedElement, directory, setReRender,
-        isDragging, cloneTimeout, resetDrag, items, setRequestError } = useContext(ProfileContext);
+        isDragging, cloneTimeout, resetDrag, items, setRequestError, rootDirectory } = useContext(ProfileContext);
     
     const trueDirectory = params.dirId ? "" : `${directory}/`;
 
@@ -70,7 +70,7 @@ export const PageItem = (props) => {
 
         if (targetElem.className === "file" && !isDragging) {
             navigate(`${trueDirectory}deck/${targetElem.id}`, 
-            {state: {allPaths: props.content, directory: directory}});
+            {state: {allPaths: props.content, directory: directory, rootDirectory: rootDirectory}});
         } 
 
         if (targetElem.className === 'file' || (draggedElement.id === targetElem.id)) {

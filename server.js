@@ -23,11 +23,13 @@ app.use("/media", express.static(path.join(__dirname, 'media/sounds')));
 app.get('/u/:username/:directory_id?', async (req, res) => {
     const { username, directory_id } = req.params;
     const info = await db_utils.getUserInfo(username);
+
+    const dirId = directory_id === 'home' ? await db_utils.getRoot(username) : directory_id;
     
     if (info) {
         const userInfo = info.rows[0]
-        if (directory_id) {
-            const directory = await db_utils.getDirectory(username, directory_id);
+        if (dirId) {
+            const directory = await db_utils.getDirectory(username, dirId);
 
             if (directory) {
                 return res.status(200).send(directory);
@@ -48,13 +50,13 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
 // Serve Item Info.
 app.get('/u/:username/:directory_id/item/:item_id', async (req, res) => {
     const { username, directory_id, item_id } = req.params;
-    const dirExists = await db_utils.checkPath(username, item_id, directory_id);
+    const dirExists = await db_utils.checkDirectory(username, directory_id);
 
     if (!dirExists) {
         return res.status(404).send("Directory does not exist.");
     }
 
-    const itemInfo = await db_utils.getItemInfo(username, item_id);
+    const itemInfo = await db_utils.getItemInfo(item_id);
     
     if (itemInfo === null) {
         return res.status(404).send('Deck does not exist.');
@@ -85,7 +87,7 @@ app.post("/u/:username/create_deck", async (req, res) => {
         'owner': username,
         'item_type': 'file',
         'parent': parent_id,
-        'content': foundFiles
+        'content': {'words': foundFiles}
     })
     .then(() => res.end())
     .catch(err => {
@@ -139,11 +141,12 @@ app.delete("/u/:username/delete_item", async (req, res) => {
 app.get('/updir/:username/:parent_id', async (req, res) => {
     const { username, parent_id } = req.params;
 
-    const grandparent_id = await db_utils.getGrandparent(username, parent_id);
+    const grandparent_id = await db_utils.getGrandparent(parent_id);
 
     // Redirect to root the folder if parent is somehow deleted.
     if (!grandparent_id) {
-        return res.status(200).send(String(1));
+        const rootId = await db_utils.getRoot(username);
+        return res.status(200).send(String(rootId));
     }
 
     if (grandparent_id) {
@@ -186,7 +189,7 @@ app.put('/paste/:username', async (req, res) => {
         return res.status(400).send('Clipboard is empty.')};
 
     // Get copied item.
-    let item = await db_utils.getItemInfo(username, item_id);
+    let item = await db_utils.getItemInfo(item_id);
     if (!item) {
         return res.status(404).send('Item does not exist anymore.')
     }
@@ -205,8 +208,8 @@ app.put('/paste/:username', async (req, res) => {
     // Insert copied item.
     if (action === 'copy') {
         await db_utils.addItem({
-            'name': item.item_name, 'item_type': item.item_type, 'owner': username,
-            'parent': new_parent, 'content': item.content
+            'name': item.item_name, 'item_type': item.item_type,
+            'owner': username, 'parent': new_parent, 'content': {'words': item.words}
         }).catch(() => res.status(400).send(
             `${titleType} '${item.item_name}' already exists in the directory.`));
         return res.end();
@@ -262,9 +265,9 @@ function findFiles (directory, wordArray, extensions) {
 
 
 async function main() {
-    const xxx = await db_utils.recursive_tree('hayri', 116);
-    console.log(xxx.rows.map(x => x.item_id))
+    db_tests.setUp()
 }
+
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));
