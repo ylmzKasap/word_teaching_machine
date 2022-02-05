@@ -18,7 +18,6 @@ app.use("/media", express.static(path.join(__dirname, 'media/images')));
 app.use("/media", express.static(path.join(__dirname, 'media/sounds')));
 
 
-
 // Serve User Info.
 app.get('/u/:username/:directory_id?', async (req, res) => {
     const { username, directory_id } = req.params;
@@ -27,7 +26,6 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
     const dirId = directory_id === 'home' ? await db_utils.getRoot(username) : directory_id;
     
     if (info) {
-        const userInfo = info.rows[0]
         if (dirId) {
             const directory = await db_utils.getDirectory(username, dirId);
 
@@ -38,7 +36,7 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
             }
 
         } else {
-            res.status(200).send(userInfo);
+            res.status(200).send(info);
         }
     } else {
         res.status(404).send('User Not Found');
@@ -50,10 +48,10 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
 // Serve Item Info.
 app.get('/u/:username/:directory_id/item/:item_id', async (req, res) => {
     const { username, directory_id, item_id } = req.params;
-    const dirExists = await db_utils.checkDirectory(username, directory_id);
+    const pathExists = await db_utils.checkFilePath(username, directory_id, item_id);
 
-    if (!dirExists) {
-        return res.status(404).send("Directory does not exist.");
+    if (!pathExists) {
+        return res.status(404).send("Item does not exist.");
     }
 
     const itemInfo = await db_utils.getItemInfo(item_id);
@@ -87,7 +85,7 @@ app.post("/u/:username/create_deck", async (req, res) => {
         'owner': username,
         'item_type': 'file',
         'parent': parent_id,
-        'content': {'words': foundFiles}
+        'content': {'words': foundFiles.join(',')}
     })
     .then(() => res.end())
     .catch(err => {
@@ -120,7 +118,6 @@ app.post("/u/:username/create_folder", async (req, res) => {
 })
 
 
-
 // Delete File or Folder.
 app.delete("/u/:username/delete_item", async (req, res) => {
     const { username } = req.params;
@@ -146,7 +143,11 @@ app.get('/updir/:username/:parent_id', async (req, res) => {
     // Redirect to root the folder if parent is somehow deleted.
     if (!grandparent_id) {
         const rootId = await db_utils.getRoot(username);
-        return res.status(200).send(String(rootId));
+        if (rootId) {
+            return res.status(200).send(String(rootId));
+        } else {
+            return res.status(404).send('Not found');
+        }
     }
 
     if (grandparent_id) {

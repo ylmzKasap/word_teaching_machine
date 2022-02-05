@@ -80,7 +80,7 @@ export const ProfilePage = (props) => {
             })
             .then(() => setDirectoryLoaded(true)
             )
-            .catch(() => {
+            .catch((err) => {
                 setDirectoryLoaded(false);
                 setContentLoaded(false);
                 setFetchError(true);
@@ -377,7 +377,7 @@ export const CardContainer = () => {
 const BottomDragBar = () => {
     // Component of ProfilePage.
     const { 
-        username, isDragging, directory, draggedElement,
+        username, isDragging, directory, draggedElement, rootDirectory,
         setReRender, resetDrag, cloneTimeout, setRequestError } = useContext(ProfileContext);
 
     const destroyItem = () => {
@@ -405,7 +405,7 @@ const BottomDragBar = () => {
 
     return (
         <div className="bottom-drag-bar">
-            {isDragging && directory !== 1 &&
+            {isDragging && ![rootDirectory, 'home', ''].includes(directory) &&
                 <div className="drag-button send-back" onMouseUp={sendBack}>
                     <i className="fas fa-long-arrow-alt-left"></i>
                 </div>

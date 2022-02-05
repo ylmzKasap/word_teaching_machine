@@ -10,6 +10,8 @@ const errorCodes = {
     "22P02": "IntegerExpected"
 }
 
+const emptyRows = ({'rows': []});
+
 
 function handleError(errorCode) {
     if (errorCodes.hasOwnProperty(errorCode)) {
@@ -60,7 +62,10 @@ async function dropTable(table) {
 
 
 async function addUser(name) {
-    await pool.query(`INSERT INTO users (username, user_picture) VALUES ('${name}', 'no_pic.png');`)
+    const addUserQuery = "INSERT INTO users (username, user_picture) VALUES ($1, 'no_pic.png');";
+    const addUserParam = [name];
+
+    await pool.query(addUserQuery, addUserParam)
         .then(() => {addItem({
             'owner': name,
             'name': `${name}_root`,
@@ -77,70 +82,89 @@ async function addUser(name) {
 
 
 async function deleteUser(name) {
-    await pool.query(`DELETE FROM users WHERE username = '${name}'`).catch(err => console.log(err));
+    const queryString = 'DELETE FROM users WHERE username = $1';
+    const parameters = [name];
+
+    await pool.query(queryString, parameters).catch(err => console.log(err));
 }
 
 
 async function addItem(infObj) {
     const { name, item_type, owner, parent, content } = infObj;
-    const orderSubQuery = `(SELECT count(*) + 1 FROM items WHERE owner = '${owner}' AND parent_id = '${parent}')`;
+    const orderSubQuery = '(SELECT count(*) + 1 FROM items WHERE owner = $1 AND parent_id = $2)';
+
     if (item_type === 'root_folder') {
-        await pool.query(
-            `INSERT INTO items (owner, item_name, item_type, item_order)
-            VALUES ('${owner}', '${name}', '${item_type}', 0);`
-        )
+        const queryString = `
+            INSERT INTO items (owner, item_name, item_type, item_order)
+            VALUES ($1, $2, $3, 0);`
+        const parameters = [owner, name, item_type];
+        await pool.query(queryString, parameters);
     } 
         
-    else if (item_type === 'folder') {
-        await pool.query(
-            `INSERT INTO items (owner, item_name, item_type, parent_id, item_order)
-            VALUES ('${owner}', '${name}', '${item_type}', '${parent}', ${orderSubQuery});`
-        )
-    }
-    
-    else if (item_type === 'file' || item_type === 'category') {
-        await pool.query(
-            `INSERT INTO items (owner, item_name, item_type, parent_id, item_order)
-            VALUES ('${owner}', '${name}', '${item_type}', '${parent}', ${orderSubQuery});`
-        )
+    else if (['folder', 'file', 'category'].includes(item_type)) {
+        const queryString = `
+            INSERT INTO items (owner, item_name, item_type, parent_id, item_order)
+            VALUES ($3, $4, $5, $6, ${orderSubQuery});`
+        const parameters = [owner, parent, owner, name, item_type, parent];
+        await pool.query(queryString, parameters);
 
-        const item_id = await pool.query(
-            `SELECT item_id FROM items
-            WHERE (owner = '${owner}' AND item_name = '${name}' AND parent_id = '${parent}' AND item_type = '${item_type}')
-            LIMIT 1`
-        )
+        // Add the content.
+        if (['file', 'category'].includes(item_type)) {
+            const contentQuery = `
+                SELECT item_id FROM items
+                WHERE (owner = $1
+                AND item_name = $2
+                AND parent_id = $3
+                AND item_type = $4)
+                LIMIT 1;`
+            const contentParms = [owner, name, parent, item_type];
+            const item_id = await pool.query(contentQuery, contentParms);
 
-        const contentKey = Object.keys(content);
-        await pool.query(
-            `INSERT INTO contents (content_id, ${contentKey})
-            VALUES (${item_id.rows[0].item_id}, '${content[contentKey]}')
-            `
-        ).catch(err => console.log(err))
+            const contentKeys = Object.keys(content);
+                
+            contentKeys.forEach(cKey => {
+                const insertQuerry =  `
+                INSERT INTO contents (content_id, ${cKey})
+                VALUES ($1, $2);`
+                const insertParams = [item_id.rows[0].item_id, content[cKey]];
+                pool.query(insertQuerry, insertParams)
+                .catch(err => console.log(err));
+            });
+        }
     }
 }
 
 
 async function getUserInfo(owner) {
-    const userInfo = await pool.query(`
-        SELECT * FROM users WHERE username = '${owner}';
-    `).catch(() => null);
-    return userInfo;
+    const queryString = 'SELECT * FROM users WHERE username = $1;';
+    const parameters = [owner];
+
+    const userInfo = await pool.query(queryString, parameters)
+    .catch(() => emptyRows);
+
+    return userInfo.rows[0] ? userInfo.rows[0] : false;
 }
 
 
 async function getRoot(owner) {
-    const rootInfo = await pool.query(`
-        SELECT root_id FROM users WHERE username = '${owner}';
-    `).catch(() => null);
-    return rootInfo ? rootInfo.rows[0].root_id : rootInfo;
+    const queryString = 'SELECT root_id FROM users WHERE username = $1;';
+    const parameters = [owner];
+
+    const rootInfo = await pool.query(queryString, parameters)
+    .catch(() => null);
+
+    return rootInfo === null ? false : rootInfo.rows[0].root_id;
 }
 
 
 async function getItemInfo(item_id) {
-    const itemInfo = await pool.query(`
+    const queryString = `
         SELECT * FROM items LEFT JOIN contents ON items.item_id = contents.content_id
-        WHERE item_id = '${item_id}';
-    `).catch(() => null);
+        WHERE item_id = $1;`;
+    const parameters = [item_id];
+
+    const itemInfo = await pool.query(queryString, parameters)
+    .catch(() => null);
     
     if (itemInfo === null) {
         return false;
@@ -152,46 +176,69 @@ async function getItemInfo(item_id) {
 }
 
 
-async function checkDirectory(owner, item_id) {
-    const checkDir = await pool.query(`
-        SELECT * FROM items WHERE owner = '${owner}' AND item_id = '${item_id}' AND item_type IN ('folder', 'root_folder');
-    `).catch(() => null);
+async function checkDirectory(owner, dir_id) {
+    const queryText = `
+        SELECT * FROM items WHERE owner = $1
+        AND item_id = $2
+        AND item_type IN ('folder', 'root_folder');`;
+    const parameters = [owner, dir_id];
 
-    if (checkDir === null) {
-        return false;
-    } else if (checkDir.rows.length === 0) {
-        return false;
-    } else {
-        return true;
-    }
+    const checkDir = await pool.query(queryText, parameters)
+    .catch(() => emptyRows);
+
+    return checkDir.rows[0] ? true : false;
 }
 
 
-async function getDirectory(owner, item_id) {
-    const dirExists = await checkDirectory(owner, item_id);
+async function checkFilePath(owner, dir_id, item_id) {
+    const queryText = `
+        SELECT * FROM items WHERE owner = $1
+        AND item_id = $2
+        AND parent_id = $3
+        AND item_type = 'file';
+    `
+    const parameters = [owner, item_id, dir_id];
 
+    const checkPath = await pool.query(queryText, parameters)
+    .catch(() => emptyRows);
+
+    return checkPath.rows[0] ? true : false;
+}
+
+
+async function getDirectory(owner, dir_id) {
+    const dirExists = await checkDirectory(owner, dir_id);
     if (!dirExists) {
-        return null;
+        return false;
     }
 
-    const directory = await pool.query(`
-        SELECT * FROM items LEFT JOIN contents ON items.item_id = contents.content_id
-        WHERE owner = '${owner}' AND parent_id = '${item_id}';
-    `)
-    return directory.rows;
+    const queryText = `
+        SELECT * FROM items
+        LEFT JOIN contents ON items.item_id = contents.content_id
+        WHERE owner = $1 AND parent_id = $2;`
+    const parameters = [owner, dir_id]
+
+    const directory = await pool.query(queryText, parameters)
+    .catch(() => null);
+
+    return directory === null ? false : directory.rows;
 }
 
 
 async function updateColumnValue(item_id, column_name, new_value) {
     if (isNaN(new_value)) {
-        new_value = `'${new_value}'`}
+        new_value = `'${new_value}'`};
 
-    await pool.query(`
+    const queryText = `
         UPDATE items
         SET
-        ${column_name} = ${new_value}
-        WHERE item_id = ${item_id}
-    `)
+        ${column_name} = $1
+        WHERE item_id = $2;
+    `
+    const parameters = [new_value, item_id];
+
+    await pool.query(queryText, parameters)
+    .catch(err => console.log(err));
 }
 
 
@@ -209,13 +256,16 @@ async function updateDirectory(owner, item_id, parent_id, target_id, direction) 
     }
 
     // Move the item.
-    const moveStatus = await pool.query(`
+    const queryText = `
         UPDATE items
         SET 
-        parent_id = ${new_parent_id},
-        item_order = (SELECT count(*) + 1 from items WHERE owner = '${owner}' AND parent_id = ${new_parent_id})
-        WHERE item_id = ${item_id};
-    `)
+        parent_id = $1,
+        item_order = (SELECT count(*) + 1 from items WHERE owner = $2 AND parent_id = $3)
+        WHERE item_id = $4;
+    `;
+    const parameters = [new_parent_id, owner, new_parent_id, item_id];
+
+    const moveStatus = await pool.query(queryText, parameters)
     .then(() => ({'exists': false}))
     .catch((err) => ({'exists': true, 'code': err.code}));
 
@@ -233,7 +283,7 @@ async function updateDirectory(owner, item_id, parent_id, target_id, direction) 
 
 
 async function reorderDirectory(owner, directory_id) {
-    await pool.query(`
+    const queryText = `
         UPDATE 
             items
         SET
@@ -242,10 +292,13 @@ async function reorderDirectory(owner, directory_id) {
             (SELECT item_id, item_order, row_number()
                 OVER (ORDER BY item_order)
                 FROM items
-                WHERE owner = '${owner}' AND parent_id = ${directory_id})
+                WHERE owner = $1 AND parent_id = $2)
             AS T2
         WHERE T2.item_id = items.item_id;
-    `)
+    `
+    const parameters = [owner, directory_id];
+
+    await pool.query(queryText, parameters);    
     return true;
 }
 
@@ -263,22 +316,24 @@ async function updateItemOrder(owner, item_id, new_order, direction, parent_id) 
 
 
 async function getGrandparent(parent_id) {
-    const grandparent_id = await pool.query(`
-        SELECT parent_id FROM items WHERE item_id = ${parent_id}
-    `).catch(() => false);
+    const queryText = `
+        SELECT parent_id FROM items WHERE item_id = $1;`;
+    const parameters = [parent_id];
 
-    if (!grandparent_id || grandparent_id.rows.length === 0) {
-        return false;
-    } else {
-        return grandparent_id.rows[0].parent_id;
-    }
+    const grandparent_id = await pool.query(queryText, parameters)
+    .catch(() => emptyRows);
+
+    return grandparent_id.rows.length === 0 ? false : grandparent_id.rows[0].parent_id;
 }
 
 
 async function deleteItem(owner, item_id, parent_id) {
-    const deleteStatus = await pool.query(`
-        DELETE FROM items WHERE item_id = ${item_id};
-        `).catch(() => false);
+    const queryText = `
+        DELETE FROM items WHERE item_id = $1;`;
+    const parameters = [item_id];
+
+    const deleteStatus = await pool.query(queryText, parameters)
+    .catch(() => false);
     
     if (!deleteStatus) {
         return false;
@@ -290,7 +345,7 @@ async function deleteItem(owner, item_id, parent_id) {
 
 
 async function recursive_tree(owner, item_id) {
-    const tree = await pool.query(`
+    const queryText = `
         WITH RECURSIVE item_tree AS (
             SELECT
                 t1.item_id,
@@ -301,7 +356,7 @@ async function recursive_tree(owner, item_id) {
                 1 as depth,
                 t1.item_id::VARCHAR as path
             FROM items t1
-            WHERE owner = '${owner}' AND parent_id = '${item_id}'
+            WHERE owner = $1 AND parent_id = $2
 
             UNION ALL
 
@@ -316,7 +371,10 @@ async function recursive_tree(owner, item_id) {
             FROM items t2
             JOIN item_tree ht ON ht.item_id = t2.parent_id
         ) SELECT * FROM item_tree;
-    `)
+    `;
+    const parameters = [owner, item_id];
+
+    const tree = await pool.query(queryText, parameters);
     return tree.rows;
 }
 
@@ -331,6 +389,7 @@ module.exports = {
     getItemInfo,
     getRoot,
     checkDirectory,
+    checkFilePath,
     getDirectory,
     updateDirectory,
     updateItemOrder,
