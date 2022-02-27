@@ -19,7 +19,8 @@ export function CreateFolderOverlay(props) {
 export function CreateFolder(props) {
   // Component of CreateFolderOverlay.
 
-    const [folderName, setfolderName] = useState("");
+    const [folderName, setFolderName] = useState("");
+    const [folderType, setFolderType] = useState("");
     const [nameError, setNameError] = useState({errorClass: "", description: ""});
     const [formError, setFormError] = useState({display: {"display": "none"}, errorClass: "", description: ""});
 
@@ -27,10 +28,14 @@ export function CreateFolder(props) {
 
     const handleNameChange = (event) => {
         const [itemName, itemNameError, generalError] = handlers.handleItemName(event);
-        setfolderName(itemName);
+        setFolderName(itemName);
         setNameError(itemNameError);
         setFormError(generalError);
     };
+
+    const handleRadioChange = (event) => {
+        setFolderType(event.target.value);
+    }
 
     const handleSubmit = (event) => {
         if (event.type === 'keydown') {
@@ -51,10 +56,11 @@ export function CreateFolder(props) {
     
         else {
             axios.post(`/u/${username}/create_folder`, {
-                folderName: folderName,
+                folder_name: folderName,
+                folder_type: folderType,
                 parent_id: directory}
             ).then(() => {
-                setfolderName("");
+                setFolderName("");
                 setFormError({display: {"display": "none"}, errorClass: "", description: ""});
                 setReRender(x => !x);
                 props.setDisplay(false);
@@ -70,6 +76,12 @@ export function CreateFolder(props) {
             <components.InputField 
                 description="Folder Name:" error={nameError} value={folderName}
                 handler={handleNameChange} placeholder="Enter a folder name" />
+            <components.Radio 
+                description="Folder Type:"
+                buttons={["Regular folder", "Thematic folder"]}
+                checked={"Regular folder"}
+                selected={folderType}
+                handler={handleRadioChange} />
             {/* Submit & Error */}
             <components.SubmitForm description="Create Folder" formError={formError} />
         </form>

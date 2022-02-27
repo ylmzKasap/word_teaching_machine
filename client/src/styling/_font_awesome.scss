@@ -65,6 +65,17 @@
   pointer-events: none;
 }
 
+.fa-solid {
+  color: black;
+}
+
+.category-circle {
+  margin-left: auto;
+  &:hover {
+    transform: scale(1);
+  }
+}
+
 .fa-binoculars {
   color:rgb(20, 82, 175);
   pointer-events: none;

@@ -42,3 +42,40 @@ export function handleDownOnDragged(targetElem, props, cloneTimeout) {
         return {}
     }
 }
+
+
+export function create_context_menu(evnt, closestItem) {
+	// Completely unrelated div.
+	if (!closestItem) {
+		var contextMenu = {
+			closest: evnt.target, openedElem: {type: 'void'}, ops: ['no actions']
+		}
+	} else {
+		var contextMenu = {
+			closest: closestItem, openedElem: {}, ops: []
+		}
+
+		// Containers
+		if (['card-container', 'category-container'].includes(closestItem.className)) {
+			contextMenu.openedElem = {id: null, type: 'container'};
+			contextMenu.ops = ['paste'];
+		
+		} else {
+			// Page item like file, folder, thematic-folder, category.
+			contextMenu.openedElem = {
+				'id': closestItem.id,
+				'type': closestItem.className,
+				'name': closestItem.className === 'category' ? 
+                    closestItem.querySelector('.category-header').innerText : closestItem.innerText}
+
+			if (closestItem.className === 'category') {
+				contextMenu.ops = ['cut', 'paste', 'delete'];
+			} else if (closestItem.className === 'file') {
+				contextMenu.ops = ['copy', 'cut', 'delete'];
+			} else {
+				contextMenu.ops = ['cut', 'delete'];
+			}
+		}
+	}
+	return contextMenu;
+}

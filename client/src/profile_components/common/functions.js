@@ -2,31 +2,59 @@ import { PageItem } from '../PageItems';
 import axios from 'axios';
 
 
-export function generate_directory(items, userName) {
+export function generate_directory(info, items, userName) {
     // Used by ProfilePage.
     // Creates folders and decks with database items.
+	const thematicOn = info.item_type === 'thematic_folder';
+
+	const categories = [];
+	const otherItems = [];
+	
+	// Separate categories from other stuff.
+	if (thematicOn) {
+		items.forEach(item => {
+			if (item.item_type === 'category') {
+				categories.push(item);
+			} else {
+				otherItems.push(item);
+			}
+		})
+	}
+
+	const iterable = thematicOn ? categories : items;
 
 	let directory = [];
-	items.forEach(
-		(item) => {
-			const { item_id, item_name, item_type, item_order, words } = item;
-
-			let item_content = (item_type === 'file')
-				? words.split(',')
-				: "";
-
-			directory.push(<PageItem
-				key={item_id}
-				id={`${item_id}`}
-				name={item_name}
-				type={item_type}
-				order={parseInt(item_order)}
-				content={item_content}
-				user={userName} />
+	iterable.forEach(
+		(pgItem) => {
+			const { item_id, item_name, item_type, item_order, words, color } = pgItem;
+			directory.push(
+				<PageItem
+					key={item_id}
+					id={`item-${item_id}`}
+					name={item_name}
+					type={item_type.replaceAll('_', '-')}
+					order={parseInt(item_order)}
+					words={words ? words.split(',') : ""}
+					color={color ? color : ""}
+					user={userName}>
+					{thematicOn && otherItems
+						.filter(item => item.category_id === item_id)
+						.map(item => 
+							<PageItem
+								key={item.item_id}
+								id={`item-${item.item_id}`}
+								name={item.item_name}
+								type={item.item_type.replaceAll('_', '-')}
+								order={parseInt(item.item_order)}
+								words={item.words ? item.words.split(',') : ""}
+								color={item.color ? item.color : ""}
+								user={userName} />
+						)}
+				</PageItem>
 			)
 		}  
 	);
-		
+	
 	return [...directory];
 }
 
@@ -49,11 +77,11 @@ const setScroll = (setter, elem, cursor, move, timing) => {
 	});
 }
 
-export function scroll_div(evnt, win, doc, scrolling, setScrolling, constraints=[]) {
+export function scroll_div(evnt, win, doc, container, scrolling, setScrolling, constraints=[]) {
 	// Used by: ../ProfilePage -> HandleMouseAction event handler.
-	
+
 	if (!([...constraints].includes(evnt.target.className.split(" ")[0]))) {
-		const scrolledElement = doc.querySelector('.card-container');
+		const scrolledElement = doc.querySelector(container);
 
 		// Scroll bottom
 		if (win.innerHeight - 80 < evnt.clientY) {
@@ -96,11 +124,12 @@ export function scroll_div(evnt, win, doc, scrolling, setScrolling, constraints=
 export function delete_item(itemObj, directory, username, setRender, setRequestError) {
 	// Used by './components/ItemContextMenu' and '../ProfilePage/BottomDragBar'.
 	const message = (
-		itemObj.type === 'folder' ? `Delete '${itemObj.name}' and all of its content?`
+		['folder', 'category'].includes(itemObj.type) ? `Delete '${itemObj.name}' and all of its content?`
 		: `Delete '${itemObj.name}?'`)
+
 	if (window.confirm(message)) {
 		axios.delete(`/u/${username}/delete_item`, {data: {
-			item_id: itemObj.id,
+			item_id: extract_int(itemObj.id),
 			parent_id: directory}}
 		)
 		.then(() => {setRender()})
@@ -108,9 +137,21 @@ export function delete_item(itemObj, directory, username, setRender, setRequestE
 	}
 }
 
-export function get_column_number(containerName, doc, win) {
-        const container = doc.querySelector(containerName);
-        const gridComputedStyle = win.getComputedStyle(container);
-        const gridColumnCount = gridComputedStyle.getPropertyValue("grid-template-columns").split(" ").length;
-        return [gridColumnCount];
-    }
+
+export function extract_int(str) {
+	return str ? str.match(/\d+$/)[0] : ''
+}
+
+
+export function find_closest_element(evnt, selectors) {
+	// Accepts an array of selectors and returns the first closest element.
+
+	for (let selector of selectors) {
+		const closestItem = evnt.target.closest(selector);
+		if (closestItem) {
+			return closestItem;
+		}
+	}
+
+	return null;
+}

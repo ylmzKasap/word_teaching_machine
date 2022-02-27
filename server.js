@@ -27,10 +27,10 @@ app.get('/u/:username/:directory_id?', async (req, res) => {
     
     if (info) {
         if (dirId) {
-            const directory = await db_utils.getDirectory(username, dirId);
+            const [directory, dirInfo] = await db_utils.getDirectory(username, dirId);
 
             if (directory) {
-                return res.status(200).send(directory);
+                return res.status(200).send([directory, dirInfo]);
             } else {
                 return res.status(404).send('Directory Not Found.')
             }
@@ -68,12 +68,12 @@ app.get('/u/:username/:directory_id/item/:item_id', async (req, res) => {
 // Handle deck creation.
 app.post("/u/:username/create_deck", async (req, res) => {
     const { username } = req.params;
-    const { deckName, cards, parent_id } = req.body;
+    const { deckName, content, parent_id, category_id } = req.body;
     
     // Locate image files.
     const imageExtensions = ['.jpg', '.png', '.PNG', '.jpeg', '.webp'];
     const [missingFiles, foundFiles] = findFiles(
-        "media\\images\\", cards.split(','), imageExtensions);
+        "media/images/", content.words.split(','), imageExtensions);
 
     if (missingFiles.length > 0) {
         return res.status(417).send(`Images not found: ${missingFiles.join(', ')}.`);
@@ -85,6 +85,7 @@ app.post("/u/:username/create_deck", async (req, res) => {
         'owner': username,
         'item_type': 'file',
         'parent': parent_id,
+        'category_id': category_id,
         'content': {'words': foundFiles.join(',')}
     })
     .then(() => res.end())
@@ -100,25 +101,47 @@ app.post("/u/:username/create_deck", async (req, res) => {
 // Handle folder creation.
 app.post("/u/:username/create_folder", async (req, res) => {
     const { username } = req.params;
-    const { folderName, parent_id } = req.body;
+    const { folder_name, parent_id, folder_type } = req.body;
 
-    // Create folder
+    const itemType = (folder_type === 'Thematic folder') ? 'thematic_folder' : 'folder';
+
     await db_utils.addItem({
-        'name': folderName,
+        'name': folder_name,
         'owner': username,
-        'item_type': 'folder',
+        'item_type': itemType,
         'parent': parent_id,
     })
     .then(() => res.end())
     .catch(err => {
         const description = db_utils.handleError(err.code);
         return res.status(400).send(
-            description == 'Unique Violation' ? `Folder '${folderName}' already exists.` : description);
+            description == 'Unique Violation' ? `Folder '${folder_name}' already exists.` : description);
     });
 })
 
 
-// Delete File or Folder.
+// Handle category creation.
+app.post("/u/:username/create_category", async (req, res) => {
+    const { username } = req.params;
+    const { category_name, parent_id, content } = req.body;
+
+    await db_utils.addItem({
+        'name': category_name,
+        'owner': username,
+        'item_type': 'category',
+        'parent': parent_id,
+        'content': content
+    })
+    .then(() => res.end())
+    .catch(err => {
+        const description = db_utils.handleError(err.code);
+        return res.status(400).send(
+            description == 'Unique Violation' ? `Category '${category_name}' already exists.` : description);
+    });
+})
+
+
+// Delete File, Folder or Category.
 app.delete("/u/:username/delete_item", async (req, res) => {
     const { username } = req.params;
     const { item_id, parent_id } = req.body;
@@ -165,7 +188,7 @@ app.put('/updatedir/:username', async (req, res) => {
     const { item_id, parent_id, target_id, direction, item_name, parent_name } = req.body;
 
     const updateStatus = await db_utils.updateDirectory(
-        username, item_id, parent_id, target_id, direction);
+        username, item_id, parent_id, target_id, null, direction);
 
     if (!updateStatus.exists) {
         return res.end()
@@ -184,7 +207,7 @@ app.put('/updatedir/:username', async (req, res) => {
 // Copy & paste stuff.
 app.put('/paste/:username', async (req, res) => {
     const { username } = req.params;
-    const { item_id, old_parent, new_parent, action } = req.body;
+    const { item_id, item_type, old_parent, new_parent, category_id, action } = req.body;
 
     if (item_id === undefined || action === undefined) {
         return res.status(400).send('Clipboard is empty.')};
@@ -209,20 +232,28 @@ app.put('/paste/:username', async (req, res) => {
     // Insert copied item.
     if (action === 'copy') {
         await db_utils.addItem({
-            'name': item.item_name, 'item_type': item.item_type,
+            'name': item.item_name, 'item_type': item.item_type, 'category_id': category_id,
             'owner': username, 'parent': new_parent, 'content': {'words': item.words}
-        }).catch(() => res.status(400).send(
+        }).catch((err) => res.status(400).send(
             `${titleType} '${item.item_name}' already exists in the directory.`));
         return res.end();
     }
     // Update the directory of cut item.
     else if (action === 'cut') {
         const updateStatus = await db_utils.updateDirectory(
-            username, item_id, old_parent, new_parent, 'subfolder')
+            username, item_id, old_parent, new_parent, category_id, 'subfolder')
 
         if (updateStatus.exists) {
             return res.status(400).send(
                 `${titleType} '${item.item_name}' already exists in the directory.`)
+        }
+
+        // Move the category.
+        const categoryItems = await db_utils.getDirectory(
+            username, old_parent, item_id
+        )
+        for (let item of categoryItems[0]) {
+            await db_utils.updateColumnValue(item.item_id, 'parent_id', new_parent);
         }
         return res.end();
     }
@@ -235,9 +266,9 @@ app.put('/paste/:username', async (req, res) => {
 
 app.put('/updateorder/:username', async (req, res) => {
     const { username } = req.params;
-    const { item_id, new_order, direction, parent_id } = req.body;
+    const { item_id, new_order, direction, parent_id, category_id } = req.body;
     
-    await db_utils.updateItemOrder(username, item_id, new_order, direction, parent_id)
+    await db_utils.updateItemOrder(username, item_id, new_order, direction, parent_id, category_id)
         .then(() => res.send())
         .catch(err => console.log(err));
 })
@@ -268,7 +299,6 @@ function findFiles (directory, wordArray, extensions) {
 async function main() {
     db_tests.setUp()
 }
-
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));

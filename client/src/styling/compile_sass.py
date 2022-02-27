@@ -11,6 +11,10 @@ class FileNotFound(Exception):
     pass
 
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
 def read_time(timedeltaObject):
     timeInSeconds = timedeltaObject.seconds
     if timedeltaObject.days > 0:
@@ -154,14 +158,16 @@ while True:
         compileTime = mainModifyTime
 
     if compileTime != lastCompileTime:
-        os.system('cls')
+        clear_screen()
         print('\nCompiling...')
-        subprocess.run(
-            ['sass', scssFile, cssFile], shell=True
-            )
+        if os.name == 'nt':
+            subprocess.run(
+                ['sass', scssFile, cssFile], shell=True)
+        else:
+            subprocess.run(['sass', scssFile, cssFile])
         lastCompileTime = compileTime
 
-    os.system('cls')
+    clear_screen()
     print(f"\nWatching changes on {scssFile}"
           + f"{' and ' + str(len(partialImports)) + ' partials' if partialImports else ''}:")
     print("\nLast compile time:")

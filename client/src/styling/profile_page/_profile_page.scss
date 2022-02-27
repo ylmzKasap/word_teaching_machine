@@ -75,14 +75,26 @@ body {
   position: relative;
   display: grid;
   grid-template-columns: repeat(auto-fill, 230px);
-  row-gap: 30px;
+  row-gap: 20px;
   grid-template-rows: repeat(auto-fill, 210px);
+  padding: 40px 10px 20px 40px;
+  align-items: center;
   height: 93vh;
   width: 83%;
-  padding: 2% 2% 6% 1%;
-  justify-content: center;
   overflow-y: scroll;
   user-select: none;
+}
+
+.category-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 93vh;
+  width: 83%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  user-select: none;
+  padding-bottom: 30px;
 }
 
 .context-menu {

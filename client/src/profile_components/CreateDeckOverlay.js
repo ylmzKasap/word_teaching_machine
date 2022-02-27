@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./ProfilePage";
+import { extract_int } from "./common/functions";
 import * as handlers from './common/handlers';
 import * as components from './common/components';
 
@@ -25,7 +26,8 @@ export function CreateDeck(props) {
     const [wordError, setWordError] = useState({errorClass: "", description: ""});
     const [formError, setFormError] = useState({display: {"display": "none"}, errorClass: "", description: ""});
     
-    const { username, directory, setReRender } = useContext(ProfileContext);
+    const { username, directory, setReRender, categoryId } = useContext(ProfileContext);
+    const categorySpec = categoryId ? categoryId : "";
   
     const handleNameChange = (event) => {
         const [itemName, itemNameError, generalError] = handlers.handleItemName(event);
@@ -71,8 +73,9 @@ export function CreateDeck(props) {
         else {
             axios.post(`/u/${username}/create_deck`, {
                 deckName: deckName,
-                cards: allWords,
-                parent_id: directory}
+                content: {'words': allWords},
+                parent_id: directory,
+                category_id: categorySpec ? extract_int(categorySpec) : null}
             ).then(() => {
                 setDeckName(""); setWords("");
                 setFormError({display: {"display": "none"}, errorClass: "", description: ""});
