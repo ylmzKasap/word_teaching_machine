@@ -237,7 +237,7 @@ async function getDirectory(owner, dir_id, category_id='') {
     const parameters = category_id ? [owner, dir_id, category_id] : [owner, dir_id];
 
     const directory = await pool.query(queryText, parameters)
-    .catch((err) => console.log(err));
+    .catch(() => null);
 
     return directory === null ? [false] : [directory.rows, dir.info];
 }
@@ -255,8 +255,7 @@ async function updateColumnValue(item_id, column_name, new_value) {
     `
     const parameters = [new_value, item_id];
 
-    await pool.query(queryText, parameters)
-    .catch(err => console.log(err));
+    await pool.query(queryText, parameters);
 }
 
 

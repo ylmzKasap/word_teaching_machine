@@ -240,6 +240,17 @@ app.put('/paste/:username', async (req, res) => {
     }
     // Update the directory of cut item.
     else if (action === 'cut') {
+        const newDirectory = await db_utils.getDirectory(username, new_parent);
+        const categoryItems = await db_utils.getDirectory(
+            username, old_parent, item_id)
+
+        if (old_parent !== new_parent) {
+            if (find_unique_violation(
+                newDirectory[0], categoryItems[0], ['item_type', 'owner', 'item_name'])) {
+                    return  res.status(400).send('Paste failed: items with the same name')
+                }
+        }
+
         const updateStatus = await db_utils.updateDirectory(
             username, item_id, old_parent, new_parent, category_id, 'subfolder')
 
@@ -248,13 +259,11 @@ app.put('/paste/:username', async (req, res) => {
                 `${titleType} '${item.item_name}' already exists in the directory.`)
         }
 
-        // Move the category.
-        const categoryItems = await db_utils.getDirectory(
-            username, old_parent, item_id
-        )
+         // Move the category. 
         for (let item of categoryItems[0]) {
             await db_utils.updateColumnValue(item.item_id, 'parent_id', new_parent);
         }
+
         return res.end();
     }
     else {
@@ -296,9 +305,26 @@ function findFiles (directory, wordArray, extensions) {
 };
 
 
-async function main() {
-    db_tests.setUp()
+function find_unique_violation(firstObjArray, otherObjArray, columns) {
+    for (let object of firstObjArray) {
+        for (let otherObject of otherObjArray) {
+            const equals = [];
+            for (let column of columns) {
+                equals.push(object[column] === otherObject[column])
+            }
+            if (equals.every(x => x === true)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
+
+
+async function main() {
+    
+}
+
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => console.log(`Listening on port ${port}`));

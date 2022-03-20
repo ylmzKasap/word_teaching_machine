@@ -37,7 +37,7 @@ body {
 
 .image-container {
   @include flexit();
-  position: relative; 
+  position: relative;
   height: 220px;
   width: 100%;
   padding: 18px 22px 18px 22px;
@@ -74,11 +74,11 @@ body {
 .card-container {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(auto-fill, 230px);
-  row-gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 0.4fr));
+  row-gap: 30px;
   grid-template-rows: repeat(auto-fill, 210px);
-  padding: 40px 10px 20px 40px;
-  align-items: center;
+  padding: 25px 40px 20px 25px;
+  align-items: flex-start;
   height: 93vh;
   width: 83%;
   overflow-y: scroll;
@@ -101,7 +101,7 @@ body {
   @include flexit();
   flex-direction: column;
   position: absolute;
-  box-shadow:rgb(255, 255, 255) 0px 0px 3px 1px;
+  box-shadow: rgb(255, 255, 255) 0px 0px 3px 1px;
   border-radius: 10px;
   overflow: hidden;
   top: 0px;
@@ -126,8 +126,8 @@ menu {
     background-color: rgb(165, 165, 165);
   }
 
-  &[title]:before {
-    content:attr(title);
+  &[title]::before {
+    content: attr(title);
   }
 }
 

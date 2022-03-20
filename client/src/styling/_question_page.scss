@@ -155,7 +155,7 @@
 
 .image-number-box {
   @include flexit();
-  font-family: 'Taviraj', serif;
+  font-family: "Taviraj", serif;
   font-size: 140%;
   font-weight: bold;
   color: black;
@@ -167,7 +167,7 @@
 
 .incorrect-answer {
   opacity: 0.2;
-  background-color: #DDD;
+  background-color: #ddd;
   animation-name: shakeIt;
   animation-fill-mode: forwards;
   animation-duration: 0.6s;
