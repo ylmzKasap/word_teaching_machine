@@ -1,7 +1,6 @@
 .fas {
   color: white;
   cursor: pointer;
-  margin: 0 5px 0 15px;
   &:hover {
     transform: scale(1.2);
   }
@@ -41,7 +40,7 @@
 
 .fa-arrow-left {
   position: absolute;
-  left: 1%;
+  left: 15px;
 }
 
 .fa-arrow-right {
@@ -69,13 +68,20 @@
   color: black;
 }
 
+.fa-folder-plus, .fa-plus-circle {
+  margin-right: 15px;
+}
+
 .category-circle {
   margin-left: auto;
+  margin-right: 15px;
   &:hover {
     transform: scale(1);
   }
 }
 
+
+// 404 Errors
 .fa-binoculars {
   color: rgb(20, 82, 175);
   pointer-events: none;

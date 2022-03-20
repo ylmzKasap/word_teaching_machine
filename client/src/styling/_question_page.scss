@@ -1,9 +1,11 @@
 .navbar {
   @include flexit();
+  inset: 0px;
+  background-color: rgb(63, 60, 60);
   justify-content: space-between;
-  padding-left: 1.2%;
-  padding-right: 1.2%;
-  height: 7vh;
+  width: 100%;
+  height: min(7vh, 55px);
+  z-index: 1000;
 }
 
 #progress-bar {

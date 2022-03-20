@@ -1,5 +1,19 @@
 // Imports
 @import url("https://fonts.googleapis.com/css2?family=Taviraj&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+
+html, body, #main-app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  overflow: hidden;
+}
 
 // Variables
 $mobile: 480px;

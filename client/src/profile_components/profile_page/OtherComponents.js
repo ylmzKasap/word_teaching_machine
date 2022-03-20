@@ -6,7 +6,7 @@ export const SideBar = (props) => {
 
   return (
     <div className="sidebar-container">
-      <figure className="user-info">
+      <div className="user-info">
         <div className="image-container">
           <img
             className="user-image"
@@ -14,8 +14,8 @@ export const SideBar = (props) => {
             alt={`${props.user}`}
           />
         </div>
-        <figcaption className="username">{props.user}</figcaption>
-      </figure>
+        <div className="username">{props.user}</div>
+      </div>
     </div>
   );
 };

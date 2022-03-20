@@ -1,5 +1,4 @@
 import "./styling/App.css";
-import "bootstrap/dist/css/bootstrap.css";
 
 import { StrictMode } from "react";
 import { render } from "react-dom";

@@ -61,7 +61,7 @@ export const ProfileNavBar = (props) => {
 
   // Children: CreateDeckOverlay, CreateFolderOverlay
   return (
-    <div className="profile-navbar sticky-top navbar-dark bg-dark">
+    <div className="profile-navbar">
       {backDisplay && (
         <i className="fas fa-arrow-left arrow" onClick={handleBackClick}></i>
       )}
