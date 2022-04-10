@@ -11,7 +11,7 @@ async function getItemInfo(pool, item_id) {
     const itemInfo = await pool.query(queryString, parameters)
     .catch(() => utils.emptyRows);
 
-    return itemInfo.rows ? itemInfo.rows[0] : false;
+    return itemInfo.rows[0] ? itemInfo.rows[0] : false;
 }
 
 

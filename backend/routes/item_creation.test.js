@@ -2,12 +2,13 @@ const app = require('../app');
 const request = require('supertest');
 
 const db = require('../database/test_database');
-const roV = require('../database/db_functions/other_functions').roV;
+const {roV } = require('../database/db_functions/other_functions');
 const setup = require('../database/db_functions/setup');
-const glob = require('../database/build_database').glob;
+const { glob } = require('../database/build_database');
 
 const test_utils = require('../test/functions');
-const fail_with_json = require('../test/functions').fail_with_json;
+const { getItemInfo } = require('../database/db_functions/item_functions');
+const { fail_with_json } = require('../test/functions');
 
 
 setup.setupBeforeAndAfter(db);
@@ -188,13 +189,13 @@ describe('Create a deck', () => {
         fail_with_json(response, 400, "Images not found: EXISTANCE.");
     });
 
-    test("Body types must be valid", async () => {
+    test("Body values must be present and valid", async () => {
         await test_utils.check_type_blank({
             "deckName": "deck_15521",
             "content": {"words": ["elevator", "square", "natural"]},
             "parent_id": 5,
             "category_id": 8
-        }, `/u/${glob.user_1}/create_deck`, app, db);
+        }, `/u/${glob.user_1}/create_deck`, 'post', app, db);
 
         // Values of words is not an array
         const wordsResponse = await request(app(db))
@@ -353,12 +354,12 @@ describe('Create a folder', () => {
         fail_with_json(invalidType, 400, "Invalid directory");
     });
 
-    test("Body types must be valid", async () => {
+    test("Body values must be present and valid", async () => {
         await test_utils.check_type_blank({
             "folder_name": "folder_1252",
             "parent_id": 1,
             "folder_type": "regular_folder"
-        }, `/u/${glob.user_1}/create_folder`, app, db);
+        }, `/u/${glob.user_1}/create_folder`, 'post', app, db);
     }); 
 })
 
@@ -444,12 +445,12 @@ describe('Create a category', () => {
         fail_with_json(response, 400, "Invalid input");
     });
 
-    test("Body types must be valid", async () => {
+    test("Body values must be present and valid", async () => {
         await test_utils.check_type_blank({
             "category_name": "my_category_2323",
             "parent_id": 6,
             "content": {"color": "#AA7854"}
-        }, `/u/${glob.user_1}/create_category`, app, db);
+        }, `/u/${glob.user_1}/create_category`, 'post', app, db);
 
         // Extra key in content
         const extraVal = await request(app(db))
@@ -461,6 +462,98 @@ describe('Create a category', () => {
         }, `/u/${glob.user_1}/create_category`, app, db);
         
         fail_with_json(extraVal, 400, "Missing or extra body");
+    });
+});
+
+describe('Delete', () => {
+    test('A file', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 27
+            });
+        
+        expect(response.status).toEqual(200);
+        expect(await getItemInfo(db, 27)).toBe(false);
+    });
+
+    test('A folder and all subdirectories', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 24
+            });
+        
+        expect(response.status).toEqual(200);
+        expect(await getItemInfo(db, 24)).toBe(false);
+        expect(await getItemInfo(db, 25)).toBe(false);
+        expect(await getItemInfo(db, 26)).toBe(false);
+    });
+
+    test('A thematic folder and all items', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 5
+            });
+        
+        expect(response.status).toEqual(200);
+        expect(await getItemInfo(db, 5)).toBe(false);
+        // Delete categories
+        expect(await getItemInfo(db, 8)).toBe(false);
+        expect(await getItemInfo(db, 9)).toBe(false);
+        // Delete category items
+        expect(await getItemInfo(db, 12)).toBe(false);
+        expect(await getItemInfo(db, 15)).toBe(false);
+    });
+
+    test('Category and all of its items', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 11
+            });
+        
+        expect(response.status).toEqual(200);
+        expect(await getItemInfo(db, 11)).toBe(false);
+        expect(await getItemInfo(db, 18)).toBe(false);
+        expect(await getItemInfo(db, 20)).toBe(false);
+    });
+
+    test('Must not delete a root folder', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 1
+            });
+        
+        expect(fail_with_json(response, 400, "Cannot delete root folder"));
+    });
+
+    test('Deleted item must belong to the user in param', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 29
+            });
+        
+        expect(fail_with_json(response));
+    });
+
+    test('Deleted item must exist', async () => {
+        const response = await request(app(db))
+            .delete(`/u/${glob.user_1}/delete_item`)
+            .send({
+                "item_id": 29353
+            });
+        
+        expect(fail_with_json(response, 400, "Item does not exist anymore..."));
+    });
+
+    test("Body values must be present and valid", async () => {
+        await test_utils.check_type_blank({
+            "item_id": 7
+        }, `/u/${glob.user_1}/delete_item`, 'delete', app, db);
     });
 })
 

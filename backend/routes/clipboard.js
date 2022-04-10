@@ -2,8 +2,8 @@ const item_utils = require('../database/db_functions/item_functions');
 const dir_utils = require('../database/db_functions/directory');
 const utils = require("./functions");
 
-const addItem = require('../database/db_functions/item_creation').addItem;
-const updateDirectory = require('../database/db_functions/item_relocation').updateDirectory;
+const { addItem } = require('../database/db_functions/item_creation');
+const  { updateDirectory } = require('../database/db_functions/item_relocation');
 
 module.exports = async (req, res) => {
     const { username } = req.params;

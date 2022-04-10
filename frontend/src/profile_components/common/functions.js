@@ -134,7 +134,6 @@ export function scroll_div(
 
 export function delete_item(
   itemObj,
-  directory,
   username,
   setRender,
   setRequestError
@@ -148,15 +147,14 @@ export function delete_item(
     axios
       .delete(`/u/${username}/delete_item`, {
         data: {
-          item_id: extract_int(itemObj.id),
-          parent_id: directory,
+          item_id: parseInt(extract_int(itemObj.id))
         },
       })
       .then(() => {
         setRender();
       })
       .catch((err) =>
-        setRequestError({ exists: true, description: err.response.data })
+        setRequestError({ exists: true, description: err.response.data.errDesc })
       );
   }
 }

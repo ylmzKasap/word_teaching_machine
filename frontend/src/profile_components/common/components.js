@@ -148,7 +148,6 @@ export const ItemContextMenu = () => {
     } else if (action === "delete") {
       delete_item(
         contextOpenedElem,
-        directory,
         username,
         setReRender,
         setRequestError

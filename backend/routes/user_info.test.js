@@ -3,8 +3,8 @@ const request = require('supertest');
 
 const db = require('../database/test_database');
 const setup = require('../database/db_functions/setup');
-const glob = require('../database/build_database').glob;
-const fail_with_json = require('../test/functions').fail_with_json;
+const { glob } = require('../database/build_database');
+const { fail_with_json } = require('../test/functions');
 
 
 setup.setupBeforeAndAfter(db);

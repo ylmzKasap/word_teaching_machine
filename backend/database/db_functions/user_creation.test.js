@@ -1,9 +1,9 @@
 const db = require('../test_database');
-const roV = require('./other_functions').roV;
+const  { roV } = require('./other_functions');
 
 const user_utils = require('./user_creation');
 const setup = require('./setup');
-const glob = require('../build_database').glob;
+const { glob } = require('../build_database');
 
 
 setup.setupBeforeAndAfter(db);

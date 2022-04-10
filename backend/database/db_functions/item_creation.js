@@ -1,4 +1,5 @@
 const directoryUtils = require('./directory');
+const { getItemInfo } = require('./item_functions');
 
 
 async function addItem(pool, infObj) {
@@ -55,13 +56,21 @@ async function addItem(pool, infObj) {
 }
 
 
-async function deleteItem(pool, owner, item_id, parent_id) {
+async function deleteItem(pool, owner, item_id) {
     const queryText = `
         DELETE FROM items WHERE item_id = $1;`;
     const parameters = [item_id];
 
+    const parentInfo = await getItemInfo(pool, item_id)
+        .catch(() => false);
+
+    if (!parentInfo) {
+        return false;
+    }
+    const parent_id = parentInfo.parent_id;
+
     const deleteStatus = await pool.query(queryText, parameters)
-    .catch(() => false);
+        .catch(() => false);
     
     if (!deleteStatus) {
         return false;

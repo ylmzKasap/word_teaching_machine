@@ -1,8 +1,7 @@
 const err_utils = require('../database/db_functions/index');
 const item_utils = require('../database/db_functions/item_functions');
 
-
-const updateDirectory = require('../database/db_functions/item_relocation').updateDirectory;
+const { updateDirectory } = require('../database/db_functions/item_relocation');
 
 
 // Change item order in a directory.

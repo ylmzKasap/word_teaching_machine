@@ -46,7 +46,6 @@ const BottomDragBar = () => {
     if (!cloneTimeout.exists) {
       delete_item(
         draggedElement,
-        directory,
         username,
         setReRender,
         setRequestError

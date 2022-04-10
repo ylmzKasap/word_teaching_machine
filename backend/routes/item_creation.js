@@ -155,7 +155,7 @@ const create_folder = async (req, res) => {
         return res.status(400).send({"errDesc": "Forbidden character"});
     }
     
-    // Prevent invalid directory
+    // Invalid directory to create a folder
     const dirInfo = await item_utils.getItemInfo(db, parent_id);
     let dirError = false;
     if (dirInfo) {
@@ -224,6 +224,7 @@ const create_category = async (req, res) => {
         return res.status(400).send({"errDesc": "Invalid input"});
     }
 
+    // Invalid directory to create a category
     const dirInfo = await item_utils.getItemInfo(db, parent_id);
     let dirError = false;
     if (dirInfo) {
@@ -261,16 +262,38 @@ const create_category = async (req, res) => {
 // Delete File, Folder or Category.
 const delete_item = async (req, res) => {
     const { username } = req.params;
-    const { item_id, parent_id } = req.body;
-
+    const { item_id } = req.body;
     const db = req.app.get('database');
 
-    const deleteStatus = await item_crt_utils.deleteItem(db, username, item_id, parent_id);
+    // Body values are missing or extra
+    if (test_utils.is_blank([item_id]) || Object.keys(req.body).length > 1) {
+        return res.status(400).send({"errDesc": "Missing or extra body"});
+    }
+
+    // Type mismatch
+    if (typeof item_id !== 'number') {
+        return res.status(400).send({"errDesc": "Type mismatch"});
+    }
+
+    // Invalid directory to delete
+    const itemInfo = await item_utils.getItemInfo(db, item_id);
+    if (itemInfo) {
+        if (itemInfo.owner !== username) {
+            return res.status(400).send({"errDesc": 'Bad request'});
+        }
+        if (itemInfo.item_type === "root_folder") {
+            return res.status(400).send({"errDesc": 'Cannot delete root folder'});
+        }
+    } else {
+        return res.status(400).send({"errDesc": 'Item does not exist anymore...'});
+    }
+
+    const deleteStatus = await item_crt_utils.deleteItem(db, username, item_id);
 
     if (deleteStatus) {
-        return res.end();
+        return res.status(200).send();
     } else {
-        return res.status(400).send('Something went wrong...');
+        return res.status(400).send({"errDesc": 'Item does not exist anymore...'});
     }
 };
 

@@ -36,9 +36,29 @@ function fail_with_json(response, status=400, expectedResponse="") {
     }
 }
 
-async function check_type_blank(correctRequest, route, server, db) {
+async function check_type_blank(correctRequest, route, operation, server, db) {
     /* Takes a valid object of a server request, and a route as an argument.
     Checks for missing keys and blank & invalid type values */
+
+    async function perform_crud(route, req) {
+        let response;
+        if (operation === 'post') {
+            response =  await request(server(db))
+            .post(route)
+            .send(req);
+        } else if (operation === 'put') {
+            response =  await request(server(db))
+            .put(route)
+            .send(req);
+        } else if (operation === 'delete') {
+            response =  await request(server(db))
+            .delete(route)
+            .send(req);
+        } else {
+            throw 'Unknown CRUD operation';
+        }
+        return response;
+    }
 
     const allKeys = Object.keys(correctRequest);
     
@@ -47,10 +67,7 @@ async function check_type_blank(correctRequest, route, server, db) {
         const dummyRequest = {...correctRequest};
         delete dummyRequest[allKeys[i]];
         
-        const response = await request(server(db))
-            .post(route)
-            .send(dummyRequest)
-        
+        const response = await perform_crud(route, dummyRequest);
         expect(fail_with_json(response, 400, "Missing or extra body"));
     }
 
@@ -58,12 +75,11 @@ async function check_type_blank(correctRequest, route, server, db) {
     let extraDummy = {...correctRequest};
     extraDummy['un!qu*3eKeH^'] = 'tesing extra key';
 
-    const extraResponse = await request(server(db))
-        .post(route)
-        .send(extraDummy)
-    
+    const extraResponse = await perform_crud(route, extraDummy);
     expect(fail_with_json(extraResponse, 400, "Missing or extra body"));
 
+
+    // Fail on type mismatch
     const counterTypes = {
         'string': ['yeah'],
         'number': '6',
@@ -74,9 +90,7 @@ async function check_type_blank(correctRequest, route, server, db) {
         'null': '6',
         'undefined': 'should work'
     }
-    
 
-    // Fail on type mismatch
     for (let i = 0; i < allKeys.length; i++) {
         let dummyRequest = {...correctRequest};
         const value = correctRequest[allKeys[i]];
@@ -92,10 +106,7 @@ async function check_type_blank(correctRequest, route, server, db) {
 
         dummyRequest[allKeys[i]] = counterTypes[keyType];
         
-        const response = await request(server(db))
-            .post(route)
-            .send(dummyRequest)
-        
+        const response = await perform_crud(route, dummyRequest);
         expect(fail_with_json(response, 400, "Type mismatch"));            
     }
 
@@ -109,10 +120,8 @@ async function check_type_blank(correctRequest, route, server, db) {
 
         // Space & tabs & new line
         dummyRequest[allKeys[i]] = '\n\t  ';
-        const spaceResponse = await request(server(db))
-            .post(route)
-            .send(dummyRequest)
         
+        const spaceResponse = await perform_crud(route, dummyRequest);
         expect(fail_with_json(spaceResponse, 400, "Blank value"));
     }
 }

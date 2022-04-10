@@ -1,4 +1,4 @@
-const addItem = require('./item_creation').addItem;
+const { addItem } = require('./item_creation');
 const utils = require('./index')
 
 
