@@ -155,7 +155,7 @@ menu {
   display: flex;
   position: fixed;
   bottom: 15%;
-  right: 2%;
+  right: 20px;
   min-height: 50px;
   width: 30%;
   text-align: center;
@@ -163,12 +163,13 @@ menu {
   background-color: rgb(255, 255, 79);
   border: solid black;
   border-radius: 7px;
+  font-size: 22px;
 }
 
 .profile-error-text {
   width: 93%;
   height: inherit;
-  padding: 3% 2% 2% 2%;
+  padding: 2% 2% 2% 2%;
 }
 
 .error-exit-button {

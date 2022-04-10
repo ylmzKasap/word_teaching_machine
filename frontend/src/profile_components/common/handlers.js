@@ -1,7 +1,7 @@
 export function handleItemName(synthEvent) {
   // Used by CreateDeckOverlay and CreateFolderOverlay.
 
-  const itemNameFilter = /[.,\\'"]/;
+  const itemNameFilter = /[.,\\<>"]/;
   const itemName = synthEvent.target.value;
   const generalError = {
     display: { display: "none" },

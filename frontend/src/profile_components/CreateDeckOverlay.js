@@ -73,8 +73,7 @@ export function CreateDeck(props) {
     let allWords = words
       .split("\n")
       .filter((word) => word !== "")
-      .filter((word) => !word.match(/^[\s]+$/))
-      .join(",");
+      .filter((word) => !word.match(/^[\s]+$/));
 
     if (nameError.errorClass !== "" || wordError.errorClass !== "") {
       setFormError({
@@ -97,7 +96,7 @@ export function CreateDeck(props) {
           deckName: deckName,
           content: { words: allWords },
           parent_id: directory,
-          category_id: categorySpec ? extract_int(categorySpec) : null,
+          category_id: categorySpec ? categorySpec : null,
         })
         .then(() => {
           setDeckName("");
@@ -113,7 +112,7 @@ export function CreateDeck(props) {
         .catch((err) =>
           setFormError({
             errorClass: "invalid-form",
-            description: err.response.data,
+            description: err.response.data.errDesc,
           })
         );
     }

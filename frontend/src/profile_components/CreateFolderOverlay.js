@@ -4,6 +4,7 @@ import axios from "axios";
 import { ProfileContext } from "./profile_page/ProfilePage";
 import * as handlers from "./common/handlers";
 import * as components from "./common/components";
+import * as utils from "./common/functions";
 
 export function CreateFolderOverlay(props) {
   // Component of ProfileNavbar.
@@ -19,7 +20,7 @@ export function CreateFolder(props) {
   // Component of CreateFolderOverlay.
 
   const [folderName, setFolderName] = useState("");
-  const [folderType, setFolderType] = useState("");
+  const [folderType, setFolderType] = useState("regular_folder");
   const [nameError, setNameError] = useState({
     errorClass: "",
     description: "",
@@ -83,7 +84,7 @@ export function CreateFolder(props) {
         .catch((err) =>
           setFormError({
             errorClass: "invalid-form",
-            description: err.response.data,
+            description: err.response.data.errDesc,
           })
         );
     }
@@ -110,7 +111,7 @@ export function CreateFolder(props) {
       <components.Radio
         description="Folder Type:"
         buttons={["Regular folder", "Thematic folder"]}
-        checked={"Regular folder"}
+        checked={"regular_folder"}
         selected={folderType}
         handler={handleRadioChange}
       />

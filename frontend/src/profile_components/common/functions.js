@@ -177,3 +177,8 @@ export function find_closest_element(evnt, selectors) {
 
   return null;
 }
+
+
+export function snakify(str) {
+  return str.split(' ').join('_').toLowerCase();
+}

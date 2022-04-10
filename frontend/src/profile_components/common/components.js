@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import axios from "axios";
 import { ProfileContext } from "../profile_page/ProfilePage";
-import { delete_item, hasKeys, extract_int } from "./functions";
+import { delete_item, hasKeys, extract_int, snakify } from "./functions";
 
 export const OverlayNavbar = (props) => {
   // Component of CreateDeck, CreateFolder.
@@ -52,13 +52,13 @@ export const Radio = (props) => {
             {itemName}
             <input
               type="radio"
-              value={itemName}
+              value={snakify(itemName)}
               name="folder-type"
               onChange={handler}
               checked={
-                itemName === selected
+                snakify(itemName) === selected
                   ? true
-                  : !selected && itemName === checked
+                  : !selected && snakify(itemName) === checked
                   ? true
                   : false
               }

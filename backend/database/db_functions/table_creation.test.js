@@ -3,16 +3,13 @@ const setup = require('./setup');
 const roV = require('./other_functions').roV;
 
 
-setup.setupBeforeAndAfter();
+setup.setupBeforeAndAfter(db);
 
 test('Create database tables', async () => {
   const tableExistsQuery = "SELECT EXISTS (SELECT relname FROM pg_class WHERE relname = $1);"
-  let userQuery = db.query(tableExistsQuery, ['users']);
-  let itemQuery = db.query(tableExistsQuery, ['items']);
-  let contentQuery = db.query(tableExistsQuery, ['contents']);
-  
-  const [userTable, itemTable, contentTable] = await Promise.all([
-    userQuery, itemQuery, contentQuery])
+  let userTable = await db.query(tableExistsQuery, ['users']);
+  let itemTable = await db.query(tableExistsQuery, ['items']);
+  let contentTable = await db.query(tableExistsQuery, ['contents']);
 
   expect(
     roV(userTable).exists &&

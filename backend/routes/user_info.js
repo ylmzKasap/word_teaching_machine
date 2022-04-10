@@ -18,14 +18,14 @@ const serve_user = async (req, res) => {
             if (directory) {
                 return res.status(200).send([directory, dirInfo]);
             } else {
-                return res.status(404).send('Directory Not Found.')
+                return res.status(404).send({"errDesc": "Directory not found"})
             }
 
         } else {
-            res.status(200).send(info);
+            return res.status(200).send(info);
         }
     } else {
-        res.status(404).send('User Not Found');
+        return res.status(404).send({"errDesc": "User not found"});
     }
 };
 
@@ -37,13 +37,13 @@ const serve_item = async (req, res) => {
     const pathExists = await item_utils.checkFilePath(db, username, directory_id, item_id);
 
     if (!pathExists) {
-        return res.status(404).send("Item does not exist.");
+        return res.status(404).send({"errDesc": "Item not found"});
     }
 
     const itemInfo = await item_utils.getItemInfo(db, item_id);
     
     if (itemInfo === null) {
-        return res.status(404).send('Deck does not exist.');
+        return res.status(404).send({"errDesc": "Deck not found"});
     } else {
         return res.status(200).send(itemInfo);
     }

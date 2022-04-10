@@ -6,7 +6,8 @@ const setup = require('./setup');
 const glob = require('../build_database').glob;
 
 
-setup.setupBeforeAndAfter();
+setup.setupBeforeAndAfter(db);
+
 
 test('Add users and root', async () => {
   const userQuery = `
@@ -43,9 +44,9 @@ test('Delete the user', async () => {
 
 
 test('Get user info', async () => {
-  let [user_1, user_2] = await Promise.all([
-    user_utils.getUserInfo(db, glob.user_1), user_utils.getUserInfo(db, glob.user_2)
-  ]);
+  const user_1 = await user_utils.getUserInfo(db, glob.user_1);
+  const user_2 = await user_utils.getUserInfo(db, glob.user_2);
+  const user_3 = await user_utils.getUserInfo(db, `NY&+%/K%+%j'4&J768/)\\(=)YKTUY"J646`);
 
   expect(user_1.user_id).toBe("1");
   expect(user_1.username).toBe(glob.user_1);
@@ -55,6 +56,8 @@ test('Get user info', async () => {
   expect(user_2.user_id).toBe("2");
   expect(user_2.username).toBe(glob.user_2);
   expect(user_2.root_id).toBe(2);
+
+  expect(user_3).toBe(false);
 });
 
 

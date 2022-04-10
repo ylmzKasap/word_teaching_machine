@@ -77,7 +77,7 @@ export function CreateCategory(props) {
         .catch((err) =>
           setFormError({
             errorClass: "invalid-form",
-            description: err.response.data,
+            description: err.response.data.errDesc,
           })
         );
     }

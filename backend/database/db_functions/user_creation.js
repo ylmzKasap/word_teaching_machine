@@ -39,6 +39,14 @@ async function getUserInfo(pool, owner) {
     return userInfo.rows[0] ? userInfo.rows[0] : false;
 }
 
+async function getUsernameFromParent(pool, parent) {
+    const queryString = 'SELECT owner FROM items WHERE item_id = $1 LIMIT 1;';
+    const username = await pool.query(queryString, [parent])
+    .catch(() => utils.emptyRows);
+
+    return username.rows[0] ? username.rows[0] : false; 
+}
+
 module.exports = {
-    addUser, deleteUser, getUserInfo
+    addUser, deleteUser, getUserInfo, getUsernameFromParent
 }

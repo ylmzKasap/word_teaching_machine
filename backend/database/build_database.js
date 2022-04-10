@@ -24,8 +24,8 @@ async function setUp(db) {
     // Root
     await item_utils.addItem(db, {'name': 'folder_1', 'owner': glob.user_1, 'item_type': 'folder', 'parent': 1});
     await item_utils.addItem(db, {'name': 'folder_2', 'owner': glob.user_1, 'item_type': 'folder', 'parent': 1});
-    await item_utils.addItem(db, {'name': 'thamatic_1', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 1});
-    await item_utils.addItem(db, {'name': 'thamatic_2', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 1});
+    await item_utils.addItem(db, {'name': 'thematic_1', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 1});
+    await item_utils.addItem(db, {'name': 'thematic_2', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 1});
     await item_utils.addItem(db, {'name': 'deck_1', 'owner': glob.user_1, 'item_type': 'file', 'parent': 1, 'content': {'words': words}});
 
     // Categories
@@ -47,18 +47,18 @@ async function setUp(db) {
 
     // Folder Content
     await item_utils.addItem(db, {'name': 'deck_1', 'owner': glob.user_1, 'item_type': 'file', 'parent': 4, 'content': {'words': words}});
-    await item_utils.addItem(db, {'name': 'folder_2', 'owner': glob.user_1, 'item_type': 'folder', 'parent': 4});
-    await item_utils.addItem(db, {'name': 'thamatic_1', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 4});
+    await item_utils.addItem(db, {'name': 'folder_3', 'owner': glob.user_1, 'item_type': 'folder', 'parent': 4});
+    await item_utils.addItem(db, {'name': 'thematic_1', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 4});
 
     await item_utils.addItem(db, {'name': 'folder_444', 'owner': glob.user_1, 'item_type': 'folder', 'parent': 3});
     await item_utils.addItem(db, {'name': 'folder_1', 'owner': glob.user_1, 'item_type': 'folder', 'parent': 24});
-    await item_utils.addItem(db, {'name': 'thamatic_22', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 25});
+    await item_utils.addItem(db, {'name': 'thematic_22', 'owner': glob.user_1, 'item_type': 'thematic_folder', 'parent': 25});
     await item_utils.addItem(db, {'name': 'deck_11', 'owner': glob.user_1, 'item_type': 'file', 'parent': 25, 'content': {'words': words}});
 
     // Add user 2 files
     await item_utils.addItem(db, {'name': 'folder_1', 'owner': glob.user_2, 'item_type': 'folder', 'parent': 2});
     await item_utils.addItem(db, {'name': 'folder_2', 'owner': glob.user_2, 'item_type': 'folder', 'parent': 2});
-    await item_utils.addItem(db, {'name': 'thamatic_1', 'owner': glob.user_2, 'item_type': 'thematic_folder', 'parent': 2});
+    await item_utils.addItem(db, {'name': 'thematic_1', 'owner': glob.user_2, 'item_type': 'thematic_folder', 'parent': 2});
     await item_utils.addItem(db, {'name': 'category_1', 'owner': glob.user_2, 'item_type': 'category', 'parent': 30, 'content': {'color': '#333'}});
     await item_utils.addItem(db, {'name': 'category_2', 'owner': glob.user_2, 'item_type': 'category', 'parent': 30, 'content': {'color': '#F28'}});
     await item_utils.addItem(db, {'name': 'deck_1', 'owner': glob.user_2, 'item_type': 'file', 'parent': 30, 'category_id': 31, 'content': {'words': words}});
@@ -66,8 +66,6 @@ async function setUp(db) {
     await item_utils.addItem(db, {'name': 'deck_1', 'owner': glob.user_2, 'item_type': 'file', 'parent': 2, 'content': {'words': words}});
     await item_utils.addItem(db, {'name': 'deck_1', 'owner': glob.user_2, 'item_type': 'file', 'parent': 29, 'content': {'words': words}});
     await item_utils.addItem(db, {'name': 'folder_1', 'owner': glob.user_2, 'item_type': 'folder', 'parent': 28});
-
-
 }
 
 

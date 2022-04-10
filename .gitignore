@@ -27,5 +27,4 @@ yarn-error.log*
 /backend/database/development_database.js
 /backend/database/test_database.js
 /backend/database/info.sql
-/backend/media
-backend/public
+/backend/public

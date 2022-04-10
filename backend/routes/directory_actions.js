@@ -1,7 +1,4 @@
 const dir_utils = require('../database/db_functions/directory');
-const err_utils = require('../database/db_functions/index');
-
-const updateDirectory = require('../database/db_functions/item_relocation').updateDirectory;
 
 // Set directory to parent folder.
 const set_back = async (req, res) => {
@@ -27,29 +24,6 @@ const set_back = async (req, res) => {
     }
 };
 
-// Send an item to a specific folder.
-const set_forward = async (req, res) => {
-    const { username } = req.params;
-    const { item_id, parent_id, target_id, direction, item_name, parent_name } = req.body;
-
-    const db = req.app.get('database');
-
-    const updateStatus = await updateDirectory(
-        db, username, item_id, parent_id, target_id, null, direction);
-
-    if (!updateStatus.exists) {
-        return res.end()
-    } else {
-        const description = err_utils.handleError(updateStatus.code);
-        return res.status(400).send(
-            description == 'Unique Violation' ? 
-            `'${item_name}' already exists in ${parent_name ? `folder '${parent_name}'` : 'the parent folder'}.`
-            :
-            description ?
-            description : `Failed, sorry.`);
-    }
-};
-
 module.exports = {
-    set_back, set_forward
+    set_back
 }

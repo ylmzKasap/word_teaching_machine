@@ -3,8 +3,10 @@ const path = require('path')
 const cors = require('cors');
 
 const user_info = require("./routes/user_info");
+const item_creation = require("./routes/item_creation");
 const item_actions = require("./routes/item_actions");
 const directory_actions = require("./routes/directory_actions");
+const clipboard = require("./routes/clipboard");
 
 
 module.exports = (database) => {
@@ -26,18 +28,29 @@ module.exports = (database) => {
     app.get('/u/:username/:directory_id/item/:item_id', user_info.serve_item);
 
     // Item actions
-    app.post("/u/:username/create_deck", item_actions.create_deck);
-    app.post("/u/:username/create_folder", item_actions.create_folder);
-    app.post("/u/:username/create_category", item_actions.create_category);
-    app.delete("/u/:username/delete_item", item_actions.delete_item);
+    app.post("/u/:username/create_deck", item_creation.create_deck);
+    app.post("/u/:username/create_folder", item_creation.create_folder);
+    app.post("/u/:username/create_category", item_creation.create_category);
+    app.delete("/u/:username/delete_item", item_creation.delete_item);
     app.put("/updateorder/:username", item_actions.update_directory);
 
     // Clipboard
-    app.put('/paste/:username', require("./routes/clipboard"));
+    app.put('/paste/:username', clipboard);
 
     // Change directory
     app.get('/updir/:username/:parent_id', directory_actions.set_back);
-    app.put('/updatedir/:username', directory_actions.set_forward);
+    app.put('/updatedir/:username', item_actions.send_item);
+
+    // Invalid route
+    app.use('*', (req, res) => {
+        return res.status(404).send({"errDesc": "Invalid request"});
+    })
+
+    // Error handling
+    app.use((err, req, res, next) => {
+        return res.status(404).send({"errDesc": "Invalid request"});
+        /* console.log('catched: \n', err.stack); */
+    })
 
     return app;
 }

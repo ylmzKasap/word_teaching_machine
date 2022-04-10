@@ -318,7 +318,7 @@ const CategoryContainer = () => {
       return;
     }
     const categoryId = event.target.closest(".category").id;
-    setCategoryId(categoryId);
+    setCategoryId(parseInt(extract_int(categoryId)));
     setDeckDisplay((x) => !x);
   };
 
