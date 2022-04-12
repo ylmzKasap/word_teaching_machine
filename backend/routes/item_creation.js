@@ -290,7 +290,7 @@ const delete_item = async (req, res) => {
 
     const deleteStatus = await item_crt_utils.deleteItem(db, username, item_id);
 
-    if (deleteStatus) {
+    if (!deleteStatus.error) {
         return res.status(200).send();
     } else {
         return res.status(400).send({"errDesc": 'Item does not exist anymore...'});

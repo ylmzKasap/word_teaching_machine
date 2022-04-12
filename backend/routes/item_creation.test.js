@@ -21,9 +21,11 @@ const itemByNameQuery = `
 
 
 describe('Create a deck', () => {
+    const createDeckUrl = `/create_deck/${glob.user_1}`;
+
     test('Create valid deck', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "myDeck",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -43,7 +45,7 @@ describe('Create a deck', () => {
 
     test('Fail on duplicate deck', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_1",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -56,7 +58,7 @@ describe('Create a deck', () => {
 
     test("Should work even there are other types of files with the same name", async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "folder_1",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -69,7 +71,7 @@ describe('Create a deck', () => {
 
     test('Deck name and words should not include forbidden characters', async () => {
         const deckResponse = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck<33",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -80,7 +82,7 @@ describe('Create a deck', () => {
         fail_with_json(deckResponse, 400, "Forbidden character");
 
         const wordResponse = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["ele,vator", "squa<re", "natural"]},
@@ -93,7 +95,7 @@ describe('Create a deck', () => {
 
     test('Parent must exist', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -106,7 +108,7 @@ describe('Create a deck', () => {
 
     test("Directory must be owned by the same user", async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -119,7 +121,7 @@ describe('Create a deck', () => {
 
     test('Should work with a valid input in category', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "myDeck",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -139,7 +141,7 @@ describe('Create a deck', () => {
 
     test("Category must exist", async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -152,7 +154,7 @@ describe('Create a deck', () => {
 
     test("Category must be in the same directory", async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -165,7 +167,7 @@ describe('Create a deck', () => {
 
     test("Category id must be null in a regular folder", async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["elevator", "square", "natural"]},
@@ -178,7 +180,7 @@ describe('Create a deck', () => {
 
     test("Images must exist", async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_33",
                 "content": {"words": ["elevator", "EXISTANCE", "natural"]},
@@ -195,11 +197,11 @@ describe('Create a deck', () => {
             "content": {"words": ["elevator", "square", "natural"]},
             "parent_id": 5,
             "category_id": 8
-        }, `/u/${glob.user_1}/create_deck`, 'post', app, db);
+        }, createDeckUrl, 'post', app, db);
 
         // Values of words is not an array
         const wordsResponse = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_521",
                 "content": {"words": 'yes'},
@@ -211,7 +213,7 @@ describe('Create a deck', () => {
 
         // All words cannot be blank
         const spaceWords = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_141",
                 "content": {"words": ["    ", "		", "     "]},
@@ -223,7 +225,7 @@ describe('Create a deck', () => {
 
         // All words cannot be blank
         const extraContent = await request(app(db))
-            .post(`/u/${glob.user_1}/create_deck`)
+            .post(createDeckUrl)
             .send({
                 "deckName": "deck_141",
                 "content": {"words": ["square", "elevator"], 'extra': 'value'},
@@ -236,10 +238,12 @@ describe('Create a deck', () => {
 })
 
 
-describe('Create a folder', () => {    
+describe('Create a folder', () => {
+    const createFolderUrl = `/create_folder/${glob.user_1}`;
+
     test('Create valid regular folder', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "myFolder",
                 "parent_id": 1,
@@ -258,7 +262,7 @@ describe('Create a folder', () => {
 
     test('Create valid thematic folder', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "myFolder",
                 "parent_id": 1,
@@ -277,7 +281,7 @@ describe('Create a folder', () => {
 
     test('Fail on duplicate folder', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "folder_2",
                 "parent_id": 1,
@@ -289,7 +293,7 @@ describe('Create a folder', () => {
 
     test('Create regular folder with the same name as thematic folder', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "folder_2",
                 "parent_id": 1,
@@ -308,7 +312,7 @@ describe('Create a folder', () => {
 
     test('Folder type must be either regular or thematic', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "folder_2",
                 "parent_id": 1,
@@ -320,7 +324,7 @@ describe('Create a folder', () => {
 
     test('Folder name cannot contain forbidden characters', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "ye<s",
                 "parent_id": 1,
@@ -333,7 +337,7 @@ describe('Create a folder', () => {
     test('Directory must be owned by the same user and not thematic', async () => {
         // Some other user's directory
         const invalidUser = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "yes",
                 "parent_id": 2,
@@ -344,7 +348,7 @@ describe('Create a folder', () => {
 
         // Cannot add a folder in a thematic folder
         const invalidType = await request(app(db))
-            .post(`/u/${glob.user_1}/create_folder`)
+            .post(createFolderUrl)
             .send({
                 "folder_name": "yes",
                 "parent_id": 5,
@@ -359,15 +363,17 @@ describe('Create a folder', () => {
             "folder_name": "folder_1252",
             "parent_id": 1,
             "folder_type": "regular_folder"
-        }, `/u/${glob.user_1}/create_folder`, 'post', app, db);
+        }, createFolderUrl, 'post', app, db);
     }); 
 })
 
 
 describe('Create a category', () => {
+    const createCategoryUrl = `/create_category/${glob.user_1}`;
+
     test('Create valid category', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "my_category",
                 "parent_id": 6,
@@ -387,7 +393,7 @@ describe('Create a category', () => {
 
     test('Fail on duplicate values', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "category_3",
                 "parent_id": 6,
@@ -400,7 +406,7 @@ describe('Create a category', () => {
     test('Cannot be outside a thematic folder', async () => {
         // Root folder
         const rootResponse = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "my_category",
                 "parent_id": 1,
@@ -411,7 +417,7 @@ describe('Create a category', () => {
 
         // Regular folder
         const folderResponse = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "my_category",
                 "parent_id": 4,
@@ -423,7 +429,7 @@ describe('Create a category', () => {
 
     test('Category must belong to the same user', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "my_category",
                 "parent_id": 30,
@@ -435,12 +441,12 @@ describe('Create a category', () => {
 
     test('Color value must be a valid hexidecimal', async () => {
         const response = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "my_category_223",
                 "parent_id": 6,
                 "content": {"color": "#AA754"}
-            }, `/u/${glob.user_1}/create_category`, app, db);
+            }, createCategoryUrl, app, db);
         
         fail_with_json(response, 400, "Invalid input");
     });
@@ -450,25 +456,26 @@ describe('Create a category', () => {
             "category_name": "my_category_2323",
             "parent_id": 6,
             "content": {"color": "#AA7854"}
-        }, `/u/${glob.user_1}/create_category`, 'post', app, db);
+        }, createCategoryUrl, 'post', app, db);
 
         // Extra key in content
         const extraVal = await request(app(db))
-            .post(`/u/${glob.user_1}/create_category`)
+            .post(createCategoryUrl)
             .send({
                 "category_name": "my_category_22523",
                 "parent_id": 6,
                 "content": {"color": "#AAA754", 'unrelated': 'value'}
-        }, `/u/${glob.user_1}/create_category`, app, db);
+        }, createCategoryUrl, app, db);
         
         fail_with_json(extraVal, 400, "Missing or extra body");
     });
 });
 
 describe('Delete', () => {
+    const deleteUrl = `/delete_item/${glob.user_1}`;
     test('A file', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 27
             });
@@ -479,7 +486,7 @@ describe('Delete', () => {
 
     test('A folder and all subdirectories', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 24
             });
@@ -492,7 +499,7 @@ describe('Delete', () => {
 
     test('A thematic folder and all items', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 5
             });
@@ -509,7 +516,7 @@ describe('Delete', () => {
 
     test('Category and all of its items', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 11
             });
@@ -522,7 +529,7 @@ describe('Delete', () => {
 
     test('Must not delete a root folder', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 1
             });
@@ -532,7 +539,7 @@ describe('Delete', () => {
 
     test('Deleted item must belong to the user in param', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 29
             });
@@ -542,7 +549,7 @@ describe('Delete', () => {
 
     test('Deleted item must exist', async () => {
         const response = await request(app(db))
-            .delete(`/u/${glob.user_1}/delete_item`)
+            .delete(deleteUrl)
             .send({
                 "item_id": 29353
             });
@@ -553,7 +560,7 @@ describe('Delete', () => {
     test("Body values must be present and valid", async () => {
         await test_utils.check_type_blank({
             "item_id": 7
-        }, `/u/${glob.user_1}/delete_item`, 'delete', app, db);
+        }, deleteUrl, 'delete', app, db);
     });
 })
 

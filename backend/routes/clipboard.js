@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
     
     // Check whether a folder is copied into its own subdirectory.
     if (item.item_type === 'folder') {
-        var subtree = await dir_utils.getRecursiveTree(db, username, item_id);
+        const subtree = await dir_utils.getRecursiveTree(db, username, item_id);
         const subIds = subtree.map(item => parseInt(item.item_id));
         if (subIds.includes(parseInt(new_parent)) || parseInt(item_id) === parseInt(new_parent)) {
             res.status(400).send(`This directory is a subdirectory of '${item.item_name}'.`);

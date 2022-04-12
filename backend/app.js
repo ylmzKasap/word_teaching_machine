@@ -28,18 +28,18 @@ module.exports = (database) => {
     app.get('/u/:username/:directory_id/item/:item_id', user_info.serve_item);
 
     // Item actions
-    app.post("/u/:username/create_deck", item_creation.create_deck);
-    app.post("/u/:username/create_folder", item_creation.create_folder);
-    app.post("/u/:username/create_category", item_creation.create_category);
-    app.delete("/u/:username/delete_item", item_creation.delete_item);
-    app.put("/updateorder/:username", item_actions.update_directory);
+    app.post("/create_deck/:username", item_creation.create_deck);
+    app.post("/create_folder/:username", item_creation.create_folder);
+    app.post("/create_category/:username", item_creation.create_category);
+    app.delete("/delete_item/:username", item_creation.delete_item);
+    app.put("/updateorder/:username", item_actions.change_item_order);
 
     // Clipboard
     app.put('/paste/:username', clipboard);
 
     // Change directory
-    app.get('/updir/:username/:parent_id', directory_actions.set_back);
-    app.put('/updatedir/:username', item_actions.send_item);
+    app.get('/goback/:username/:parent_id', directory_actions.set_back);
+    app.put('/updatedir/:username', item_actions.set_item_directory);
 
     // Invalid route
     app.use('*', (req, res) => {

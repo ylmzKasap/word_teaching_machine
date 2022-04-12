@@ -64,7 +64,7 @@ describe('Serve item info', () => {
         fail_with_json(response, 404, "Item not found");
     });
 
-    test('Fail on existing user, someone elses item', async () => {
+    test("Fail on existing user, someone else's item", async () => {
         const response = await request(app(db)).get(`/u/${glob.user_1}/2/item/35`);
         
         fail_with_json(response, 404, "Item not found");

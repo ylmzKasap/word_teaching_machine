@@ -22,6 +22,28 @@ function is_blank(values) {
     return false;
 }
 
+const group_objects = (objArray, groupKey) => {
+    // Group an array of objects based on the value of one of their properties.
+    const groupedObjects = {};
+
+    if (!groupKey) {
+        throw `Provide a property to group the items.`
+    }
+
+    for (let obj of objArray) {
+        if (!obj.hasOwnProperty(groupKey)) {
+            throw `Object has no property called ${groupKey}.`
+        }
+        const groupedValue = obj[groupKey];
+        if (groupedObjects.hasOwnProperty(groupedValue)) {
+            groupedObjects[groupedValue].push(obj);
+        } else {
+            groupedObjects[groupedValue] = [obj];
+        }
+    }
+    return groupedObjects;
+}
+
 function fail_with_json(response, status=400, expectedResponse="") {
     if (!(response.body.hasOwnProperty('errDesc')) && response.status > 400) {
         console.log('Received body: ', response.body);
@@ -33,6 +55,22 @@ function fail_with_json(response, status=400, expectedResponse="") {
         expect(response.body.errDesc).toEqual(expectedResponse); 
     } else {
         expect(response.body.errDesc).toEqual('Bad request'); 
+    }
+}
+
+const numbers_in_order = (array) => {
+    // Takes an array of integers and checks whether all of them are sequential.
+    if (array.every(n => typeof n !== 'number')) {
+        throw 'Array elements must be all integers.';
+    }
+
+    try {
+        const sortedArray = array.sort((a, b) => a - b);
+        const minusIndex = sortedArray.map(x => x - sortedArray.findIndex(z => z == x));
+        const noUniques = new Set(minusIndex);
+        return Array.from(noUniques).length === 1;      
+    } catch {
+        return false;
     }
 }
 
@@ -127,5 +165,5 @@ async function check_type_blank(correctRequest, route, operation, server, db) {
 }
 
 module.exports = {
-    is_object, check_type_blank, fail_with_json, is_blank
+    is_object, check_type_blank, fail_with_json, is_blank, numbers_in_order, group_objects
 };

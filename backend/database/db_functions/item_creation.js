@@ -76,8 +76,8 @@ async function deleteItem(pool, owner, item_id) {
         return false;
     }
 
-    await directoryUtils.reorderDirectory(pool, owner, parent_id);
-    return true;
+    const orderStatus = await directoryUtils.reorderDirectory(pool, owner, parent_id);
+    return !orderStatus.error;
 }
 
 

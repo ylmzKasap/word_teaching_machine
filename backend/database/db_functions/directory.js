@@ -52,9 +52,8 @@ async function getRoot(pool, owner) {
 async function getGrandparent(pool, parent_id) {
     const queryText = `
         SELECT parent_id FROM items WHERE item_id = $1;`;
-    const parameters = [parent_id];
 
-    const grandparent_id = await pool.query(queryText, parameters)
+    const grandparent_id = await pool.query(queryText, [parent_id])
     .catch(() => utils.emptyRows);
 
     return grandparent_id.rows.length === 0 ? false : grandparent_id.rows[0].parent_id;
@@ -80,7 +79,7 @@ async function reorderDirectory(pool, owner, directory_id) {
     const parameters = [owner, directory_id];
 
     await pool.query(queryText, parameters);    
-    return true;
+    return {"error": false, "code": ""};
 }
 
 async function getRecursiveTree(pool, owner, item_id) {
