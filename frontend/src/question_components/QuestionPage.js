@@ -167,7 +167,7 @@ function NavBar(props) {
       : `/${props.directory}`;
 
   return (
-    <div className="navbar sticky-top navbar-dark bg-dark">
+    <div className="navbar">
       {!props.fetchError && props.pageNumber > 0 && (
         <i className="fas fa-arrow-left arrow" onClick={props.goBack}></i>
       )}

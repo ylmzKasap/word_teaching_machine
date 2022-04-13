@@ -59,14 +59,12 @@ const BottomDragBar = () => {
     // Move dragged item to parent folder.
     axios
       .put(`/updatedir/${username}`, {
-        item_id: extract_int(draggedElement.id),
-        item_name: draggedElement.name,
-        parent_id: directory,
-        direction: "parent",
+        item_id: parseInt(extract_int(draggedElement.id)),
+        target_id: null
       })
       .then(() => setReRender())
       .catch((err) =>
-        setRequestError({ exists: true, description: err.response.data })
+        setRequestError({ exists: true, description: err.response.data.errDesc })
       );
     resetDrag();
   };

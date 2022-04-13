@@ -145,7 +145,7 @@ export function delete_item(
 
   if (window.confirm(message)) {
     axios
-      .delete(`/u/${username}/delete_item`, {
+      .delete(`/delete_item/${username}`, {
         data: {
           item_id: parseInt(extract_int(itemObj.id))
         },

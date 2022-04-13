@@ -38,7 +38,7 @@ export const ProfileNavBar = (props) => {
 
   const handleBackClick = () => {
     axios
-      .get(`/updir/${username}/${directory}`)
+      .get(`/goback/${username}/${directory}`)
       .then((response) =>
         props.navigate(
           `/user/${username}${

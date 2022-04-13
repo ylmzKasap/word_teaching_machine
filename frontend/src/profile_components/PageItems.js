@@ -142,16 +142,12 @@ export const PageItem = (props) => {
     if (isDragging) {
       axios
         .put(`/updatedir/${username}`, {
-          item_id: extract_int(draggedElement.id),
-          item_name: draggedElement.name,
-          target_id: extract_int(targetElem.id),
-          parent_name: targetElem.innerText,
-          parent_id: directory,
-          direction: "subfolder",
+          item_id: parseInt(extract_int(draggedElement.id)),
+          target_id: parseInt(extract_int(targetElem.id))
         })
         .then(() => setReRender())
         .catch((err) =>
-          setRequestError({ exists: true, description: err.response.data })
+          setRequestError({ exists: true, description: err.response.data.errDesc })
         );
     }
     resetDrag();

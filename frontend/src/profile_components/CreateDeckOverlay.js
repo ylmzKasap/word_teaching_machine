@@ -92,7 +92,7 @@ export function CreateDeck(props) {
       });
     } else {
       axios
-        .post(`/u/${username}/create_deck`, {
+        .post(`/create_deck/${username}`, {
           deckName: deckName,
           content: { words: allWords },
           parent_id: directory,

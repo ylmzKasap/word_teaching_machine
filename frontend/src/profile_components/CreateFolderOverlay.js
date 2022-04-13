@@ -66,7 +66,7 @@ export function CreateFolder(props) {
       });
     } else {
       axios
-        .post(`/u/${username}/create_folder`, {
+        .post(`/create_folder/${username}`, {
           folder_name: folderName,
           folder_type: folderType,
           parent_id: directory,

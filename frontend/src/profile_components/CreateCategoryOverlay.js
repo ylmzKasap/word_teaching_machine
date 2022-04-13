@@ -59,7 +59,7 @@ export function CreateCategory(props) {
       });
     } else {
       axios
-        .post(`/u/${username}/create_category`, {
+        .post(`/create_category/${username}`, {
           category_name: categoryName,
           parent_id: directory,
           content: { color: color },

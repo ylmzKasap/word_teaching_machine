@@ -206,9 +206,9 @@ export const Filler = (props) => {
     isDragging,
     cloneTimeout,
     draggedElement,
-    directory,
     resetDrag,
     setReRender,
+    setRequestError
   } = useContext(ProfileContext);
 
   // Style the filler on hovering.
@@ -270,16 +270,17 @@ export const Filler = (props) => {
 
     axios
       .put(`/updateorder/${username}`, {
-        item_id: extract_int(draggedElement.id),
-        parent_id: directory,
+        item_id: parseInt(extract_int(draggedElement.id)),
         category_id: categoryContainer
-          ? extract_int(categoryContainer.id)
+          ? parseInt(extract_int(categoryContainer.id))
           : null,
         new_order: props.order,
         direction: props.type === "last" ? "after" : "before",
       })
       .then(() => setReRender())
-      .catch((err) => console.log(err.response.data));
+      .catch((err) => setRequestError({
+        exists: true, description: err.response.data.errDesc
+      }));
   };
 
   return (
