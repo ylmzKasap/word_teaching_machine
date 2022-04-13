@@ -4,17 +4,100 @@ const dir_utils = require('../database/db_functions/directory');
 const { updateDirectory } = require('../database/db_functions/item_relocation');
 const test_utils = require("../test/functions");
 
+const fullSpace = /^[\s\t\n]+$/
+
 
 // Change item order in a directory.
 const change_item_order = async (req, res) => {
     const { username } = req.params;
-    const { item_id, new_order, direction, parent_id, category_id } = req.body;
+    const { item_id, new_order, direction, category_id } = req.body;
 
     const db = req.app.get('database');
+
+    // Body mismatch
+    if (test_utils.is_blank([item_id, new_order, direction, category_id])
+        || Object.keys(req.body).length > 4) {
+        return res.status(400).send({"errDesc": "Missing or extra body"});
+    };
+
+    // Type mismatch
+    if (typeof item_id !== 'number' || typeof new_order !== 'number'
+        || typeof direction !== 'string'
+        || (category_id !== null && typeof category_id !== 'number')) {
+            return res.status(400).send({"errDesc": "Type mismatch"});
+    }
+
+    if (fullSpace.test(direction)) {
+        return res.status(400).send({"errDesc": "Blank value"});
+    }
+
+    const itemInfo = await item_utils.getItemInfo(db, item_id);
+    if (!itemInfo
+        || itemInfo.owner !== username
+        || itemInfo.item_type === 'root_folder'
+        || new_order <= 0
+        || !['before', 'after'].includes(direction)) {
+        return res.status(400).send({"errDesc": "Bad request"});
+    }
+
+    let categoryError = false;
+    if (category_id !== null) {
+        // Provided category must be valid.
+        var categoryInfo = await item_utils.getItemInfo(db, category_id);
+        if (!categoryInfo) {
+            categoryError = true;
+        }
+        // Category's item type must be a category.
+        if (categoryInfo.item_type !== 'category') {
+            categoryError = true;
+        }
+        // Moved item cannot be a category if it has a category_id.
+        if (itemInfo.item_type === 'category'){
+            categoryError = true;
+        }
+        // Category does not belong to the user in params.
+        if (categoryInfo.owner !== username) {
+            categoryError = true;
+        }
+        // Category and moved item are not in the same folder.
+        if (categoryInfo.parent_id !== itemInfo.parent_id) {
+            categoryError = true;
+        }
+    } else {
+        const dirInfo = await item_utils.getItemInfo(db, itemInfo.parent_id);
+        if (!dirInfo) {
+            categoryError = true;
+        } else {
+            // Items must have a category in a thematic folder.
+            if (dirInfo.item_type === 'thematic_folder'
+                && itemInfo.item_type !== 'category'
+                && category_id === null) {
+                    categoryError = true;
+                }
+        }
+    }
+
+    if (categoryError) {
+        return res.status(400).send({"errDesc": "Invalid category"});
+    }
+
+    // Item moved to the same place.
+    if (parseInt(itemInfo.item_order) === new_order) {
+        if (category_id !== null) {
+            if (parseInt(itemInfo.category_id) === category_id) {
+                return res.status(200).send({"errDesc": 'No change needed'});
+            }
+        } else {
+            if (itemInfo.category_id === category_id) {
+                return res.status(200).send({"errDesc": 'No change needed'});
+            }
+        }
+    }
     
-    await item_utils.updateItemOrder(db, username, item_id, new_order, direction, parent_id, category_id)
+    await item_utils.updateItemOrder(
+        db, username, item_id, new_order, direction, itemInfo.parent_id, category_id)
         .then(() => res.status(200).send())
-        .catch(err => console.log(err));
+        .catch(() => res.status(400).send({"errDesc": "Something went wrong..."}));
 };
 
 
@@ -41,7 +124,9 @@ const set_item_directory = async (req, res) => {
     }
     
     const itemInfo = await item_utils.getItemInfo(db, item_id);
-    if (!itemInfo || itemInfo.owner !== username || itemInfo.item_type === 'root_folder') {
+    if (!itemInfo
+        || itemInfo.owner !== username
+        || itemInfo.item_type === 'root_folder') {
         return res.status(400).send({"errDesc": "Bad request"});
     }
 

@@ -60,9 +60,11 @@ function fail_with_json(response, status=400, expectedResponse="") {
 
 const numbers_in_order = (array) => {
     // Takes an array of integers and checks whether all of them are sequential.
-    if (array.every(n => typeof n !== 'number')) {
+    if (array.some(n => isNaN(n))) {
         throw 'Array elements must be all integers.';
     }
+
+    array = array.map(n => parseInt(n));
 
     try {
         const sortedArray = array.sort((a, b) => a - b);

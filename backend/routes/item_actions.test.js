@@ -38,13 +38,11 @@ describe('Change item directory', () => {
         // All old directory items are in order.
         const previousDirectory = await getDirectory(db, glob.user_1, 1);
         let oldItemOrders = previousDirectory[0].map(x => x.item_order);
-        oldItemOrders = oldItemOrders.map(n => parseInt(n));
         expect(numbers_in_order(oldItemOrders)).toBe(true);
 
         // All new directory items are in order.
         const newDirectory = await getDirectory(db, glob.user_1, 3);
         let newItemOrders = newDirectory[0].map(x => x.item_order);
-        newItemOrders = newItemOrders.map(n => parseInt(n));
         expect(numbers_in_order(newItemOrders)).toBe(true);
     });
 
@@ -71,7 +69,6 @@ describe('Change item directory', () => {
         const groupedDir = group_objects(oldDirectory[0], 'category_id');
         for (let group in groupedDir) {
             let itemOrders = groupedDir[group].map(x => x.item_order);
-            itemOrders = itemOrders.map(x => parseInt(x));
             expect(numbers_in_order(itemOrders)).toBe(true);
         }
     });
@@ -140,7 +137,7 @@ describe('Change item directory', () => {
         fail_with_json(response, 400, 'Invalid directory');
     });
 
-    test('Should not move a directory to its subdirectory', async () => {
+    test('Should not move a directory into its subdirectory', async () => {
         const response = await request(app(db))
         .put(updateUrl)
         .send({
@@ -180,4 +177,383 @@ describe('Change item directory', () => {
         }, updateUrl, 'put', app, db);
     }); 
 });
+
+
+describe('Set item order', () => {
+    const relocateUrl = `/updateorder/${glob.user_1}`;
+
+    test('Before in a regular folder', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 7,
+            category_id: null,
+            new_order: 3,
+            direction: 'before'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 7);
+        expect(itemInfo.item_order).toEqual("3");
+
+        // Directory is in order.
+        const newDirectory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        let itemOrders = newDirectory[0].map(x => x.item_order);
+        expect(numbers_in_order(itemOrders)).toBe(true);
+    });
+
+    test('After in a regular folder', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 4,
+            category_id: null,
+            new_order: 5,
+            direction: 'after'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 4);
+        expect(itemInfo.item_order).toEqual("5");
+
+        // Directory is in order.
+        const newDirectory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        let itemOrders = newDirectory[0].map(x => x.item_order);
+        expect(numbers_in_order(itemOrders)).toBe(true);
+    });
+
+    test('Before in a thematic folder', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 14,
+            category_id: 8,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 14);
+        expect(itemInfo.item_order).toEqual("2");
+        expect(itemInfo.category_id).toEqual("8");
+
+        const directory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        // All items in categories are ordered.
+        const groupedDir = group_objects(directory[0], 'category_id');
+        for (let group in groupedDir) {
+            let itemOrders = groupedDir[group].map(x => x.item_order);
+            expect(numbers_in_order(itemOrders)).toBe(true);
+        }
+    });
+
+    test('After in a thematic folder', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 18,
+            category_id: 10,
+            new_order: 2,
+            direction: 'after'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 18);
+        expect(itemInfo.item_order).toEqual("3");
+        expect(itemInfo.category_id).toEqual("10");
+
+        const directory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        // All items in categories are ordered.
+        const groupedDir = group_objects(directory[0], 'category_id');
+        for (let group in groupedDir) {
+            let itemOrders = groupedDir[group].map(x => x.item_order);
+            expect(numbers_in_order(itemOrders)).toBe(true);
+        }
+    });
+
+    test('Before for a category', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 11,
+            category_id: null,
+            new_order: 1,
+            direction: 'before'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 11);
+        expect(itemInfo.item_order).toEqual("1");
+        expect(itemInfo.category_id).toBe(null);
+
+        const directory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        // All items in categories are ordered.
+        const groupedDir = group_objects(directory[0], 'category_id');
+        for (let group in groupedDir) {
+            let itemOrders = groupedDir[group].map(x => x.item_order);
+            expect(numbers_in_order(itemOrders)).toBe(true);
+        }
+    });
+
+    test('After for a category', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 10,
+            category_id: null,
+            new_order: 2,
+            direction: 'after'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 10);
+        expect(itemInfo.item_order).toEqual("2");
+        expect(itemInfo.category_id).toBe(null);
+
+        const directory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        // All items in categories are ordered.
+        const groupedDir = group_objects(directory[0], 'category_id');
+        for (let group in groupedDir) {
+            let itemOrders = groupedDir[group].map(x => x.item_order);
+            expect(numbers_in_order(itemOrders)).toBe(true);
+        }
+    });
+
+    test('Category must exist', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 14,
+            category_id: 245,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        fail_with_json(response, 400, 'Invalid category');
+    });
+
+    test('Category must exist in the directory', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 20,
+            category_id: 8,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        fail_with_json(response, 400, 'Invalid category');
+    });
+
+    test("Category id must point to a valid category", async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 7,
+            category_id: 3,
+            new_order: 3,
+            direction: 'before'
+        });
+
+        fail_with_json(response, 400, 'Invalid category');
+    });
+
+    test("Moved item must belong to the same user", async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 29,
+            category_id: null,
+            new_order: 1,
+            direction: 'before'
+        });
+
+        fail_with_json(response);
+    });
+
+    test("Do nothing in case of a request to the same order", async () => {
+        const beforeResponse = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 4,
+            category_id: null,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        fail_with_json(beforeResponse, 200, 'No change needed');
+
+        const afterResponse = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 4,
+            category_id: null,
+            new_order: 2,
+            direction: 'after'
+        });
+
+        fail_with_json(afterResponse, 200, 'No change needed');
+    });
+
+    test("Do nothing in case of a request to the same order in a category", async () => {
+        const afterResponse = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 19,
+            category_id: 11,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        fail_with_json(afterResponse, 200, 'No change needed');
+
+        const beforeResponse = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 19,
+            category_id: 10,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        expect(beforeResponse.status).toEqual(200);
+    });
+
+    test('Direction must be before or after', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 7,
+            category_id: null,
+            new_order: 3,
+            direction: 'haha yes'
+        });
+
+        fail_with_json(response);
+    });
+
+    test('Should not move a root folder', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 1,
+            category_id: null,
+            new_order: 2,
+            direction: 'before'
+        });
+
+        fail_with_json(response);
+    });
+
+    test('Send items to the end if order is bigger than item count', async () => {
+        // Big order no category
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 4,
+            category_id: null,
+            new_order: 1512,
+            direction: 'before'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo = await getItemInfo(db, 4);
+        expect(itemInfo.item_order).toEqual("5");
+
+        // Directory is in order.
+        const newDirectory = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        let itemOrders = newDirectory[0].map(x => x.item_order);
+        expect(numbers_in_order(itemOrders)).toBe(true);
+
+        // Big order in a category
+        const response2 = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 18,
+            category_id: 11,
+            new_order: 1512,
+            direction: 'after'
+        });
+
+        expect(response.status).toEqual(200);
+
+        // Item relocated.
+        const itemInfo2 = await getItemInfo(db, 18);
+        expect(itemInfo2.item_order).toEqual("3");
+
+        // Directory is in order.
+        const newDirectory2 = await getDirectory(db, glob.user_1, itemInfo.parent_id);
+        let itemOrders2 = newDirectory2[0].map(x => x.item_order);
+        expect(numbers_in_order(itemOrders2)).toBe(true);
+        
+    });
+
+    test('Order cannot be smaller than 1', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 4,
+            category_id: null,
+            new_order: 0,
+            direction: 'before'
+        });
+
+        fail_with_json(response);
+    });
+
+    test('Categories cannot have a category id', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 9,
+            category_id: 8,
+            new_order: 1,
+            direction: 'before'
+        });
+
+        fail_with_json(response, 400, "Invalid category");
+    });
+
+    test('Items in a thematic folder must have a category id', async () => {
+        const response = await request(app(db))
+        .put(relocateUrl)
+        .send({
+            item_id: 17,
+            category_id: null,
+            new_order: 1,
+            direction: 'before'
+        });
+
+        fail_with_json(response, 400, "Invalid category");
+    });
+
+    test("Body values must be present and valid", async () => {
+        await test_utils.check_type_blank({
+            item_id: 7,
+            category_id: null,
+            new_order: 3,
+            direction: 'before'
+        }, relocateUrl, 'put', app, db);
+
+        await test_utils.check_type_blank({
+            item_id: 18,
+            category_id: 10,
+            new_order: 2,
+            direction: 'after'
+        }, relocateUrl, 'put', app, db);
+    });
+})
 

@@ -556,6 +556,7 @@ describe('Delete', () => {
         
         expect(fail_with_json(response, 400, "Item does not exist anymore..."));
     });
+    
 
     test("Body values must be present and valid", async () => {
         await test_utils.check_type_blank({

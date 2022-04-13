@@ -76,9 +76,8 @@ async function reorderDirectory(pool, owner, directory_id) {
             AS T2
         WHERE T2.item_id = items.item_id;
     `
-    const parameters = [owner, directory_id];
 
-    await pool.query(queryText, parameters);    
+    await pool.query(queryText, [owner, directory_id]);    
     return {"error": false, "code": ""};
 }
 

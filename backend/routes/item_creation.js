@@ -72,7 +72,7 @@ const create_deck = async (req, res) => {
     }
 
     // Prevent invalid category
-    if (category_id) {
+    if (category_id !== null) {
         const categoryInfo = await item_utils.getItemInfo(db, category_id);
         let categoryError = false;
         if (categoryInfo) {
