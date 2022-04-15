@@ -34,6 +34,14 @@ describe('Serve user info', () => {
         expect(response.body[0].length).toEqual(5);        
     });
 
+    test('Empty directory', async () => {
+        const response = await request(app(db)).get(`/u/${glob.user_1}/22`);
+
+        expect(response.headers["content-type"]).toMatch(/json/);
+        expect(response.status).toEqual(200);
+        expect(response.body[0].length).toEqual(0);
+    });
+
     test('Fail on non-existing directory', async () => {
         const response = await request(app(db)).get(`/u/${glob.user_2}/1`);
 

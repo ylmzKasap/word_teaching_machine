@@ -145,7 +145,7 @@ describe('Change item directory', () => {
             target_id: 25
         });
 
-        fail_with_json(response, 400, 'Invalid directory');
+        fail_with_json(response, 400, "This directory is a subdirectory of 'folder_1'");
     });
 
     test('Should not move a directory into itself', async () => {

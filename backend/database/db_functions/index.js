@@ -8,8 +8,6 @@ const errorCodes = {
     "22P02": "IntegerExpected"
 }
 
-const emptyRows = ({'rows': []});
-
 
 function handleError(errorCode) {
     if (errorCodes.hasOwnProperty(errorCode)) {
@@ -21,6 +19,5 @@ function handleError(errorCode) {
 
 module.exports = {
     errorCodes,
-    emptyRows,
     handleError
 }

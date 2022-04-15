@@ -1,19 +1,15 @@
-const utils = require('./index');
-
 async function checkDirectory(pool, owner, dir_id) {
     const queryText = `
         SELECT * FROM items WHERE owner = $1
         AND item_id = $2
         AND item_type IN ('folder', 'thematic_folder', 'root_folder')
         LIMIT 1;`;
-    const parameters = [owner, dir_id];
 
-    const checkDir = await pool.query(queryText, parameters)
-    .catch(() => utils.emptyRows);
+    const checkDir = await pool.query(queryText, [owner, dir_id])
+    .then((res) => res.rows[0]).catch(() => false);
 
-    return checkDir.rows[0] ? {'exists': true, 'info': checkDir.rows[0]} : {'exists': false, 'info': null};
+    return checkDir ? {'exists': true, 'info': checkDir} : {'exists': false, 'info': null};
 }
-
 
 async function getDirectory(pool, owner, dir_id, category_id='') {
     // Return values:
@@ -40,23 +36,24 @@ async function getDirectory(pool, owner, dir_id, category_id='') {
 
 async function getRoot(pool, owner) {
     const queryString = 'SELECT root_id FROM users WHERE username = $1;';
-    const parameters = [owner];
 
-    const rootInfo = await pool.query(queryString, parameters)
-    .catch(() => null);
+    const rootInfo = await pool.query(queryString, [owner])
+    .then(res => res.rows[0])
+    .catch(() => false);
 
-    return rootInfo === null ? false : rootInfo.rows[0].root_id;
+    return rootInfo ? rootInfo.root_id : false;
 }
 
 
-async function getGrandparent(pool, parent_id) {
+async function getGrandparent(pool, parent_id, owner) {
     const queryText = `
-        SELECT parent_id FROM items WHERE item_id = $1;`;
+        SELECT parent_id FROM items WHERE item_id = $1 AND owner = $2;`;
 
-    const grandparent_id = await pool.query(queryText, [parent_id])
-    .catch(() => utils.emptyRows);
+    const grandparent_id = await pool.query(queryText, [parent_id, owner])
+    .then(res => res.rows[0])
+    .catch(() => false);
 
-    return grandparent_id.rows.length === 0 ? false : grandparent_id.rows[0].parent_id;
+    return grandparent_id ? grandparent_id.parent_id : false;
 }
 
 
@@ -109,9 +106,7 @@ async function getRecursiveTree(pool, owner, item_id) {
             JOIN item_tree ht ON ht.item_id = t2.parent_id
         ) SELECT * FROM item_tree;
     `;
-    const parameters = [owner, item_id];
-
-    const tree = await pool.query(queryText, parameters);
+    const tree = await pool.query(queryText, [owner, item_id]);
     return tree.rows;
 }
 

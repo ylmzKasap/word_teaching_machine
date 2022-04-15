@@ -185,7 +185,8 @@ const set_item_directory = async (req, res) => {
         const folder_tree = await dir_utils.getRecursiveTree(db, username, item_id);
         const treeIds = folder_tree.map(item => parseInt(item.item_id));
         if (treeIds.includes(new_target_id)) {
-            return res.status(400).send({"errDesc": "Invalid directory"});
+            return res.status(400).send(
+                {"errDesc": `This directory is a subdirectory of '${itemInfo.item_name}'`});
         }
     }
 

@@ -48,8 +48,8 @@ module.exports = (database) => {
 
     // Error handling
     app.use((err, req, res, next) => {
-        return res.status(404).send({"errDesc": "Invalid request"});
         /* console.log('catched: \n', err.stack); */
+        return res.status(404).send({"errDesc": "Invalid request"});
     })
 
     return app;

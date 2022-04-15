@@ -16,8 +16,7 @@ async function addItem(pool, infObj) {
         const queryString = `
             INSERT INTO items (owner, item_name, item_type, item_order)
             VALUES ($1, $2, $3, 0);`
-        const parameters = [owner, name, item_type];
-        await pool.query(queryString, parameters);
+        await pool.query(queryString, [owner, name, item_type]);
     } 
         
     else if (['folder', 'file', 'category', 'thematic_folder'].includes(item_type)) {
@@ -59,18 +58,17 @@ async function addItem(pool, infObj) {
 async function deleteItem(pool, owner, item_id) {
     const queryText = `
         DELETE FROM items WHERE item_id = $1;`;
-    const parameters = [item_id];
 
     const parentInfo = await getItemInfo(pool, item_id)
-        .catch(() => false);
+    .catch(() => false);
 
     if (!parentInfo) {
         return false;
     }
     const parent_id = parentInfo.parent_id;
 
-    const deleteStatus = await pool.query(queryText, parameters)
-        .catch(() => false);
+    const deleteStatus = await pool.query(queryText, [item_id])
+    .catch(() => false);
     
     if (!deleteStatus) {
         return false;

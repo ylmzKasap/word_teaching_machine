@@ -1,5 +1,4 @@
 const { addItem } = require('./item_creation');
-const utils = require('./index')
 
 
 async function addUser(pool, name) {
@@ -16,35 +15,32 @@ async function addUser(pool, name) {
         UPDATE users
         SET root_id = (SELECT item_id FROM items WHERE owner = $1 AND item_type = 'root_folder')
         WHERE username = $2;`
-    const parameters = [name, name];
-    await pool.query(queryText, parameters)
+    await pool.query(queryText, [name, name])
 }
 
 
 async function deleteUser(pool, name) {
     const queryString = 'DELETE FROM users WHERE username = $1';
-    const parameters = [name];
 
-    await pool.query(queryString, parameters).catch(err => console.log(err));
+    await pool.query(queryString, [name]).catch(err => console.log(err));
 }
 
 
 async function getUserInfo(pool, owner) {
     const queryString = 'SELECT * FROM users WHERE username = $1;';
-    const parameters = [owner];
 
-    const userInfo = await pool.query(queryString, parameters)
-    .catch(() => utils.emptyRows);
+    const userInfo = await pool.query(queryString, [owner])
+    .then((res) => res.rows[0]).catch(() => false);
 
-    return userInfo.rows[0] ? userInfo.rows[0] : false;
+    return userInfo ? userInfo : false;
 }
 
 async function getUsernameFromParent(pool, parent) {
     const queryString = 'SELECT owner FROM items WHERE item_id = $1 LIMIT 1;';
     const username = await pool.query(queryString, [parent])
-    .catch(() => utils.emptyRows);
+    .then((res) => res.rows[0]).catch(() => false);
 
-    return username.rows[0] ? username.rows[0] : false; 
+    return username ? username : false; 
 }
 
 module.exports = {

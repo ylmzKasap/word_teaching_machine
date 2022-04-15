@@ -42,7 +42,7 @@ export const ProfileNavBar = (props) => {
       .then((response) =>
         props.navigate(
           `/user/${username}${
-            response.data === rootDirectory ? "" : `/${response.data}`
+            response.data === rootDirectory ? "" : `/${response.data.parent_id}`
           }`
         )
       );

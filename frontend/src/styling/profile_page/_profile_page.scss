@@ -74,8 +74,9 @@
   padding: 20px 35px 25px 15px;
   align-items: flex-start;
   height: 93vh;
-  width: 83%;
+  width: calc(83% - 50px);
   overflow-y: scroll;
+  overflow-x: hidden;
   user-select: none;
 }
 
