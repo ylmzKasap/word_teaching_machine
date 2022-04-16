@@ -5,7 +5,6 @@ const cors = require('cors');
 const user_info = require("./routes/user_info");
 const item_creation = require("./routes/item_creation");
 const item_actions = require("./routes/item_actions");
-const directory_actions = require("./routes/directory_actions");
 const clipboard = require("./routes/clipboard");
 
 
@@ -38,7 +37,6 @@ module.exports = (database) => {
     app.put('/paste/:username', clipboard);
 
     // Change directory
-    app.get('/goback/:username/:parent_id', directory_actions.set_back);
     app.put('/updatedir/:username', item_actions.set_item_directory);
 
     // Invalid route

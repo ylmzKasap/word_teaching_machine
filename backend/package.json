@@ -2,7 +2,7 @@
   "name": "some-random-backend",
   "version": "1.0.0",
   "scripts": {
-    "test": "jest --runInBand --verbose --watchAll",
+    "test": "jest --runInBand --verbose --watchAll routes/user_info.test.js",
     "client": "cd ../frontend && npm start",
     "server": "nodemon server.js",
     "sass": "cd ../frontend/src/styling && python compile_sass.py",

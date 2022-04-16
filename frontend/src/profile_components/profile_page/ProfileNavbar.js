@@ -37,15 +37,9 @@ export const ProfileNavBar = (props) => {
   }, [directory, fetchError, contentLoaded]);
 
   const handleBackClick = () => {
-    axios
-      .get(`/goback/${username}/${directory}`)
-      .then((response) =>
-        props.navigate(
-          `/user/${username}${
-            response.data === rootDirectory ? "" : `/${response.data.parent_id}`
-          }`
-        )
-      );
+    const prevDirectory = (
+      directoryInfo.parent_id === rootDirectory ? "" : `/${directoryInfo.parent_id}`);
+    props.navigate(`/user/${username}${prevDirectory}`);
   };
 
   const addItem = (event) => {
@@ -89,6 +83,13 @@ export const ProfileNavBar = (props) => {
         contentLoaded && directoryInfo.item_type !== "thematic_folder" && (
           <i className="fas fa-plus-circle" type="deck" onClick={addItem}></i>
         )
+      }
+
+      {
+        // Display home icon when a fetch error exists.
+        (fetchError && rootDirectory) &&
+        <i className="fas fa-home"
+        onClick={() => props.navigate(`/user/${username}`)}></i>
       }
 
       {categoryDisplay && (

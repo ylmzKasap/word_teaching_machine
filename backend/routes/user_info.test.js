@@ -17,7 +17,8 @@ describe('Serve user info', () => {
         expect(response.headers["content-type"]).toMatch(/json/);
         expect(response.status).toEqual(200);
         expect(response.body.username).toEqual(glob.user_1); 
-        expect(response.body.user_id).toEqual("1");        
+        expect(response.body.user_id).toEqual("1");     
+        expect(response.body.root_id).toEqual(1);     
     });
 
     test('Fail on non-existing user', async () => {
@@ -29,9 +30,16 @@ describe('Serve user info', () => {
     test('Existing directory', async () => {
         const response = await request(app(db)).get(`/u/${glob.user_1}/1`);
 
+        // Serve directory info
         expect(response.headers["content-type"]).toMatch(/json/);
         expect(response.status).toEqual(200);
-        expect(response.body[0].length).toEqual(5);        
+        expect(response.body[0].length).toEqual(5);
+
+        // Serve parent info
+        expect(response.body[1].owner).toEqual(glob.user_1);
+        expect(response.body[1].item_id).toEqual("1");
+        expect(response.body[1].parent_id).toBe(null);
+        expect(response.body[1].item_type).toEqual("root_folder");     
     });
 
     test('Empty directory', async () => {
@@ -40,6 +48,12 @@ describe('Serve user info', () => {
         expect(response.headers["content-type"]).toMatch(/json/);
         expect(response.status).toEqual(200);
         expect(response.body[0].length).toEqual(0);
+
+        // Serve parent info
+        expect(response.body[1].owner).toEqual(glob.user_1);
+        expect(response.body[1].item_id).toEqual("22");
+        expect(response.body[1].parent_id).toBe(4);
+        expect(response.body[1].item_type).toEqual("folder");
     });
 
     test('Fail on non-existing directory', async () => {
