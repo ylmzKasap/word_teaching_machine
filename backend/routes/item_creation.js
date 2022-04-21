@@ -3,11 +3,11 @@ const item_utils = require('../database/db_functions/item_functions');
 const err_utils = require('../database/db_functions/index');
 const utils = require("./functions");
 const test_utils = require("../test/functions");
+const { fullSpace } = require("../test/functions");
 
 const itemNameFilter = /[.,\\<>"]/;
 const wordNameFilter = /[.,\\/<>:"|?*]/;
 const colorFilter = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/
-const fullSpace = /^[\s\t\n]+$/
 
 // Handle deck creation.
 const create_deck = async (req, res) => {

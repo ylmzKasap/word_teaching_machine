@@ -21,14 +21,23 @@ function findFiles (directory, wordArray, extensions) {
 };
 
 
-function find_unique_violation(firstObjArray, otherObjArray, columns) {
-    for (let object of firstObjArray) {
-        for (let otherObject of otherObjArray) {
-            const equals = [];
-            for (let column of columns) {
-                equals.push(object[column] === otherObject[column])
+function find_unique_violation(firstObjArray, secondObjArray, columns) {
+    const getValues = (obj) => {
+        let values = [];
+        if (obj) {
+            for (let col of columns) {
+                values.push(obj[col]);
             }
-            if (equals.every(x => x === true)) {
+        }
+        return values;
+    }
+
+    const firstDirValues = firstObjArray.map(obj => getValues(obj));
+    const secondDirValues = secondObjArray.map(obj => getValues(obj));
+
+    for (let values of firstDirValues) {
+        for (let otherValues of secondDirValues) {
+            if (values.every(x => otherValues.includes(x))) {
                 return true;
             }
         }

@@ -4,9 +4,6 @@ const dir_utils = require('../database/db_functions/directory');
 const { updateDirectory } = require('../database/db_functions/item_relocation');
 const test_utils = require("../test/functions");
 
-const fullSpace = /^[\s\t\n]+$/
-
-
 // Change item order in a directory.
 const change_item_order = async (req, res) => {
     const { username } = req.params;
@@ -27,7 +24,7 @@ const change_item_order = async (req, res) => {
             return res.status(400).send({"errDesc": "Type mismatch"});
     }
 
-    if (fullSpace.test(direction)) {
+    if (test_utils.fullSpace.test(direction)) {
         return res.status(400).send({"errDesc": "Blank value"});
     }
 

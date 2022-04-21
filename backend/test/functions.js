@@ -1,5 +1,6 @@
 const request = require('supertest');
 
+const fullSpace = /^[\s\t\n]+$/
 
 function is_object(val) {
     return val?.constructor === Object;
@@ -167,5 +168,6 @@ async function check_type_blank(correctRequest, route, operation, server, db) {
 }
 
 module.exports = {
-    is_object, check_type_blank, fail_with_json, is_blank, numbers_in_order, group_objects
+    is_object, check_type_blank, fail_with_json, 
+    is_blank, numbers_in_order, group_objects, fullSpace
 };

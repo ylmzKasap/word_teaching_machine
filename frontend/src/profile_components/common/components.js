@@ -155,13 +155,11 @@ export const ItemContextMenu = () => {
     } else if (action === "paste") {
       axios
         .put(`/paste/${username}`, {
-          item_id: extract_int(clipboard.id),
-          old_parent: clipboard.directory,
+          item_id: parseInt(extract_int(clipboard.id)),
           new_parent: directory,
-          item_type: clipboard.type,
           category_id:
             contextOpenedElem.type === "category"
-              ? extract_int(contextOpenedElem.id)
+              ? parseInt(extract_int(contextOpenedElem.id))
               : null,
           action: clipboard.action,
         })
@@ -172,7 +170,7 @@ export const ItemContextMenu = () => {
           setReRender();
         })
         .catch((err) =>
-          setRequestError({ exists: true, description: err.response.data })
+          setRequestError({ exists: true, description: err.response.data.errDesc })
         );
     }
     resetContext();
