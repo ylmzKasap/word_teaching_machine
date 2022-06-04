@@ -1,7 +1,8 @@
 import { useContext } from "react";
 import { ProfileContext } from "./ProfilePage";
+import { ProfileContextTypes, CloneStyleTypes } from "../types/profilePageTypes";
 
-export const SideBar = (props) => {
+export const SideBar: React.FC<SideBarTypes> = ({user, userPicture}) => {
   // Component of ProfilePage.
 
   return (
@@ -10,18 +11,18 @@ export const SideBar = (props) => {
         <div className="image-container">
           <img
             className="user-image"
-            src={props.userPicture}
-            alt={`${props.user}`}
+            src={userPicture}
+            alt={user}
           />
         </div>
-        <div className="username">{props.user}</div>
+        <div className="username">{user}</div>
       </div>
     </div>
   );
 };
 
-export const ErrorInfo = () => {
-  const { requestError, setRequestError } = useContext(ProfileContext);
+export const ErrorInfo: React.FC = () => {
+  const { requestError, setRequestError } = useContext(ProfileContext) as ProfileContextTypes;
 
   const handleExit = () => {
     setRequestError({ exists: false, description: "" });
@@ -39,7 +40,7 @@ export const ErrorInfo = () => {
   );
 };
 
-export const DragClone = (props) => {
+export const DragClone: React.FC<DragCloneTypes> = (props) => {
   // Component of ProfilePage.
 
   return (
@@ -52,3 +53,13 @@ export const DragClone = (props) => {
     </div>
   );
 };
+
+interface SideBarTypes {
+  user: string | undefined;
+  userPicture: string;
+}
+
+interface DragCloneTypes {
+  item: string;
+  cloneStyle: CloneStyleTypes;
+}

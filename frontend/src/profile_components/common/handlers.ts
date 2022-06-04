@@ -1,3 +1,6 @@
+import { ContextMenuInfoTypes } from "../types/profilePageTypes";
+import { contextMenuInfoDefault, contextMenuScrollDefault, contextOpenedElemDefault } from "../types/profilePageDefaults";
+
 export function handleItemName(synthEvent) {
   // Used by CreateDeckOverlay and CreateFolderOverlay.
 
@@ -50,44 +53,47 @@ export function handleDownOnDragged(props, cloneTimeout) {
   }
 }
 
-export function create_context_menu(evnt, closestItem) {
+export function create_context_menu(
+  event: React.MouseEvent, closestItem: HTMLElement | null): ContextMenuInfoTypes {
+    const element = event.target as HTMLInputElement;
+
   // Completely unrelated div.
-  let contextMenu = !closestItem
-    ? {
-        closest: evnt.target,
-        openedElem: { type: "void" },
-        ops: ["no actions"],
-      }
-    : {
-        closest: closestItem,
-        openedElem: {},
-        ops: [],
-      };
+  if (!closestItem) {
+    return {
+      closest: element,
+      openedElem: { id: null, type: "void", name: null },
+      ops: ["no actions"],
+    };
+  }
+
+  let contextMenuInfo:ContextMenuInfoTypes = contextMenuInfoDefault;
+  contextMenuInfo.closest = closestItem;
 
   // Containers
   if (
     ["card-container", "category-container"].includes(closestItem.className)
   ) {
-    contextMenu.openedElem = { id: null, type: "container" };
-    contextMenu.ops = ["paste"];
+    contextMenuInfo.openedElem = { id: null, type: "container", name: null };
+    contextMenuInfo.ops = ["paste"];
   } else {
     // Page item like file, folder, thematic-folder, category.
-    contextMenu.openedElem = {
+    const categoryHeader = closestItem.querySelector(".category-header") as HTMLElement;
+    contextMenuInfo.openedElem = {
       id: closestItem.id,
       type: closestItem.className,
       name:
         closestItem.className === "category"
-          ? closestItem.querySelector(".category-header").innerText
+          ? categoryHeader.innerText
           : closestItem.innerText,
     };
 
     if (closestItem.className === "category") {
-      contextMenu.ops = ["cut", "paste", "delete"];
+      contextMenuInfo.ops = ["cut", "paste", "delete"];
     } else if (closestItem.className === "file") {
-      contextMenu.ops = ["copy", "cut", "delete"];
+      contextMenuInfo.ops = ["copy", "cut", "delete"];
     } else {
-      contextMenu.ops = ["cut", "delete"];
+      contextMenuInfo.ops = ["cut", "delete"];
     }
   }
-  return contextMenu;
+  return contextMenuInfo;
 }

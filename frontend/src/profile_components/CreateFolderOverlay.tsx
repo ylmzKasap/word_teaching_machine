@@ -1,39 +1,35 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
 import * as handlers from "./common/handlers";
 import * as components from "./common/components";
-import * as utils from "./common/functions";
+import * as defaults from "./types/overlayDefaults";
+import { ProfileContextTypes } from "./types/profilePageTypes";
+import { CreateItemOverlayTypes } from "./types/overlayTypes";
 
-export function CreateFolderOverlay(props) {
+
+export const CreateFolderOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of ProfileNavbar.
 
   return (
-    <div className="input-overlay" style={props.display}>
-      <CreateFolder setDisplay={props.setDisplay} />
+    <div className="input-overlay">
+      <CreateFolder setDisplay={setDisplay} />
     </div>
   );
-}
+};
 
-export function CreateFolder(props) {
+export const CreateFolder: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of CreateFolderOverlay.
 
   const [folderName, setFolderName] = useState("");
   const [folderType, setFolderType] = useState("regular_folder");
-  const [nameError, setNameError] = useState({
-    errorClass: "",
-    description: "",
-  });
-  const [formError, setFormError] = useState({
-    display: { display: "none" },
-    errorClass: "",
-    description: "",
-  });
+  const [nameError, setNameError] = useState(defaults.nameErrorDefault);
+  const [formError, setFormError] = useState(defaults.formErrorDefault);
 
-  const { username, directory, setReRender } = useContext(ProfileContext);
+  const { username, directory, setReRender } = useContext(ProfileContext) as ProfileContextTypes;
 
-  const handleNameChange = (event) => {
+  const handleNameChange = (event: React.ChangeEvent) => {
     const [itemName, itemNameError, generalError] =
       handlers.handleItemName(event);
     setFolderName(itemName);
@@ -41,13 +37,15 @@ export function CreateFolder(props) {
     setFormError(generalError);
   };
 
-  const handleRadioChange = (event) => {
-    setFolderType(event.target.value);
+  const handleRadioChange = (event: React.ChangeEvent) => {
+    const element = event.target as HTMLInputElement;
+    setFolderType(element.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.SyntheticEvent) => {
     if (event.type === "keydown") {
-      if (event.code !== "Enter") {
+      const keyboardEvent = event as React.KeyboardEvent;
+      if (keyboardEvent.key !== "Enter") {
         return;
       }
     }
@@ -56,11 +54,13 @@ export function CreateFolder(props) {
 
     if (folderName === "") {
       setFormError({
+        display: {display: "flex"},
         errorClass: "invalid-form",
         description: "Enter a folder name.",
       });
     } else if (nameError.errorClass !== "") {
       setFormError({
+        display: {display: "flex"},
         errorClass: "invalid-form",
         description: "Fix the problem above.",
       });
@@ -73,16 +73,13 @@ export function CreateFolder(props) {
         })
         .then(() => {
           setFolderName("");
-          setFormError({
-            display: { display: "none" },
-            errorClass: "",
-            description: "",
-          });
-          setReRender((x) => !x);
-          props.setDisplay(false);
+          setFormError(defaults.formErrorDefault);
+          setReRender();
+          setDisplay(false);
         })
         .catch((err) =>
           setFormError({
+            display: {display: "flex"},
             errorClass: "invalid-form",
             description: err.response.data.errDesc,
           })
@@ -97,7 +94,7 @@ export function CreateFolder(props) {
       onKeyDown={handleSubmit}
     >
       <components.OverlayNavbar
-        setDisplay={props.setDisplay}
+        setDisplay={setDisplay}
         description="Create a new folder"
       />
       {/* Folder name */}
@@ -122,4 +119,4 @@ export function CreateFolder(props) {
       />
     </form>
   );
-}
+};

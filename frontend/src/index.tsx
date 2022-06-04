@@ -12,7 +12,7 @@ import { QuestionPage } from "./question_components/QuestionPage";
 const App = () => {
   return (
     <Routes>
-      <Route path="user/:username" element={<ProfilePage dir={"home"} />}>
+      <Route path="user/:username" element={<ProfilePage dir="home" />}>
         <Route path=":dirId" element={<CardContainer />} />
       </Route>
       <Route

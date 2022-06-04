@@ -1,10 +1,10 @@
-import { useState, useEffect, useReducer, createContext } from "react";
-import { useParams, Outlet, useNavigate } from "react-router-dom";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useReducer, createContext } from "react";
+import { useParams, Outlet } from "react-router-dom";
 import axios from "axios";
 
 import {
   generate_directory,
-  hasKeys,
   scroll_div,
   find_closest_element,
 } from "../common/functions";
@@ -15,67 +15,68 @@ import { ProfileNavBar } from "./ProfileNavbar";
 import { create_context_menu } from "../common/handlers";
 import { ItemContextMenu, NotFound } from "../common/components";
 import { useWindowSize } from "../common/hooks";
+import * as types from "../types/profilePageTypes";
+import * as defaults from "../types/profilePageDefaults";
 
-export const ProfileContext = createContext();
+export const ProfileContext = createContext<types.ProfileContextTypes | undefined>(undefined);
 
-export const ProfilePage = (props) => {
+export const ProfilePage: React.FC<types.ProfilePageTypes> = (props) => {
   // Rendered by main.
   const params = useParams();
-  const navigate = useNavigate();
 
   const username = params.username;
   const dirId = params.dirId;
 
   const [userPicture, setUserPicture] = useState("");
-  const [rootDirectory, setRootDirectory] = useState("");
-  const [directory, setDirectory] = useState(() => (dirId ? dirId : props.dir));
-  const [directoryInfo, setDirectoryInfo] = useState("");
+  const [rootDirectory, setRootDirectory] = useState(0);
+  const [directory, setDirectory] = useState(() => dirId ? parseInt(dirId) : parseInt(props.dir));
+  const [directoryInfo, setDirectoryInfo] = useState<types.DirectoryInfoTypes>(
+    defaults.directoryInfoDefault);
 
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<React.ReactElement[]>([]);
   const [reRender, setReRender] = useReducer((x) => x + 1, 0);
-  const [clipboard, setClipboard] = useState("");
+  const [clipboard, setClipboard] = useState<types.ClipboardTypes>(
+    defaults.clipboardDefault);
 
   // Content fetching related states.
   const [pictureLoaded, setPictureLoaded] = useState(false);
   const [directoryLoaded, setDirectoryLoaded] = useState(false);
   const [contentLoaded, setContentLoaded] = useState(false);
   const [fetchError, setFetchError] = useState(false);
-  const [requestError, setRequestError] = useState({
-    exists: false,
-    description: "",
-  });
+  const [requestError, setRequestError] = useState<types.RequestErrorTypes>(
+    defaults.requestErrorDefault);
 
   // Context menu related states.
   const [contextMenu, setContextMenu] = useState(false);
-  const [contextOpenedElem, setContextOpenedElem] = useState({});
-  const [contextOptions, setContextOptions] = useState([]);
-  const [contextMenuStyle, setContextMenuStyle] = useState({});
-  const [contextMenuScroll, setContextMenuScroll] = useState({});
+  const [contextOpenedElem, setContextOpenedElem] = useState<types.ContextOpenedElemTypes>(
+    defaults.contextOpenedElemDefault
+  );
+  const [contextOptions, setContextOptions] = useState(['']);
+  const [contextMenuStyle, setContextMenuStyle] = useState(defaults.contextMenuStyleDefault);
+  const [contextMenuScroll, setContextMenuScroll] = useState<types.ContextMenuScrollTypes>(
+    defaults.contextMenuScrollDefault);
 
   // Dragging related states.
-  const [cloneElement, setCloneElement] = useState("");
-  const [cloneStyle, setCloneStyle] = useState({});
-  const [cloneTimeout, setCloneTimeout] = useState({
-    exists: false,
-    timeouts: "",
-  });
-  const [draggedElement, setDraggedElement] = useState({});
+  const [cloneElement, setCloneElement] = useState<React.ReactElement | null>(null);
+  const [cloneStyle, setCloneStyle] = useState<types.CloneStyleTypes>(defaults.cloneStyleDefault);
+  const [cloneTimeout, setCloneTimeout] = useState(defaults.cloneTimeoutDefault);
+  const [draggedElement, setDraggedElement] = useState<types.DraggedElementTypes>(
+    defaults.draggedElementDefault);
   const [dragCount, setDragCount] = useState(0);
   const [isDragging, setDrag] = useState(false);
   const [categoryDrag, setCategoryDrag] = useState(false);
-  const [scrolling, setScrolling] = useState({
-    exists: false,
-    direction: null,
-  });
+  const [scrolling, setScrolling] = useState<types.ScrollingTypes>(defaults.scrollingDefault);
 
   const [deckDisplay, setDeckDisplay] = useState(false);
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(0);
   const [columnNumber] = useWindowSize(directoryInfo, contentLoaded);
 
-  const currentConteiner =
-    directoryInfo.item_type === "thematic_folder"
+  let currentContainer: string;
+  if (directoryInfo) {
+    currentContainer = directoryInfo.item_type === "thematic_folder"
       ? ".category-container"
       : ".card-container";
+  }
 
   // Load user picture.
   useEffect(() => {
@@ -129,7 +130,7 @@ export const ProfilePage = (props) => {
 
   // Update clone position.
   useEffect(() => {
-    if (hasKeys(draggedElement) && hasKeys(cloneStyle) && isDragging) {
+    if (draggedElement.name !== null && isDragging) {
       setCloneElement(
         <DragClone item={draggedElement.name} cloneStyle={cloneStyle} />
       );
@@ -140,7 +141,7 @@ export const ProfilePage = (props) => {
   useEffect(() => {
     if (scrolling.exists) {
       clearInterval(scrolling.interval);
-      setScrolling({ exists: false });
+      setScrolling(defaults.scrollingDefault);
     }
   }, [isDragging]);
 
@@ -152,25 +153,25 @@ export const ProfilePage = (props) => {
   // Reset categoryId when deck form is closed.
   useEffect(() => {
     if (deckDisplay === false) {
-      setCategoryId("");
+      setCategoryId(0);
     }
   }, [deckDisplay]);
 
   // Reset all context menu related state.
   const resetContext = () => {
     setContextMenu(false);
-    setContextOptions([]);
-    setContextOpenedElem({});
-    setContextMenuScroll({});
-    setContextMenuStyle({});
+    setContextOptions(['']);
+    setContextOpenedElem(defaults.contextOpenedElemDefault);
+    setContextMenuScroll(defaults.contextMenuScrollDefault);
+    setContextMenuStyle(defaults.contextMenuStyleDefault);
   };
-
+  
   // Reset all drag related state.
-  function resetDrag(timeout = false) {
-    if (timeout && hasKeys(draggedElement)) {
+  function resetDrag(timeout = false): void {
+    if (timeout && draggedElement.name !== null) {
       const { top, left, width, height } = document
-        .getElementById(draggedElement.id)
-        .getBoundingClientRect();
+        ?.getElementById(draggedElement.id)
+        ?.getBoundingClientRect() as DOMRect;
       setDragCount(0);
       setCloneStyle({
         width: `${width}px`,
@@ -184,21 +185,21 @@ export const ProfilePage = (props) => {
       });
       setCloneTimeout({
         exists: true,
-        timeouts: setTimeout(() => resetDrag(), 300),
+        timeouts: window.setTimeout(() => resetDrag(), 300),
       });
     } else {
       setDragCount(0);
-      setCloneElement("");
-      setCloneStyle({});
-      setDraggedElement({});
+      setCloneElement(null);
+      setCloneStyle(defaults.cloneStyleDefault);
+      setDraggedElement(defaults.draggedElementDefault);
       setDrag(false);
-      setCloneTimeout({ exists: false, timeouts: "" });
+      setCloneTimeout(defaults.cloneTimeoutDefault);
     }
   }
 
   // Set 'isDragging' value to true when mouse moves.
-  const handleMouseAction = (event) => {
-    if (hasKeys(draggedElement) && !cloneTimeout.exists) {
+  const handleMouseAction = (event: React.MouseEvent): void => {
+    if (draggedElement.name !== null && !cloneTimeout.exists) {
       if (dragCount > 6) {
         setCloneStyle({
           width: "180px",
@@ -221,7 +222,7 @@ export const ProfilePage = (props) => {
           event,
           window,
           document,
-          currentConteiner,
+          currentContainer,
           scrolling,
           setScrolling,
           ["drag-button", "sidebar-container", "user-info", "user-image"]
@@ -232,31 +233,33 @@ export const ProfilePage = (props) => {
     }
   };
 
-  const handleMouseUp = (event) => {
+  const handleMouseUp = (event: React.MouseEvent): void => {
+    const element = event.target as HTMLInputElement;
     setCategoryDrag(false);
-    const specialClass = event.target.className.split(" ")[0];
+    const specialClass = element.className.split(" ")[0];
     if (
-      hasKeys(draggedElement) &&
+      draggedElement.name !== null && isDragging &&
       !["file", "folder", "filler", "drag-button"].includes(specialClass)
     ) {
       resetDrag(true);
     }
   };
 
-  const handleMouseDown = (event) => {
-    if (event.target.tagName !== "MENU") {
+  const handleMouseDown = (event: React.MouseEvent): void => {
+    const element = event.target as HTMLInputElement;
+    if (element.tagName !== "MENU") {
       resetContext();
     }
   };
 
-  const handleContextMenu = (event) => {
+  const handleContextMenu = (event: React.MouseEvent): void => {
     event.preventDefault();
     if (isDragging) {
       return;
     }
     resetContext();
 
-    const container = document.querySelector(currentConteiner);
+    const container = document.querySelector(currentContainer) as HTMLElement;
     const closestItem = find_closest_element(event, [
       ".file",
       ".folder",
@@ -265,30 +268,31 @@ export const ProfilePage = (props) => {
       ".card-container",
       ".category-container",
     ]);
-    const contextMenu = create_context_menu(event, closestItem);
-    setContextOptions(contextMenu.ops);
+    const contextMenuInfo = create_context_menu(event, closestItem);
+    setContextOptions(contextMenuInfo.ops);
 
     let top = event.clientY;
     let left = event.clientX;
-    if (contextMenu.closest) {
+    if (contextMenuInfo.closest) {
       // Height of each menu should be 60px.
-      if (window.innerHeight - top < contextMenu.ops.length * 60) {
-        top -= contextMenu.ops.length * 60;
+      if (window.innerHeight - top < contextMenuInfo.ops.length * 60) {
+        top -= contextMenuInfo.ops.length * 60;
       }
       // Width of the context menu should be 200px.
       if (window.innerWidth - left < 200) {
         left -= 200;
       }
       setContextMenu(true);
-      setContextOpenedElem(contextMenu.openedElem);
+      setContextOpenedElem(contextMenuInfo.openedElem);
       setContextMenuScroll({ scroll: container.scrollTop, top: top });
       setContextMenuStyle({ top: top, left: left });
     }
   };
 
-  const handleScroll = (event) => {
+  const handleScroll = (event: React.UIEvent<HTMLElement>): void => {
+    const element = event.target as HTMLInputElement;
     if (contextMenu) {
-      const scrollTop = event.target.scrollTop;
+      const scrollTop = element.scrollTop;
       let scrollDiff = Math.abs(scrollTop - contextMenuScroll.scroll);
       scrollDiff =
         scrollTop >= contextMenuScroll.scroll ? -scrollDiff : scrollDiff;
@@ -304,34 +308,34 @@ export const ProfilePage = (props) => {
     <ProfileContext.Provider
       value={{
         username: username,
-        setReRender: setReRender,
-        directory: directory,
         rootDirectory: rootDirectory,
+        directory: directory,
+        directoryInfo: directoryInfo,
+        items: items,
+        setReRender: setReRender,
+        clipboard: clipboard,
+        setClipboard: setClipboard,
+        contentLoaded: contentLoaded,
+        fetchError: fetchError,
+        requestError: requestError,
+        setRequestError: setRequestError,
+        contextOpenedElem: contextOpenedElem,
+        contextOptions: contextOptions,
+        contextMenuStyle: contextMenuStyle,
+        cloneTimeout: cloneTimeout,
         draggedElement: draggedElement,
         setDraggedElement: setDraggedElement,
         isDragging: isDragging,
         categoryDrag: categoryDrag,
-        cloneTimeout: cloneTimeout,
-        resetDrag: resetDrag,
-        items: items,
-        handleContextMenu: handleContextMenu,
-        contextOpenedElem: contextOpenedElem,
-        clipboard: clipboard,
-        contentLoaded: contentLoaded,
-        contextOptions: contextOptions,
-        contextMenuStyle: contextMenuStyle,
-        setClipboard: setClipboard,
-        resetContext: resetContext,
-        handleScroll: handleScroll,
-        fetchError: fetchError,
-        requestError: requestError,
-        setRequestError: setRequestError,
         deckDisplay: deckDisplay,
         setDeckDisplay: setDeckDisplay,
         categoryId: categoryId,
         setCategoryId: setCategoryId,
-        directoryInfo: directoryInfo,
         columnNumber: columnNumber,
+        handleContextMenu: handleContextMenu,
+        handleScroll: handleScroll,
+        resetDrag: resetDrag,
+        resetContext: resetContext
       }}
     >
       <div className="profile-page">
@@ -341,7 +345,7 @@ export const ProfilePage = (props) => {
           onMouseUp={handleMouseUp}
           onMouseDown={handleMouseDown}
         >
-          <ProfileNavBar user={username} navigate={navigate} />
+          <ProfileNavBar />
           {contentLoaded && (
             <div className="profile-content">
               <SideBar user={username} userPicture={userPicture} />

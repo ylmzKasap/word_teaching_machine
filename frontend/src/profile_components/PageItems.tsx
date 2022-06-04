@@ -129,8 +129,8 @@ export const PageItem = (props) => {
     }
 
     if (
-      ["file", "category", "thematic-folder"].includes(targetElem.className) ||
-      draggedElement.id === targetElem.id
+      (["file", "category", "thematic-folder"].includes(targetElem.className) ||
+      draggedElement.id === targetElem.id) && isDragging
     ) {
       resetDrag(true);
       return;

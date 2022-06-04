@@ -1,45 +1,38 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
-import { extract_int } from "./common/functions";
 import * as handlers from "./common/handlers";
 import * as components from "./common/components";
+import * as defaults from "./types/overlayDefaults";
+import { CreateItemOverlayTypes } from "./types/overlayTypes";
+import { ProfileContextTypes } from "./types/profilePageTypes";
 
-export function CreateDeckOverlay(props) {
+export const CreateDeckOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of ProfileNavbar.
 
   return (
-    <div className="input-overlay" style={props.display}>
-      <CreateDeck setDisplay={props.setDisplay} />
+    <div className="input-overlay">
+      <CreateDeck setDisplay={setDisplay} />
     </div>
   );
-}
+};
 
-export function CreateDeck(props) {
+export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of CreateDeckOverlay.
 
   const [deckName, setDeckName] = useState("");
   const [words, setWords] = useState("");
-  const [nameError, setNameError] = useState({
-    errorClass: "",
-    description: "",
-  });
-  const [wordError, setWordError] = useState({
-    errorClass: "",
-    description: "",
-  });
-  const [formError, setFormError] = useState({
-    display: { display: "none" },
-    errorClass: "",
-    description: "",
-  });
+  const [nameError, setNameError] = useState(defaults.nameErrorDefault);
+  const [wordError, setWordError] = useState(defaults.nameErrorDefault);
+  const [formError, setFormError] = useState(defaults.formErrorDefault);
 
   const { username, directory, setReRender, categoryId } =
-    useContext(ProfileContext);
+    useContext(ProfileContext) as ProfileContextTypes;
+
   const categorySpec = categoryId ? categoryId : "";
 
-  const handleNameChange = (event) => {
+  const handleNameChange = (event: React.ChangeEvent) => {
     const [itemName, itemNameError, generalError] =
       handlers.handleItemName(event);
     setDeckName(itemName);
@@ -47,27 +40,25 @@ export function CreateDeck(props) {
     setFormError(generalError);
   };
 
-  const handleWordChange = (event) => {
+  const handleWordChange = (event:React.ChangeEvent) => {
+    const element = event.target as HTMLInputElement;
+
     const wordNameFilter = /[.,\\/<>:"|?*]/;
-    if (wordNameFilter.test(event.target.value)) {
+    if (wordNameFilter.test(element.value)) {
       setWordError({
         errorClass: "forbidden-input",
-        description: `Forbidden character ' ${event.target.value.match(
+        description: `Forbidden character ' ${element.value.match(
           wordNameFilter
         )} '`,
       });
     } else {
-      setWordError({ errorClass: "", description: "" });
+      setWordError(defaults.nameErrorDefault);
     }
-    setWords(event.target.value);
-    setFormError({
-      display: { display: "none" },
-      errorClass: "",
-      description: "",
-    });
+    setWords(element.value);
+    setFormError(defaults.formErrorDefault);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
 
     let allWords = words
@@ -77,16 +68,19 @@ export function CreateDeck(props) {
 
     if (nameError.errorClass !== "" || wordError.errorClass !== "") {
       setFormError({
+        display: {display: "flex"},
         errorClass: "invalid-form",
         description: "Fix the problem(s) above.",
       });
     } else if (allWords.length === 0) {
-      setFormError({
+      setFormError(prev => ({
+        ...prev,
         errorClass: "invalid-form",
         description: "Enter at least one word.",
-      });
+      }));
     } else if (words === "") {
       setFormError({
+        display: {display: "flex"},
         errorClass: "invalid-form",
         description: "Enter a deck name.",
       });
@@ -106,11 +100,12 @@ export function CreateDeck(props) {
             errorClass: "",
             description: "",
           });
-          setReRender((x) => !x);
-          props.setDisplay(false);
+          setReRender();
+          setDisplay(false);
         })
         .catch((err) =>
           setFormError({
+            display: {display: "flex"},
             errorClass: "invalid-form",
             description: err.response.data.errDesc,
           })
@@ -122,7 +117,7 @@ export function CreateDeck(props) {
   return (
     <form className="create-item-info" onSubmit={handleSubmit}>
       <components.OverlayNavbar
-        setDisplay={props.setDisplay}
+        setDisplay={setDisplay}
         description="Create a new deck"
       />
       {/* Deck name */}
@@ -150,4 +145,4 @@ export function CreateDeck(props) {
       <components.SubmitForm description="Create Deck" formError={formError} />
     </form>
   );
-}
+};

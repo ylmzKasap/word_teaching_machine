@@ -87,7 +87,7 @@ export function scroll_div(
   container,
   scrolling,
   setScrolling,
-  constraints = []
+  constraints:string[] = []
 ) {
   // Used by: ../ProfilePage -> HandleMouseAction event handler.
 
@@ -163,11 +163,13 @@ export function extract_int(str) {
   return str ? str.match(/\d+$/)[0] : "";
 }
 
-export function find_closest_element(evnt, selectors) {
+export function find_closest_element(
+  event: React.MouseEvent, selectors: string[]): HTMLElement | null {
   // Accepts an array of selectors and returns the first closest element.
+  const element = event.target as HTMLInputElement;
 
   for (let selector of selectors) {
-    const closestItem = evnt.target.closest(selector);
+    const closestItem = element.closest(selector) as HTMLElement;
     if (closestItem) {
       return closestItem;
     }

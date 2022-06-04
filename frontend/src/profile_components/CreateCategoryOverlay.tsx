@@ -1,38 +1,35 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
 import * as handlers from "./common/handlers";
 import * as components from "./common/components";
+import * as defaults from "./types/overlayDefaults";
+import { ProfileContextTypes } from "./types/profilePageTypes";
+import { CreateItemOverlayTypes } from "./types/overlayTypes";
 
-export function CreateCategoryOverlay(props) {
+export const CreateCategoryOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of ProfileNavbar.
 
   return (
-    <div className="input-overlay" style={props.display}>
-      <CreateCategory setDisplay={props.setDisplay} />
+    <div className="input-overlay">
+      <CreateCategory setDisplay={setDisplay} />
     </div>
   );
-}
+};
 
-export function CreateCategory(props) {
+// TODO: Fix memory leak when submit button is pressed multiple times.
+export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of CreateCategoryOverlay.
 
   const [categoryName, setCategoryName] = useState("");
   const [color, setColor] = useState("#fff7f0");
-  const [nameError, setNameError] = useState({
-    errorClass: "",
-    description: "",
-  });
-  const [formError, setFormError] = useState({
-    display: { display: "none" },
-    errorClass: "",
-    description: "",
-  });
+  const [nameError, setNameError] = useState(defaults.nameErrorDefault);
+  const [formError, setFormError] = useState(defaults.formErrorDefault);
 
-  const { username, directory, setReRender } = useContext(ProfileContext);
+  const { username, directory, setReRender } = useContext(ProfileContext) as ProfileContextTypes;
 
-  const handleNameChange = (event) => {
+  const handleNameChange = (event: React.ChangeEvent) => {
     const [itemName, itemNameError, generalError] =
       handlers.handleItemName(event);
     setCategoryName(itemName);
@@ -40,20 +37,23 @@ export function CreateCategory(props) {
     setFormError(generalError);
   };
 
-  const handleColor = (event) => {
-    setColor(event.target.value);
+  const handleColorChange = (event: React.ChangeEvent) => {
+    const element = event.target as HTMLInputElement;
+    setColor(element.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
 
     if (categoryName === "") {
       setFormError({
+        display: {display: "flex"},
         errorClass: "invalid-form",
         description: "Enter a category name.",
       });
     } else if (nameError.errorClass !== "") {
       setFormError({
+        display: {display: "flex"},
         errorClass: "invalid-form",
         description: "Fix the problem above.",
       });
@@ -66,16 +66,13 @@ export function CreateCategory(props) {
         })
         .then(() => {
           setCategoryName("");
-          setFormError({
-            display: { display: "none" },
-            errorClass: "",
-            description: "",
-          });
-          setReRender((x) => !x);
-          props.setDisplay(false);
+          setFormError(defaults.formErrorDefault);
+          setReRender();
+          setDisplay(false);
         })
         .catch((err) =>
           setFormError({
+            display: {display: "flex"},
             errorClass: "invalid-form",
             description: err.response.data.errDesc,
           })
@@ -86,7 +83,7 @@ export function CreateCategory(props) {
   return (
     <form className="create-item-info" onSubmit={handleSubmit}>
       <components.OverlayNavbar
-        setDisplay={props.setDisplay}
+        setDisplay={setDisplay}
         description="Create a new category"
       />
       {/* Category name */}
@@ -98,7 +95,7 @@ export function CreateCategory(props) {
         placeholder="Enter a category name"
       />
       <div className="color-info">
-        <input type="color" value={color} onChange={handleColor} />
+        <input type="color" value={color} onChange={handleColorChange} />
         <span className="input-info">Pick a background color</span>
       </div>
       {/* Submit & Error */}
@@ -108,4 +105,4 @@ export function CreateCategory(props) {
       />
     </form>
   );
-}
+};

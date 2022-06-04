@@ -1,16 +1,27 @@
-import { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 
 import { ProfileContext } from "./ProfilePage";
 import { CreateDeckOverlay } from "../CreateDeckOverlay";
 import { CreateFolderOverlay } from "../CreateFolderOverlay";
 import { CreateCategoryOverlay } from "../CreateCategoryOverlay";
+import { useNavigate } from "react-router-dom";
+import { ProfileContextTypes } from "../types/profilePageTypes";
 
-export const ProfileNavBar = (props) => {
+
+declare module 'react' {
+  // Extend React's HTMLAttributes to accept custom attributes.
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    type?: string;
+  }
+}
+
+export const ProfileNavBar: React.FC = () => {
   // Component of ProfilePage.
 
   const [folderDisplay, setFolderDisplay] = useState(false);
   const [categoryDisplay, setCategoryDisplay] = useState(false);
   const [backDisplay, setBackDisplay] = useState(false);
+  const navigate = useNavigate();
 
   const {
     username,
@@ -21,7 +32,7 @@ export const ProfileNavBar = (props) => {
     rootDirectory,
     deckDisplay,
     setDeckDisplay,
-  } = useContext(ProfileContext);
+  } = useContext(ProfileContext) as ProfileContextTypes;
 
   useEffect(() => {
     if (
@@ -33,16 +44,17 @@ export const ProfileNavBar = (props) => {
     } else {
       setBackDisplay(false);
     }
-  }, [directory, fetchError, contentLoaded]);
+  }, [directory, fetchError, contentLoaded, rootDirectory]);
 
   const handleBackClick = () => {
     const prevDirectory = (
-      directoryInfo.parent_id === rootDirectory ? "" : `/${directoryInfo.parent_id}`);
-    props.navigate(`/user/${username}${prevDirectory}`);
+      parseInt(directoryInfo.parent_id!) === rootDirectory ? "" : `/${directoryInfo.parent_id}`);
+    navigate(`/user/${username}${prevDirectory}`);
   };
 
-  const addItem = (event) => {
-    const itemType = event.target.attributes.type.value;
+  const addItem = (event: React.MouseEvent): void => {
+    const element = event.target as HTMLInputElement;
+    const itemType = element.getAttribute('type');
     if (itemType === "deck") {
       setDeckDisplay((view) => !view);
     } else if (itemType === "folder") {
@@ -88,7 +100,7 @@ export const ProfileNavBar = (props) => {
         // Display home icon when a fetch error exists.
         (fetchError && rootDirectory) &&
         <i className="fas fa-home"
-        onClick={() => props.navigate(`/user/${username}`)}></i>
+        onClick={() => navigate(`/user/${username}`)}></i>
       }
 
       {categoryDisplay && (

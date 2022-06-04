@@ -16,9 +16,10 @@ function get_column_number(containerName, doc, win) {
 
 export function useWindowSize(dirInfo, reload) {
   const [columnNumber, setColumnNumber] = useState([0]);
-  const container =
-    dirInfo.item_type === "thematic_folder" ? ".category" : ".card-container";
   useLayoutEffect(() => {
+    if (!dirInfo) return;
+    const container =
+      dirInfo.item_type === "thematic_folder" ? ".category" : ".card-container";
     function updateSize() {
       setColumnNumber(get_column_number(container, document, window));
     }

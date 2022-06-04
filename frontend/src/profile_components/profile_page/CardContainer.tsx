@@ -2,10 +2,12 @@ import { useContext } from "react";
 import axios from "axios";
 import { extract_int, delete_item } from "../common/functions";
 import { ProfileContext } from "./ProfilePage";
+import { ProfileContextTypes } from "../types/profilePageTypes";
 
-export const CardContainer = () => {
+export const CardContainer: React.FC = () => {
   const { handleContextMenu, handleScroll, items, isDragging, directoryInfo } =
-    useContext(ProfileContext);
+    useContext(ProfileContext) as ProfileContextTypes;
+    
   const containerClass =
     directoryInfo.item_type === "thematic_folder"
       ? "category-container"
@@ -26,7 +28,7 @@ export const CardContainer = () => {
   );
 };
 
-const BottomDragBar = () => {
+const BottomDragBar: React.FC = () => {
   // Component of ProfilePage.
   const {
     username,
@@ -38,7 +40,7 @@ const BottomDragBar = () => {
     resetDrag,
     cloneTimeout,
     setRequestError,
-  } = useContext(ProfileContext);
+  } = useContext(ProfileContext) as ProfileContextTypes;
 
   const destroyItem = () => {
     // Delete dragged the item.
