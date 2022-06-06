@@ -7,17 +7,21 @@ import { extract_int } from "./common/functions";
 import * as handlers from "./common/handlers";
 import { Filler } from "./common/components";
 
-export const ItemContext = createContext();
+import { PageItemPropTypes, PageItemContextTypes } from "./types/pageItemTypes";
+import { ProfileContextTypes } from "./types/profilePageTypes";
+import * as defaults from "./types/pageItemDefaults";
 
-export const PageItem = (props) => {
+export const ItemContext = createContext<PageItemContextTypes | undefined>(undefined);
+
+export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   // Component of ProfilePage.
   // Deployed by './common/functions' -> generate_decks.
 
   const navigate = useNavigate();
   const params = useParams();
 
-  const [selfStyle, setSelfStyle] = useState({ order: props.order });
-  const [itemStyle, setItemStyle] = useState({ backgroundColor: props.color });
+  const [selfStyle, setSelfStyle] = useState({...defaults.selfStyleDefault, order: props.order });
+  const [itemStyle, setItemStyle] = useState({ backgroundColor: props.color, boxShadow: "" });
   const [folderStyle, setFolderStyle] = useState("");
   const [fillerClass, setFillerClass] = useState("");
   const [lastFillerClass, setLastFillerClass] = useState("");
@@ -37,21 +41,24 @@ export const PageItem = (props) => {
     items,
     setRequestError,
     rootDirectory,
-  } = useContext(ProfileContext);
+  } = useContext(ProfileContext) as ProfileContextTypes;
 
   const trueDirectory = params.dirId ? "" : `${directory}/`;
 
   // Get children count for each category.
   let childCount;
   if (props.type === "category") {
-    childCount = props.children.length;
+    const elemChildren = props.children as React.ReactNode[];
+    childCount = elemChildren.length;
   } else {
     childCount = 0;
     const extraChildren = 1; // Unrelated children in a category like the top bar.
     if (directoryInfo.item_type === "thematic_folder") {
       let elem = document.querySelector(`#${props.id}`);
       if (elem) {
-        childCount = elem.closest(".category").children.length - extraChildren;
+        const closestElem = elem.closest(".category") as HTMLElement | null;
+        const elemChildren = closestElem ? closestElem.children : 0;
+        childCount = elemChildren ? elemChildren.length - extraChildren : elemChildren;
       }
     }
   }
@@ -59,14 +66,14 @@ export const PageItem = (props) => {
   // Set the opacity of dragged element while dragging.
   useEffect(() => {
     if (isDragging && draggedElement.id === props.id) {
-      setSelfStyle({
-        opacity: 0.5,
-        transition: "opacity .3s",
+      setSelfStyle(prev => ({
+        ...prev,
         order: props.order,
-      });
+        opacity: "0.5"
+      }));
       setFolderStyle("dragged-folder");
     } else {
-      setSelfStyle({ order: props.order });
+      setSelfStyle(prev => ({...prev, order: props.order, opacity: "1"}));
       setFolderStyle("");
     }
   }, [isDragging, draggedElement, props.name, props.order, props.id]);
@@ -79,12 +86,12 @@ export const PageItem = (props) => {
   };
 
   // Set the properties of the 'to be dragged' element on mouse click.
-  const handleMouseDown = (event) => {
+  const handleMouseDown = (event: React.MouseEvent) => {
     // Only left click
-    if (event.nativeEvent.which !== 1 || isDragging) {
+    if (event.button !== 0 || isDragging) {
       return;
     }
-    var targetElem = event.target;
+    var targetElem = event.target as HTMLElement;
 
     // Only drag categories through their navigation bar.
     if (
@@ -101,21 +108,24 @@ export const PageItem = (props) => {
     }
 
     if (targetElem.className !== props.type) {
-      targetElem = event.target.closest(`.${props.type}`);
+      targetElem = targetElem.closest(`.${props.type}`)!;
     }
     const draggedElement = handlers.handleDownOnDragged(props, cloneTimeout);
     setDraggedElement(draggedElement);
   };
 
-  const handleMouseUp = (event) => {
+  const handleMouseUp = (event: React.MouseEvent) => {
     // Only left click
-    if (event.nativeEvent.which !== 1) {
+    if (event.button !== 0) {
       return;
     }
 
-    let targetElem = event.target;
+    let targetElem = event.target as HTMLElement;
     if (!["file", "folder", "category"].includes(targetElem.className)) {
-      targetElem = event.target.closest(`.${props.type}`);
+      const closestElem = targetElem.closest(`.${props.type}`) as HTMLElement;
+      if (closestElem) {
+        targetElem = closestElem;
+      }
     }
 
     if (targetElem.className === "file" && !isDragging) {
@@ -136,7 +146,7 @@ export const PageItem = (props) => {
       return;
     }
 
-    setItemStyle({ backgroundColor: props.color });
+    setItemStyle(prev => ({...prev, backgroundColor: props.color }));
     setFolderStyle("");
 
     if (isDragging) {
@@ -153,12 +163,15 @@ export const PageItem = (props) => {
     resetDrag();
   };
 
-  const handleHover = (event) => {
+  const handleHover = (event: React.MouseEvent) => {
     if (!isDragging || cloneTimeout.exists) {
       return;
     }
 
-    const targeted = event.target.closest("div");
+    const element = event.target as HTMLElement;
+    const targeted = element.closest("div");
+    if (!targeted) return;
+
     if (targeted.id === draggedElement.id) {
       return;
     }
@@ -172,7 +185,7 @@ export const PageItem = (props) => {
       });
       setFolderStyle("drag-hover-folder");
     } else if (event.type === "mouseout") {
-      setItemStyle({ backgroundColor: props.color });
+      setItemStyle({ boxShadow: "", backgroundColor: props.color });
       setFolderStyle("");
     }
   };
@@ -240,7 +253,7 @@ const ItemContainer = () => {
     handleMouseDown,
     handleMouseUp,
     handleHover,
-  } = useContext(ItemContext);
+  } = useContext(ItemContext) as PageItemContextTypes;
 
   const createThumbnail = () => {
     let thumbnail = [];
@@ -299,7 +312,7 @@ const ItemContainer = () => {
 
 const CategoryContainer = () => {
   const { setDeckDisplay, isDragging, setCategoryId } =
-    useContext(ProfileContext);
+    useContext(ProfileContext) as ProfileContextTypes;
 
   const {
     parentProps,
@@ -307,13 +320,17 @@ const CategoryContainer = () => {
     handleMouseDown,
     handleMouseUp,
     handleHover,
-  } = useContext(ItemContext);
+  } = useContext(ItemContext) as PageItemContextTypes;
 
-  const addItem = (event) => {
+  const addItem = (event: React.MouseEvent) => {
     if (isDragging) {
       return;
     }
-    const categoryId = event.target.closest(".category").id;
+    const element = event.target as HTMLElement;
+    const closestElement = element.closest(".category");
+    if (!closestElement) return;
+    const categoryId = closestElement.id;
+
     setCategoryId(parseInt(extract_int(categoryId)));
     setDeckDisplay((x) => !x);
   };

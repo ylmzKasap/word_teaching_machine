@@ -48,7 +48,7 @@ export const ProfileNavBar: React.FC = () => {
 
   const handleBackClick = () => {
     const prevDirectory = (
-      parseInt(directoryInfo.parent_id!) === rootDirectory ? "" : `/${directoryInfo.parent_id}`);
+      directoryInfo.parent_id === rootDirectory ? "" : `/${directoryInfo.parent_id}`);
     navigate(`/user/${username}${prevDirectory}`);
   };
 

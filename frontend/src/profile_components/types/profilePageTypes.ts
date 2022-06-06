@@ -1,15 +1,21 @@
+import React from "react";
+
+type Timer = ReturnType<typeof setTimeout>;
+
+export type userResponse = [serverItemTypes[], dirInfoTypes];
+
 export interface ClipboardTypes {
-  action: "copy" | "cut" | null;
+  action: string | null;
   id: string | null;
-  type: 'root_folder' | 'thematic_folder' | 'folder' | 'file' | 'category' | null;
-  directory: string | null;
+  type: string | null;
+  directory: number | null;
 }
 
 export interface DirectoryInfoTypes {
   item_id: string | null;
   owner: string | null;
-  item_type: 'root_folder' | 'thematic_folder' | 'folder' | null;
-  parent_id: string | null;
+  item_type: string | null;
+  parent_id: number | null;
   item_order: string | null;
   category_id: string | null;
 }
@@ -26,10 +32,10 @@ export interface RequestErrorTypes {
 }
 
 export interface ScrollingTypes {
-  exists: boolean,
-  element: React.ReactElement | null,
-  clientY: number | null,
-  interval: number
+  exists: boolean;
+  element: React.ReactElement | Element | null;
+  clientY: number | null;
+  interval: number | Timer;
 }
 
 export interface ContextMenuScrollTypes {
@@ -49,6 +55,12 @@ export interface ContextMenuInfoTypes {
   ops: string[];
 }
 
+export interface ContextRestrictTypes {
+  [paste: string]: {
+    [key: string]: string;
+  }
+}
+
 export interface CloneStyleTypes {
   width: string | undefined,
   height?: string | undefined,
@@ -61,8 +73,33 @@ export interface CloneStyleTypes {
   transition: string | undefined
 }
 
-export interface ProfilePageTypes {
-  dir: string;
+export interface CloneTimeoutTypes {
+  exists: boolean,
+  timeouts: number,
+}
+
+export interface dirInfoTypes {
+  category_id: null;
+  item_id: string;
+  item_name: string;
+  item_order: string;
+  item_type: string;
+  owner: string;
+  parent_id: number | null;
+}
+
+export interface serverItemTypes {
+  category_id: string | null;
+  color: string | null;
+  content_id: number | null;
+  content_number: string | null;
+  item_id: string;
+  item_name: string;
+  item_order: string;
+  item_type: string;
+  owner: string;
+  parent_id: number;
+  words: string | null
 }
 
 export interface ProfileContextTypes {

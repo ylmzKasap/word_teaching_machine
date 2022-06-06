@@ -1,13 +1,18 @@
 import { PageItem } from "../PageItems";
 import axios from "axios";
+import * as profileTypes from "../types/profilePageTypes";
+import { scrollingDefault } from "../types/profilePageDefaults";
 
-export function generate_directory(info, items, userName) {
+export function generate_directory(
+  info: profileTypes.dirInfoTypes,
+  items: profileTypes.serverItemTypes[],
+  username: string) {
   // Used by ProfilePage.
   // Creates folders and decks with database items.
   const thematicOn = info.item_type === "thematic_folder";
 
-  const categories = [];
-  const otherItems = [];
+  const categories: profileTypes.serverItemTypes[] = [];
+  const otherItems: profileTypes.serverItemTypes[] = [];
 
   // Separate categories from other stuff.
   if (thematicOn) {
@@ -22,7 +27,7 @@ export function generate_directory(info, items, userName) {
 
   const iterable = thematicOn ? categories : items;
 
-  let directory = [];
+  let directory: React.ReactElement[] = [];
   iterable.forEach((pgItem) => {
     const { item_id, item_name, item_type, item_order, words, color } = pgItem;
     directory.push(
@@ -30,11 +35,11 @@ export function generate_directory(info, items, userName) {
         key={item_id}
         id={`item-${item_id}`}
         name={item_name}
-        type={item_type.replaceAll("_", "-")}
+        type={item_type.replace(/_/g, "-")}
         order={parseInt(item_order)}
         words={words ? words.split(",") : ""}
         color={color ? color : ""}
-        user={userName}
+        user={username}
       >
         {thematicOn &&
           otherItems
@@ -44,25 +49,27 @@ export function generate_directory(info, items, userName) {
                 key={item.item_id}
                 id={`item-${item.item_id}`}
                 name={item.item_name}
-                type={item.item_type.replaceAll("_", "-")}
+                type={item.item_type.replace(/_/g, "-")}
                 order={parseInt(item.item_order)}
                 words={item.words ? item.words.split(",") : ""}
                 color={item.color ? item.color : ""}
-                user={userName}
+                user={username}
               />
             ))}
       </PageItem>
     );
   });
-
   return [...directory];
 }
 
-export function hasKeys(anyObject) {
-  return Object.keys(anyObject).length > 0;
-}
-
-const setScroll = (setter, elem, cursor, move, timing) => {
+const setScroll = (
+  setter: React.Dispatch<React.SetStateAction<profileTypes.ScrollingTypes>>,
+  elem: Element,
+  cursor: number,
+  move: number,
+  timing: number
+  ) => {
+    // Helper function for scroll_div
   if (timing < 7) {
     timing = 7;
   } else if (timing > 30) {
@@ -80,65 +87,70 @@ const setScroll = (setter, elem, cursor, move, timing) => {
   });
 };
 
-export function scroll_div(
-  evnt,
-  win,
-  doc,
-  container,
-  scrolling,
-  setScrolling,
-  constraints:string[] = []
+export function scroll_div (
+  event: React.MouseEvent,
+  container: string,
+  scrolling: profileTypes.ScrollingTypes,
+  setScrolling: React.Dispatch<React.SetStateAction<profileTypes.ScrollingTypes>>,
+  constraints: string[] = []
 ) {
   // Used by: ../ProfilePage -> HandleMouseAction event handler.
 
-  if (![...constraints].includes(evnt.target.className.split(" ")[0])) {
-    const scrolledElement = doc.querySelector(container);
+  const element = event.target as HTMLElement;
+  if (![...constraints].includes(element.className.split(" ")[0])) {
+    const scrolledElement = document.querySelector(container);
+
+    // Type guard
+    if (!scrolling.clientY || !scrolledElement) return;
 
     // Scroll bottom
-    if (win.innerHeight - 80 < evnt.clientY) {
-      let interval = win.innerHeight - evnt.clientY;
+    if (window.innerHeight - 80 < event.clientY) {
+      let interval = window.innerHeight - event.clientY;
       if (!scrolling.exists) {
-        setScroll(setScrolling, scrolledElement, evnt.clientY, 10, interval);
+        setScroll(setScrolling, scrolledElement, event.clientY, 10, interval);
       } else {
-        if (Math.abs(evnt.clientY - scrolling.clientY) > 8) {
+        if (Math.abs(event.clientY - scrolling.clientY) > 8) {
           clearInterval(scrolling.interval);
-          setScroll(setScrolling, scrolledElement, evnt.clientY, 10, interval);
+          setScroll(setScrolling, scrolledElement, event.clientY, 10, interval);
         }
       }
       // Scroll top
-    } else if (evnt.clientY < 80) {
-      let interval = evnt.clientY;
+    } else if (event.clientY < 80) {
+      let interval = event.clientY;
       if (!scrolling.exists) {
-        setScroll(setScrolling, scrolledElement, evnt.clientY, -10, interval);
+        setScroll(setScrolling, scrolledElement, event.clientY, -10, interval);
       } else {
-        if (Math.abs(evnt.clientY - scrolling.clientY) > 8) {
+        if (Math.abs(event.clientY - scrolling.clientY) > 8) {
           clearInterval(scrolling.interval);
-          setScroll(setScrolling, scrolledElement, evnt.clientY, -10, interval);
+          setScroll(setScrolling, scrolledElement, event.clientY, -10, interval);
         }
       }
       // Cancel scroll due to mouse position.
     } else {
       if (scrolling.exists) {
         clearInterval(scrolling.interval);
-        setScrolling({ exists: false });
+        setScrolling(scrollingDefault);
       }
     }
     // Cancel scroll due to targeting forbidden element.
   } else {
     if (scrolling.exists) {
       clearInterval(scrolling.interval);
-      setScrolling({ exists: false });
+      setScrolling(scrollingDefault);
     }
   }
 }
 
 export function delete_item(
-  itemObj,
-  username,
-  setRender,
-  setRequestError
+  itemObj: profileTypes.ContextOpenedElemTypes | profileTypes.DraggedElementTypes,
+  username: string | undefined,
+  setRender: React.DispatchWithoutAction,
+  setRequestError: React.Dispatch<React.SetStateAction<profileTypes.RequestErrorTypes>>
 ) {
-  // Used by './components/ItemContextMenu' and '../ProfilePage/BottomDragBar'.
+  // Type Guard
+  if (!itemObj.type || !itemObj.id || !username) throw Error;
+
+  // Used by './components/ItemContextMenu' and '../profile_page/CardContainer/BottomDragBar'.
   const message = ["folder", "category"].includes(itemObj.type)
     ? `Delete '${itemObj.name}' and all of its content?`
     : `Delete '${itemObj.name}?'`;
@@ -159,8 +171,9 @@ export function delete_item(
   }
 }
 
-export function extract_int(str) {
-  return str ? str.match(/\d+$/)[0] : "";
+export function extract_int(str: string) {
+  const intMatch = str.match(/\d+$/);
+  return intMatch ? intMatch[0] : "";
 }
 
 export function find_closest_element(
@@ -169,7 +182,7 @@ export function find_closest_element(
   const element = event.target as HTMLInputElement;
 
   for (let selector of selectors) {
-    const closestItem = element.closest(selector) as HTMLElement;
+    const closestItem = element.closest(selector) as HTMLElement | null;
     if (closestItem) {
       return closestItem;
     }
@@ -179,6 +192,6 @@ export function find_closest_element(
 }
 
 
-export function snakify(str) {
+export function snakify(str: string) {
   return str.split(' ').join('_').toLowerCase();
 }

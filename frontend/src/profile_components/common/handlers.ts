@@ -1,17 +1,18 @@
-import { ContextMenuInfoTypes } from "../types/profilePageTypes";
-import { contextMenuInfoDefault, contextMenuScrollDefault, contextOpenedElemDefault } from "../types/profilePageDefaults";
+import { ContextMenuInfoTypes, CloneTimeoutTypes } from "../types/profilePageTypes";
+import { contextMenuInfoDefault, draggedElementDefault } from "../types/profilePageDefaults";
+import { PageItemPropTypes } from "../types/pageItemTypes";
+import React from "react";
+import { formErrorDefault, nameErrorDefault } from "../types/overlayDefaults";
 
-export function handleItemName(synthEvent) {
+export function handleItemName(event: React.ChangeEvent) {
   // Used by CreateDeckOverlay and CreateFolderOverlay.
 
   const itemNameFilter = /[.,\\<>"]/;
-  const itemName = synthEvent.target.value;
-  const generalError = {
-    display: { display: "none" },
-    errorClass: "",
-    description: "",
-  };
-  let itemNameError = { errorClass: "", description: "" };
+  const element = event.target as HTMLInputElement;
+
+  const itemName = element.value;
+  let itemNameError = nameErrorDefault;
+  const generalError = formErrorDefault;
 
   if (itemNameFilter.test(itemName)) {
     itemNameError = {
@@ -28,17 +29,14 @@ export function handleItemName(synthEvent) {
       errorClass: "forbidden-input",
       description: "Input cannot only contain spaces",
     };
-  } else {
-    itemNameError = {
-      errorClass: "",
-      description: "",
-    };
   }
 
-  return [itemName, itemNameError, generalError];
+  return [itemName, itemNameError, generalError] as const;
 }
 
-export function handleDownOnDragged(props, cloneTimeout) {
+export function handleDownOnDragged(
+  props: PageItemPropTypes,
+  cloneTimeout: CloneTimeoutTypes) {
   // Used by PageItem component.
 
   if (!cloneTimeout.exists) {
@@ -49,7 +47,7 @@ export function handleDownOnDragged(props, cloneTimeout) {
     };
     return draggedElement;
   } else {
-    return {};
+    return draggedElementDefault;
   }
 }
 
@@ -66,7 +64,7 @@ export function create_context_menu(
     };
   }
 
-  let contextMenuInfo:ContextMenuInfoTypes = contextMenuInfoDefault;
+  let contextMenuInfo: ContextMenuInfoTypes = contextMenuInfoDefault;
   contextMenuInfo.closest = closestItem;
 
   // Containers

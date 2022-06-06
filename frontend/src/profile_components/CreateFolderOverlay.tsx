@@ -108,7 +108,7 @@ export const CreateFolder: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => 
       <components.Radio
         description="Folder Type:"
         buttons={["Regular folder", "Thematic folder"]}
-        checked={"regular_folder"}
+        checked="regular_folder"
         selected={folderType}
         handler={handleRadioChange}
       />

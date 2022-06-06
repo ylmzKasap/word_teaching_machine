@@ -20,7 +20,7 @@ import * as defaults from "../types/profilePageDefaults";
 
 export const ProfileContext = createContext<types.ProfileContextTypes | undefined>(undefined);
 
-export const ProfilePage: React.FC<types.ProfilePageTypes> = (props) => {
+export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   // Rendered by main.
   const params = useParams();
 
@@ -29,7 +29,7 @@ export const ProfilePage: React.FC<types.ProfilePageTypes> = (props) => {
 
   const [userPicture, setUserPicture] = useState("");
   const [rootDirectory, setRootDirectory] = useState(0);
-  const [directory, setDirectory] = useState(() => dirId ? parseInt(dirId) : parseInt(props.dir));
+  const [directory, setDirectory] = useState(() => dirId ? parseInt(dirId) : parseInt(dir));
   const [directoryInfo, setDirectoryInfo] = useState<types.DirectoryInfoTypes>(
     defaults.directoryInfoDefault);
 
@@ -98,9 +98,10 @@ export const ProfilePage: React.FC<types.ProfilePageTypes> = (props) => {
   // Render directory.
   useEffect(() => {
     axios
-      .get(`/u/${username}/${dirId ? dirId : props.dir}`)
+      .get(`/u/${username}/${dirId ? dirId : dir}`)
       .then((response) => {
-        const [dirItems, dirInfo] = response.data;
+        if (!username) throw Error;
+        const [dirItems, dirInfo] = response.data as types.userResponse;
         setItems(generate_directory(dirInfo, dirItems, username));
         setDirectoryInfo(dirInfo);
         if (rootDirectory) {
@@ -220,8 +221,6 @@ export const ProfilePage: React.FC<types.ProfilePageTypes> = (props) => {
         }
         scroll_div(
           event,
-          window,
-          document,
           currentContainer,
           scrolling,
           setScrolling,

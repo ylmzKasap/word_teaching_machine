@@ -1,21 +1,25 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 import { ProfileContext } from "../profile_page/ProfilePage";
-import { delete_item, hasKeys, extract_int, snakify } from "./functions";
+import { delete_item, extract_int, snakify } from "./functions";
+
+import * as types from "../types/overlayTypes";
+import * as defaults from "../types/profilePageDefaults";
+import { ProfileContextTypes, ContextRestrictTypes } from "../types/profilePageTypes";
+import { FillerTypes } from "../types/pageItemTypes";
 
 
-
-export const OverlayNavbar = (props) => {
+export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = ({setDisplay, description}) => {
   // Component of CreateDeck, CreateFolder.
 
-  const handleExit = (event) => {
+  const handleExit = (event: React.MouseEvent) => {
     event.preventDefault();
-    props.setDisplay(false);
+    setDisplay(false);
   };
 
   return (
     <div className="overlay-nav">
-      {props.description}
+      {description}
       <button className="exit-button" onClick={handleExit}>
         X
       </button>
@@ -23,7 +27,8 @@ export const OverlayNavbar = (props) => {
   );
 };
 
-export const InputField = (props) => {
+export const InputField: React.FC<types.InputFieldTypes> = (props) => {
+  // Component of Create_x_Overlay(s).
   const { description, error, value, handler, placeholder } = props;
 
   return (
@@ -42,7 +47,7 @@ export const InputField = (props) => {
   );
 };
 
-export const Radio = (props) => {
+export const Radio: React.FC<types.RadioTypes> = (props) => {
   const { description, handler, selected, checked } = props;
 
   return (
@@ -72,7 +77,7 @@ export const Radio = (props) => {
   );
 };
 
-export const SubmitForm = (props) => {
+export const SubmitForm: React.FC<types.submitButtonTypes> = (props) => {
   const { description, formError } = props;
 
   return (
@@ -91,7 +96,7 @@ export const SubmitForm = (props) => {
   );
 };
 
-export const ItemContextMenu = () => {
+export const ItemContextMenu: React.FC = () => {
   const {
     username,
     directory,
@@ -104,42 +109,44 @@ export const ItemContextMenu = () => {
     setClipboard,
     resetContext,
     setRequestError,
-  } = useContext(ProfileContext);
+  } = useContext(ProfileContext) as ProfileContextTypes;
 
-  const restrictions = {
+  const restrictions: ContextRestrictTypes = {
     paste: {
-      [!hasKeys(clipboard)]: "Clipboard is empty",
+      [`${clipboard.id === null}`]: "Clipboard is empty",
 
       // Pasting category into category.
-      [(contextOpenedElem.id === clipboard.id ||
+      [`${(contextOpenedElem.id === clipboard.id ||
         contextOpenedElem.type === clipboard.type) &&
-      hasKeys(clipboard)]: "Cannot paste category here",
+      clipboard.id !== null}`]: "Cannot paste category here",
 
       // Pasting category into a regular folder.
-      [clipboard.type === "category" &&
-      directoryInfo.item_type !== "thematic_folder" &&
-      hasKeys(clipboard)]: "Cannot paste category here",
+      [`${clipboard.type === "category" &&
+      directoryInfo.item_type !== "thematic_folder"}`]: 
+      "Cannot paste category here",
 
       // Pasting an item outside of a category in a thematic folder.
-      [directoryInfo.item_type === "thematic_folder" &&
+      [`${directoryInfo.item_type === "thematic_folder" &&
       clipboard.type !== "category" &&
-      contextOpenedElem.type !== "category" &&
-      hasKeys(clipboard)]: "Can only paste in a category",
+      contextOpenedElem.type !== "category"}`]:
+       "Can only paste in a category",
 
-      [contextOpenedElem.type === "category" && clipboard.type !== "file"]:
+      [`${contextOpenedElem.type === "category" && clipboard.type !== "file"}`]:
         "Categories can only contain decks",
     },
   };
 
-  const handleClick = (event) => {
-    if (event.target.className === "disabled-context") {
+  const handleClick = (event: React.MouseEvent) => {
+    const element = event.target as HTMLElement;
+
+    if (element.className === "disabled-context") {
       setRequestError({
         exists: true,
-        description: restrictions[event.target.title]["true"],
+        description: restrictions[element.title]["true"],
       });
       return;
     }
-    const action = event.target.title;
+    const action = element.title;
     if (["cut", "copy"].includes(action)) {
       setClipboard({
         action: action,
@@ -155,19 +162,22 @@ export const ItemContextMenu = () => {
         setRequestError
       );
     } else if (action === "paste") {
+      // Type guard
+      if (!clipboard.id) throw Error;
+
       axios
         .put(`/paste/${username}`, {
           item_id: parseInt(extract_int(clipboard.id)),
           new_parent: directory,
           category_id:
             contextOpenedElem.type === "category"
-              ? parseInt(extract_int(contextOpenedElem.id))
+              ? parseInt(extract_int(contextOpenedElem.id!))
               : null,
           action: clipboard.action,
         })
         .then(() => {
           if (clipboard.action === "cut") {
-            setClipboard({});
+            setClipboard(defaults.clipboardDefault);
           }
           setReRender();
         })
@@ -200,7 +210,8 @@ export const ItemContextMenu = () => {
   );
 };
 
-export const Filler = (props) => {
+export const Filler: React.FC<FillerTypes> = (props) => {
+  // Rendered by "../PageItems"
   const {
     username,
     isDragging,
@@ -209,11 +220,12 @@ export const Filler = (props) => {
     resetDrag,
     setReRender,
     setRequestError
-  } = useContext(ProfileContext);
+  } = useContext(ProfileContext) as ProfileContextTypes;
 
   // Style the filler on hovering.
-  const handleFillerHover = (event) => {
+  const handleFillerHover = (event: React.MouseEvent) => {
     // Disable interaction between different types of fillers.
+    const element = event.target as HTMLElement;
     if (
       [props.siblingType, draggedElement.type].includes("category") &&
       props.siblingType !== draggedElement.type
@@ -222,9 +234,10 @@ export const Filler = (props) => {
     }
 
     let nextElement =
-      props.type === "regular"
-        ? event.target.nextElementSibling
-        : event.target.previousSibling;
+      (props.type === "regular"
+        ? element.nextElementSibling
+        : element.previousSibling) as Element | null;
+    if (!nextElement) return;
 
     if (isDragging && !cloneTimeout.exists) {
       if (nextElement.id !== draggedElement.id) {
@@ -237,10 +250,11 @@ export const Filler = (props) => {
     }
   };
 
-  const handleFillerUp = (event) => {
+  const handleFillerUp = (event: React.MouseEvent) => {
     if (!isDragging) {
       return;
     }
+    const element = event.target as HTMLElement;
 
     // Disable interaction between different types of fillers.
     if (
@@ -250,15 +264,19 @@ export const Filler = (props) => {
       return;
     }
 
-    const categoryContainer = event.target.closest(".category");
+    const categoryContainer = element.closest(".category");
     if (props.type === "regular") {
-      let nextElement = event.target.nextElementSibling;
+      let nextElement = element.nextElementSibling as Element | null;
+      if (!nextElement) return;
+
       if (nextElement.id === draggedElement.id) {
         resetDrag(true);
         return;
       }
     } else if (props.type === "last") {
-      let previousElement = event.target.previousSibling;
+      let previousElement = element.previousSibling as Element | null;
+      if (!previousElement) return;
+
       if (previousElement.id === draggedElement.id) {
         resetDrag(true);
         return;
