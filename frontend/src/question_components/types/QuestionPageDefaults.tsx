@@ -13,3 +13,8 @@ export const timeoutDefaults = {
 export const introTextTimeoutDefaults = {
   "intro-sound": 0
 };
+
+export const optionStyleDefaults = {
+  animation: "",
+  numStyle: ""
+};

@@ -1,10 +1,11 @@
 // AskFromText -> IntroText | ImageOptions -> ImageOptionBox -> NumberBox
 
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useReducer, useEffect } from "react";
 import { IntroText, NumberBox } from "./common/components";
 import { getRandomOptions, playAndCatchError } from "./common/functions";
+import { handleStyles } from "./common/reducers";
 import { audioMixer, QuestionContext } from "./QuestionPage";
-import { timeoutDefaults } from "./types/QuestionPageDefaults";
+import * as defaults from "./types/QuestionPageDefaults";
 import * as types from "./types/QuestionPageTypes";
 
 export const AskFromText: React.FC<types.QuestionComponentPropTypes> = (
@@ -41,9 +42,9 @@ export const AskFromText: React.FC<types.QuestionComponentPropTypes> = (
 const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
   // Component of ImageOptions - Handled by './functions' -> getRandomOptions.
 
-  const [animation, setAnimation] = useState("");
-  const [numStyle, setNumStyle] = useState("");
-  const [timeouts, handleTimeouts] = useState(timeoutDefaults);
+  const [optionStyle, setOptionStyle] = useReducer(
+    handleStyles, defaults.optionStyleDefaults);
+  const [timeouts, handleTimeouts] = useState(defaults.timeoutDefaults);
 
   const { handleParentClick, handleIncorrect, correctFound, setCorrectFound } =
     useContext(QuestionContext) as types.QuestionContextTypes;
@@ -66,12 +67,11 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
   function handleClick() {
     let errorMessage = "Sound interrupted by user.";
     if (props.isCorrect === true) {
-      if (animation === "") {
+      if (optionStyle.animation === "") {
         setCorrectFound(true);
         audioMixer.src = "media\\correct.mp3";
         playAndCatchError(audioMixer, errorMessage);
-        setAnimation("correct-answer");
-        setNumStyle("correct-image-number");
+        setOptionStyle({type: "image", answer: "correct"});
         handleTimeouts({
           sound: window.setTimeout(() => {
             props.animate();
@@ -82,11 +82,10 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
         });
       }
     } else {
-      if (animation === "") {
+      if (optionStyle.animation === "") {
         audioMixer.src = "media\\incorrect.mp3";
         playAndCatchError(audioMixer, errorMessage);
-        setAnimation("incorrect-answer");
-        setNumStyle("incorrect-image-number");
+        setOptionStyle({type: "image", answer: "incorrect"});
         if (!correctFound) {
           handleIncorrect();
         }
@@ -96,13 +95,13 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
 
   // Children: './shared/' -> NumberBox.
   return (
-    <div className={`image-option-box ${animation}`} onClick={handleClick}>
+    <div className={`image-option-box ${optionStyle.animation}`} onClick={handleClick}>
       <img
         className="image-option"
         src={`media\\${props.imgPath}`}
         alt={props.word}
       />
-      <NumberBox type="image" number={props.number} style={numStyle} />
+      <NumberBox type="image" number={props.number} style={optionStyle.numStyle} />
     </div>
   );
 };

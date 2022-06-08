@@ -1,4 +1,7 @@
 @keyframes shakeIt {
+  0% {
+    opacity: 0.2;
+  }
   25% {
     transform: rotate(3deg);
   }
@@ -7,6 +10,7 @@
   }
   100% {
     transform: rotate(0deg);
+    opacity: 0.2;
   }
 }
 
