@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, createContext, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
@@ -8,21 +9,24 @@ import {
   randint,
 } from "./common/functions";
 import { NotFound } from "../profile_components/common/components";
+import * as types from "./types/QuestionPageTypes";
+import * as defaults from "./types/QuestionPageDefaults";
 
-export const FunctionContext = createContext();
+export const QuestionContext = createContext<types.QuestionContextTypes | undefined>(undefined);
 export var audioMixer = new Audio();
 
-export function QuestionPage() {
+export const QuestionPage: React.FC = () => {
   // Rendered by '../index.js' -> 'Deck' component.
 
-  const { state } = useLocation();
-  const params = useParams();
+  const location = useLocation();
+  const state = location.state as types.LocationTypes;
+  const params = useParams<types.ParamTypes>();
   const navigate = useNavigate();
 
-  const [directory] = useState(state ? state.directory : params.dirId);
-  const [rootDirectory, setRootDirectory] = useState("");
-  const [words, setWords] = useState(null);
-  const [pages, setPages] = useState(null);
+  const [directory] = useState(state ? state.directory : params.dirId ? parseInt(params.dirId) : 0);
+  const [rootDirectory, setRootDirectory] = useState(0);
+  const [words, setWords] = useState([""]);
+  const [pages, setPages] = useState<types.PageTypes>(defaults.questionPageDefault);
   const [pageNumber, setPageNumber] = useState(0);
   const [progress, setProgress] = useState(0);
   const [childAnimation, setChildAnimtion] = useState("load-page");
@@ -50,7 +54,7 @@ export function QuestionPage() {
 
   // Generate pages from words.
   useEffect(() => {
-    if (words !== null && pages === null) {
+    if (words[0] !== "" && pages[0].component === null) {
       setPages(generate_pages(words));
     }
   }, [words]);
@@ -61,13 +65,13 @@ export function QuestionPage() {
       setChildAnimtion((cAnim) =>
         cAnim === "load-page" ? "load-page-2" : "load-page"
       );
-      setProgress(parseInt(((pageNumber - 1) * 110) / pages.length) + 5);
+      setProgress(((pageNumber - 1) * 110) / pages.length + 5);
     }
   }
 
   function goForward() {
     const dirToGo =
-      parseInt(directory) === rootDirectory || fetchError
+      directory === rootDirectory || fetchError
         ? ""
         : `/${directory}`;
     if (pageNumber < pages.length) {
@@ -75,7 +79,7 @@ export function QuestionPage() {
       setChildAnimtion((cAnim) =>
         cAnim === "load-page" ? "load-page-2" : "load-page"
       );
-      setProgress(parseInt(((pageNumber + 1) * 110) / pages.length) + 5);
+      setProgress(((pageNumber + 1) * 110) / pages.length + 5);
     }
     if (pageNumber === pages.length - 1) {
       navigate(`/user/${params.username}${dirToGo}`);
@@ -84,7 +88,7 @@ export function QuestionPage() {
 
   function handleClick() {
     const dirToGo =
-      parseInt(directory) === rootDirectory || fetchError
+      directory === rootDirectory || fetchError
         ? ""
         : `/${directory}`;
     if (pageNumber < pages.length) {
@@ -92,7 +96,7 @@ export function QuestionPage() {
       setChildAnimtion((cAnim) =>
         cAnim === "load-page" ? "load-page-2" : "load-page"
       );
-      setProgress(parseInt((pageNumber * 110) / pages.length) + 5);
+      setProgress((pageNumber * 110) / pages.length + 5);
     }
     if (pageNumber === pages.length - 1) {
       navigate(`/user/${params.username}${dirToGo}`);
@@ -106,7 +110,7 @@ export function QuestionPage() {
 
       for (let i = 0; i < restOfArray.length; i++) {
         if (restOfArray[i].path === currentPage.path) {
-          return null;
+          return;
         }
       }
 
@@ -120,7 +124,7 @@ export function QuestionPage() {
 
       copyPages.splice(pageNumber + randint(2, 4), 0, repeatPage);
       setPages(copyPages);
-      setProgress(parseInt(((pageNumber - 1) * 110) / pages.length));
+      setProgress(((pageNumber - 1) * 110) / pages.length);
     }
   }
 
@@ -134,35 +138,35 @@ export function QuestionPage() {
         root={rootDirectory}
         pageNumber={pageNumber}
         user={params.username}
-        navigate={navigate}
         fetchError={fetchError}
       />
       <ProgressBar width={progress} />
       {/* Context consumed by AskFromPicture, AskFromText, IntroduceWord */}
-      <FunctionContext.Provider
+      <QuestionContext.Provider
         value={{
-          clickHandler: handleClick,
+          handleParentClick: handleClick,
           handleIncorrect: handleIncorrect,
           correctFound: correctFound,
           setCorrectFound: setCorrectFound,
         }}
       >
-        {pages !== null && pageNumber < pages.length && (
+        {pages[0].component !== null && pageNumber < pages.length && (
           <QuestionBody
             animation={childAnimation}
             page={process_page_object(pages[pageNumber], words)}
           />
         )}
-      </FunctionContext.Provider>
+      </QuestionContext.Provider>
       {fetchError && <NotFound />}
     </div>
   );
-}
+};
 
-function NavBar(props) {
+const NavBar: React.FC<types.NavBarTypes> = (props) => {
   // Component of QuestionPage.
+  const navigate = useNavigate();
   const directory =
-    parseInt(props.directory) === props.root || props.fetchError
+    props.directory === props.root || props.fetchError
       ? ""
       : `/${props.directory}`;
 
@@ -173,26 +177,26 @@ function NavBar(props) {
       )}
       <i
         className="fas fa-home"
-        onClick={() => props.navigate(`/user/${props.user}${directory}`)}
+        onClick={() => navigate(`/user/${props.user}${directory}`)}
       ></i>
       {!props.fetchError && (
         <i className="fas fa-arrow-right arrow" onClick={props.goForward}></i>
       )}
     </div>
   );
-}
+};
 
-function ProgressBar(props) {
+const ProgressBar: React.FC<{width: number}> = ({width}) => {
   // Component of QuestionPage.
 
-  return <div id="progress-bar" style={{ width: `${props.width}%` }}></div>;
-}
+  return <div id="progress-bar" style={{ width: `${width}%` }}></div>;
+};
 
-function QuestionBody(props) {
+const QuestionBody: React.FC<types.QuestionBodyTypes> = ({animation, page}) => {
   // Component of QuestionPage.
 
   // Children: (Indirect) IntroduceWord, AskFromPicture, AskFromText.
-  return <div className={`main-page ${props.animation}`}>{props.page}</div>;
-}
+  return <div className={`main-page ${animation}`}>{page}</div>;
+};
 
 export default QuestionPage;

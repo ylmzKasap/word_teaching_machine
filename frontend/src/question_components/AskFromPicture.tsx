@@ -3,64 +3,58 @@
 import { useState, useContext, useEffect } from "react";
 import { IntroImage, NumberBox } from "./common/components";
 import { playAndCatchError, getRandomOptions } from "./common/functions";
-import { audioMixer, FunctionContext } from "./QuestionPage";
+import { audioMixer, QuestionContext } from "./QuestionPage";
+import { timeoutDefaults } from "./types/QuestionPageDefaults";
+import * as types from "./types/QuestionPageTypes";
 
-export function AskFromPicture(props) {
+export const AskFromPicture: React.FC<types.QuestionComponentPropTypes> = (
+  {allPaths, allWords, imgPath, word}) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
 
   const [imageAnimation, setImageAnimtion] = useState("");
   const [layout] = useState(Math.random());
 
-  const { allPaths, allWords, imgPath, word } = props;
+  function animateImage() {
+    setImageAnimtion("emphasize");
+  }
+
   const pageItems = [
     <TextOptions
       allPaths={allPaths}
       allWords={allWords}
       imgPath={imgPath}
       word={word}
-      animateImg={animateImage}
+      animate={animateImage}
       key={word + "-option"}
     />,
 
     <IntroImage
       imgPath={imgPath}
       word={word}
-      imageAnimation={imageAnimation}
+      animation={imageAnimation}
       key={word + "-image"}
     />,
   ];
 
-  function animateImage() {
-    setImageAnimtion("emphasize");
-  }
-
   // Children: TextOptions, IntroImage.
   return (
-    <div className="ask-from-picture container-fluid">
+    <div className="ask-from-picture">
       {layout >= 0.25 && window.innerWidth > 1024
         ? [...pageItems]
         : [...pageItems.reverse()]}
     </div>
   );
-}
+};
 
-function TextOptions(props) {
-  // Component of AskFromPicture.
-  const [options] = useState(getRandomOptions(TextOptionBox, props));
-
-  // Children: TextOptionBox.
-  return <div className="text-options">{options}</div>;
-}
-
-function TextOptionBox(props) {
+const TextOptionBox: React.FC<types.OptionTypes> = (props) => {
   // Component of TextOptions - Hanled by './functions' -> getRandomOptions.
 
   const [animation, setAnimation] = useState("");
   const [numStyle, setNumStyle] = useState("");
-  const [timeouts, handleTimeouts] = useState({});
+  const [timeouts, setTimeouts] = useState(timeoutDefaults);
 
-  const { clickHandler, handleIncorrect, correctFound, setCorrectFound } =
-    useContext(FunctionContext);
+  const { handleParentClick, handleIncorrect, correctFound, setCorrectFound } =
+    useContext(QuestionContext  ) as types.QuestionContextTypes;
 
   const useMountEffect = () =>
     useEffect(() => {
@@ -72,7 +66,7 @@ function TextOptionBox(props) {
   useEffect(() => {
     return () => {
       for (let key in timeouts) {
-        clearTimeout(timeouts[key]);
+        window.clearTimeout(timeouts[key as keyof types.TimeoutTypes]);
       }
     };
   }, [timeouts]);
@@ -86,13 +80,13 @@ function TextOptionBox(props) {
         playAndCatchError(audioMixer, errorMessage);
         setAnimation("correct-answer");
         setNumStyle("correct-number");
-        handleTimeouts({
-          sound: setTimeout(() => {
-            props.animateImg();
+        setTimeouts({
+          sound: window.setTimeout(() => {
+            props.animate();
             audioMixer.src = `media\\${props.word}.mp3`;
             playAndCatchError(audioMixer, errorMessage);
           }, 1000),
-          click: setTimeout(() => clickHandler(), 2000),
+          click: window.setTimeout(() => handleParentClick(), 2000),
         });
       }
     } else {
@@ -119,4 +113,12 @@ function TextOptionBox(props) {
       <div className="option-text">{props.word}</div>
     </label>
   );
-}
+};
+
+const TextOptions: React.FC<types.TextOptionsPropsTypes> = (props) => {
+  // Component of AskFromPicture.
+  const [options] = useState(getRandomOptions(TextOptionBox, props));
+
+  // Children: TextOptionBox.
+  return <div className="text-options">{options}</div>;
+};

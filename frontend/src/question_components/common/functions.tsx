@@ -1,8 +1,9 @@
 import { IntroduceWord } from "../IntroduceWord";
 import { AskFromText } from "../AskFromText";
 import { AskFromPicture } from "../AskFromPicture";
+import * as types from "../types/QuestionPageTypes";
 
-export function shuffle(array) {
+export function shuffle(array: string[]) {
   let currentIndex = array.length,
     randomIndex;
 
@@ -28,11 +29,11 @@ export function is_mobile() {
   );
 }
 
-export function randint(fromN, toN) {
+export function randint(fromN: number, toN: number) {
   return Math.floor(Math.random() * (toN - fromN + 1)) + fromN;
 }
 
-export function playAndCatchError(mixer, message) {
+export function playAndCatchError(mixer:  HTMLAudioElement, message: string) {
   mixer.load();
   let playPromise = mixer.play();
   if (playPromise !== undefined) {
@@ -42,7 +43,8 @@ export function playAndCatchError(mixer, message) {
   }
 }
 
-export function getRandomOptions(Component, props) {
+export function getRandomOptions(
+  Component: React.FC<types.OptionTypes>, props: types.TextOptionsPropsTypes) {
   // Creates random options with ImageOptionBox and TextOptionBox.
   // Called by ImageOptions and TextOptions.
 
@@ -74,7 +76,7 @@ export function getRandomOptions(Component, props) {
         word={pathStem}
         number={index + 1}
         key={pathStem + `-option-${index}`}
-        animateImg={props.animateImg}
+        animate={props.animate}
       />
     );
   });
@@ -82,10 +84,10 @@ export function getRandomOptions(Component, props) {
   return [...options];
 }
 
-export function generate_pages(paths) {
+export function generate_pages(paths: string[]) {
   // Used by QuestionPage.
 
-  function disperse_questions(array) {
+  function disperse_questions(array: types.PageTypes) {
     let copyArray = [...array];
     for (let i = 0; i < array.length; i++) {
       let randomRange = Math.random();
@@ -123,18 +125,24 @@ export function generate_pages(paths) {
   return [...pages];
 }
 
-export function process_page_object(obj, allPaths) {
+export const process_page_object = (obj: types.PageContent, allPaths: string[]) => {
+
   const keyType = obj.type === "IntroduceWord" ? "-intro-" : "-question-";
   const wordStem = obj.path.split(".")[0];
 
   let allWords = allPaths.map((p) => p.split(".")[0]);
+
   return (
-    <obj.component
-      allPaths={allPaths}
-      allWords={allWords}
-      imgPath={obj.path}
-      word={wordStem}
-      key={wordStem + keyType + String(obj.order)}
-    />
+    <>
+      {obj.component && <obj.component
+        allPaths={allPaths}
+        allWords={allWords}
+        imgPath={obj.path}
+        word={wordStem}
+        key={wordStem + keyType + String(obj.order)}
+      />
+      }
+    </>
+    
   );
-}
+};

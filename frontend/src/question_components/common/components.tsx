@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { playAndCatchError, is_mobile } from "./functions";
 import { audioMixer } from "../QuestionPage";
+import * as types from "../types/QuestionPageTypes";
+import { introTextTimeoutDefaults } from "../types/QuestionPageDefaults";
 
-export function IntroImage(props) {
+export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
   // Shared by IntroduceWord and AskFromPicture.
 
-  let imgAnim = props.imageAnimation === undefined ? "" : props.imageAnimation;
+  let imgAnim = props.animation === undefined ? "" : props.animation;
   return (
     <div className={`intro-img-box ${imgAnim}`}>
       <img
@@ -15,19 +17,19 @@ export function IntroImage(props) {
       />
     </div>
   );
-}
+};
 
-export function IntroText(props) {
+export const IntroText: React.FC<types.IntroTextTypes> = (props) => {
   // Shared by IntroduceWord and AskFromText.
 
   const [isAnimated, setIsAnimated] = useState(false);
   const [isMobile] = useState(is_mobile);
-  const [timeouts, handleTimeouts] = useState({});
+  const [timeouts, handleTimeouts] = useState(introTextTimeoutDefaults);
 
   const useMountEffect = () =>
     useEffect(() => {
       handleTimeouts({
-        "intro-sound": setTimeout(() => playSound(), 200),
+        "intro-sound": window.setTimeout(() => playSound(), 200),
       });
       setIsAnimated(true);
     }, []);
@@ -37,7 +39,7 @@ export function IntroText(props) {
   useEffect(() => {
     return () => {
       for (let key in timeouts) {
-        clearTimeout(timeouts[key]);
+        window.clearTimeout(timeouts[key as keyof typeof introTextTimeoutDefaults]);
       }
     };
   }, [timeouts]);
@@ -56,7 +58,7 @@ export function IntroText(props) {
   const pageIcon = isMobile ? "fas fa-fingerprint" : "fa fa-mouse-pointer";
 
   return (
-    <label className={`text-intro-box ${props.textAnimation}`}>
+    <label className={`text-intro-box ${props.animation}`}>
       <p
         className={`${props.type}-text ${isAnimated ? "emphasize" : ""}`}
         onClick={() => {
@@ -74,13 +76,13 @@ export function IntroText(props) {
       )}
     </label>
   );
-}
+};
 
-export function NumberBox(props) {
+export const NumberBox: React.FC<types.NumberBoxPropTypes> = (props) => {
   // Shared by AskFromPicture and AskFromText.
   return (
     <label className={`${props.type}-number-box ${props.style}`}>
       {props.number}
     </label>
   );
-}
+};

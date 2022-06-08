@@ -19,7 +19,7 @@ const App = () => {
         path="user/:username/:dirId/deck/:deckId"
         element={<QuestionPage />}
       />
-      <Route path="*" element={<NotFound category="page" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

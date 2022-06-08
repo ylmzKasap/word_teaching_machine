@@ -1,8 +1,10 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { IntroImage, IntroText } from "./common/components";
-import { FunctionContext } from "./QuestionPage";
+import { QuestionContext } from "./QuestionPage";
 
-export function IntroduceWord(props) {
+import { QuestionComponentPropTypes, QuestionContextTypes } from "./types/QuestionPageTypes";
+
+export const IntroduceWord: React.FC<QuestionComponentPropTypes> = (props) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
 
   const [layout] = useState(Math.random());
@@ -14,16 +16,17 @@ export function IntroduceWord(props) {
       word={word}
       key={word + "-text"}
       type="intro"
-      textAnimation=""
+      animation=""
     />,
     <IntroImage imgPath={imgPath} word={word} key={word + "-image"} />,
   ];
 
-  const { clickHandler } = useContext(FunctionContext);
+  const { handleParentClick } = useContext(QuestionContext) as QuestionContextTypes;
 
-  function handleClick(elem) {
-    if (!/^intro-text/.test(elem.target.className)) {
-      clickHandler();
+  function handle_click(event: React.MouseEvent) {
+    const element = event.target as HTMLInputElement;
+    if (!/^intro-text/.test(element.className)) {
+      handleParentClick();
     }
   }
 
@@ -31,11 +34,11 @@ export function IntroduceWord(props) {
   return (
     <div
       className="intro-word container-fluid"
-      onClick={(elem) => handleClick(elem)}
+      onClick={(elem) => handle_click(elem)}
     >
       {layout >= 0.5 && window.innerWidth > 1024
         ? [...pageItems]
         : [...pageItems.reverse()]}
     </div>
   );
-}
+};

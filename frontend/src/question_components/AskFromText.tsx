@@ -1,17 +1,21 @@
 // AskFromText -> IntroText | ImageOptions -> ImageOptionBox -> NumberBox
 
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { IntroText, NumberBox } from "./common/components";
 import { getRandomOptions, playAndCatchError } from "./common/functions";
-import { audioMixer, FunctionContext } from "./QuestionPage";
+import { audioMixer, QuestionContext } from "./QuestionPage";
+import { timeoutDefaults } from "./types/QuestionPageDefaults";
+import * as types from "./types/QuestionPageTypes";
 
-const textAnimContext = createContext();
-
-export function AskFromText(props) {
+export const AskFromText: React.FC<types.QuestionComponentPropTypes> = (
+  {allPaths, allWords, imgPath, word}) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
 
   const [textAnimation, setTextAnimation] = useState("");
-  const { allPaths, allWords, imgPath, word } = props;
+  
+  function animateText() {
+    setTextAnimation("emphasize");
+  }
 
   // Children: ImageOptions, './shared' -> IntroText.
   return (
@@ -20,42 +24,29 @@ export function AskFromText(props) {
         imgPath={imgPath}
         word={word}
         type="ask-from"
-        textAnimation={textAnimation}
+        animation={textAnimation}
       />
-      <textAnimContext.Provider value={setTextAnimation}>
-        {/* Context consumed by ImageOptionBox. */}
-
         <ImageOptions
           allPaths={allPaths}
           allWords={allWords}
           imgPath={imgPath}
           word={word}
-          id={"image-option"}
+          animate={animateText}
+          key={word + '-option'}
         />
-      </textAnimContext.Provider>
     </div>
   );
-}
+};
 
-function ImageOptions(props) {
-  // Component of AskFromText.
-
-  const [options] = useState(getRandomOptions(ImageOptionBox, props));
-
-  // Children: ImageOptionBox.
-  return <div className="image-options">{options}</div>;
-}
-
-function ImageOptionBox(props) {
+const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
   // Component of ImageOptions - Handled by './functions' -> getRandomOptions.
 
   const [animation, setAnimation] = useState("");
   const [numStyle, setNumStyle] = useState("");
-  const [timeouts, handleTimeouts] = useState({});
+  const [timeouts, handleTimeouts] = useState(timeoutDefaults);
 
-  const { clickHandler, handleIncorrect, correctFound, setCorrectFound } =
-    useContext(FunctionContext);
-  const animateText = useContext(textAnimContext);
+  const { handleParentClick, handleIncorrect, correctFound, setCorrectFound } =
+    useContext(QuestionContext) as types.QuestionContextTypes;
 
   const useMountEffect = () =>
     useEffect(() => {
@@ -67,7 +58,7 @@ function ImageOptionBox(props) {
   useEffect(() => {
     return () => {
       for (let key in timeouts) {
-        clearTimeout(timeouts[key]);
+        window.clearTimeout(timeouts[key as keyof types.TimeoutTypes]);
       }
     };
   }, [timeouts]);
@@ -82,12 +73,12 @@ function ImageOptionBox(props) {
         setAnimation("correct-answer");
         setNumStyle("correct-image-number");
         handleTimeouts({
-          sound: setTimeout(() => {
-            animateText("emphasize");
+          sound: window.setTimeout(() => {
+            props.animate();
             audioMixer.src = `media\\${props.word}.mp3`;
             playAndCatchError(audioMixer, errorMessage);
           }, 1000),
-          click: setTimeout(() => clickHandler(), 2000),
+          click: window.setTimeout(() => handleParentClick(), 2000),
         });
       }
     } else {
@@ -107,7 +98,6 @@ function ImageOptionBox(props) {
   return (
     <div className={`image-option-box ${animation}`} onClick={handleClick}>
       <img
-        id={props.id}
         className="image-option"
         src={`media\\${props.imgPath}`}
         alt={props.word}
@@ -115,4 +105,13 @@ function ImageOptionBox(props) {
       <NumberBox type="image" number={props.number} style={numStyle} />
     </div>
   );
-}
+};
+
+const ImageOptions: React.FC<types.TextOptionsPropsTypes> = (props) => {
+  // Component of AskFromText.
+
+  const [options] = useState(getRandomOptions(ImageOptionBox, props));
+
+  // Children: ImageOptionBox.
+  return <div className="image-options">{options}</div>;
+};
