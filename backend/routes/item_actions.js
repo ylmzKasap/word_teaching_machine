@@ -2,7 +2,7 @@ const err_utils = require('../database/db_functions/index');
 const item_utils = require('../database/db_functions/item_functions');
 const dir_utils = require('../database/db_functions/directory');
 const { updateDirectory } = require('../database/db_functions/item_relocation');
-const test_utils = require("../test/functions");
+const test_utils = require("../test/other_functions");
 
 // Change item order in a directory.
 const change_item_order = async (req, res) => {

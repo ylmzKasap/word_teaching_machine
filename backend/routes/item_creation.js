@@ -2,8 +2,7 @@ const item_crt_utils = require('../database/db_functions/item_creation');
 const item_utils = require('../database/db_functions/item_functions');
 const err_utils = require('../database/db_functions/index');
 const utils = require("./functions");
-const test_utils = require("../test/functions");
-const { fullSpace } = require("../test/functions");
+const test_utils = require("../test/other_functions");
 
 const itemNameFilter = /[.,\\<>"]/;
 const wordNameFilter = /[.,\\/<>:"|?*]/;
@@ -39,10 +38,10 @@ const create_deck = async (req, res) => {
 
     // Blank values
     const filteredWords = content.words.filter(
-        word => !(fullSpace.test(word))
+        word => !(test_utils.fullSpace.test(word))
     );
 
-    if (filteredWords.length === 0 || fullSpace.test(deckName)) {
+    if (filteredWords.length === 0 || test_utils.fullSpace.test(deckName)) {
         return res.status(400).send({"errDesc": "Blank value"});
     }
 
@@ -141,7 +140,7 @@ const create_folder = async (req, res) => {
     }
 
     // Blank folder name
-    if (fullSpace.test(folder_name) || fullSpace.test(folder_type)) {
+    if (test_utils.fullSpace.test(folder_name) || test_utils.fullSpace.test(folder_type)) {
         return res.status(400).send({"errDesc": "Blank value"});
     }
     
@@ -215,7 +214,7 @@ const create_category = async (req, res) => {
     }
 
     // Blank category name
-    if (fullSpace.test(category_name)) {
+    if (test_utils.fullSpace.test(category_name)) {
         return res.status(400).send({"errDesc": "Blank value"});
     }
 

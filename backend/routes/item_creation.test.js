@@ -6,9 +6,9 @@ const {roV } = require('../database/db_functions/other_functions');
 const setup = require('../database/db_functions/setup');
 const { glob } = require('../database/build_database');
 
-const test_utils = require('../test/functions');
 const { getItemInfo } = require('../database/db_functions/item_functions');
-const { fail_with_json } = require('../test/functions');
+const test_utils = require('../test/test_functions');
+const { fail_with_json } = require('../test/test_functions');
 
 
 setup.setupBeforeAndAfter(db);

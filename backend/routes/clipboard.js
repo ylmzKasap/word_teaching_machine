@@ -1,6 +1,6 @@
 const item_utils = require('../database/db_functions/item_functions');
 const dir_utils = require('../database/db_functions/directory');
-const test_utils = require("../test/functions");
+const test_utils = require("../test/other_functions");
 const utils = require("./functions");
 
 const { addItem } = require('../database/db_functions/item_creation');

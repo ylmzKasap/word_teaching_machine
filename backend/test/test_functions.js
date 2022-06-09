@@ -1,28 +1,5 @@
 const request = require('supertest');
 
-const fullSpace = /^[\s\t\n]+$/
-
-function is_object(val) {
-    return val?.constructor === Object;
-}
-
-function is_blank(values) {
-    if (!Array.isArray(values)) {
-        throw 'is_blank function accepts an array of values';
-    }
-
-    if (values.length === 0){
-        return true;
-    }
-
-    for (let value of values) {
-        if (value === '' || value === undefined) {
-            return true
-        }
-    }
-    return false;
-}
-
 const group_objects = (objArray, groupKey) => {
     // Group an array of objects based on the value of one of their properties.
     const groupedObjects = {};
@@ -168,6 +145,6 @@ async function check_type_blank(correctRequest, route, operation, server, db) {
 }
 
 module.exports = {
-    is_object, check_type_blank, fail_with_json, 
-    is_blank, numbers_in_order, group_objects, fullSpace
+    check_type_blank, fail_with_json, 
+    numbers_in_order, group_objects
 };
