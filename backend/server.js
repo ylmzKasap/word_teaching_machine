@@ -1,3 +1,4 @@
+require('dotenv').config();
 const database = require('./database/development_database');
 const db_tests = require('./database/build_database');
 const startApp = require('./app');
