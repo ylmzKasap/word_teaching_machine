@@ -2,6 +2,7 @@
   "name": "some-random-backend",
   "version": "1.0.0",
   "scripts": {
+    "start": "node server.js",
     "test": "jest --runInBand --verbose --watchAll",
     "client": "cd ../frontend && npm start",
     "server": "nodemon server.js",
