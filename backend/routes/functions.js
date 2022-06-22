@@ -1,25 +1,29 @@
-const fs = require('fs');
+async function locate_words (pool, wordArray, target_language) {
+    let missingImages = [];
+    let missingSounds = [];
 
-function findFiles (directory, wordArray, extensions) {
-    // Directory -> `${process.cwd()}\\public\\images\\`
-    let missingFiles = [];
-    let foundFiles = [];
-    for (let word of wordArray) {
-        let fileFound = false;
-        for (let extension of extensions) {
-            if (fs.existsSync(directory + word + extension)) {
-                foundFiles.push(word + extension);
-                fileFound = true;
-                break;
-            }
+    const wordQuery = `
+        SELECT *
+            FROM word_content
+        LEFT JOIN translations
+            ON word_content.word_content_id = translations.translation_id
+        LEFT JOIN sound_paths
+            ON translations.translation_id = sound_paths.sound_id
+        WHERE ${target_language} = $1;
+    `
+    for (word of wordArray) {
+        const response = await pool.query(wordQuery, [word])
+            .then(res => res.rows[0]).catch((err) => console.log(err));
+        if (!response || !response.image_path) {
+            missingImages.push(word);
+            missingSounds.push(word);
+        } else if (!response[`${target_language}_sound_path`]) {
+            missingSounds.push(word);
         }
-        if (!fileFound) {
-            missingFiles.push(word);
-        }
-    };
-    return [missingFiles, foundFiles];
-};
+    }
 
+    return [missingImages, missingSounds];
+}
 
 function find_unique_violation(firstObjArray, secondObjArray, columns) {
     const getValues = (obj) => {
@@ -30,6 +34,10 @@ function find_unique_violation(firstObjArray, secondObjArray, columns) {
             }
         }
         return values;
+    }
+
+    if (firstObjArray.length === 0 || secondObjArray === 0) {
+        return false;
     }
 
     const firstDirValues = firstObjArray.map(obj => getValues(obj));
@@ -45,7 +53,6 @@ function find_unique_violation(firstObjArray, secondObjArray, columns) {
     return false;
 }
 
-
 module.exports = {
-    findFiles, find_unique_violation
+    locate_words, find_unique_violation
 }

@@ -1,7 +1,7 @@
-const err_utils = require('../database/db_functions/index');
+const err_utils = require('../database/db_functions/common/index');
 const item_utils = require('../database/db_functions/item_functions');
 const dir_utils = require('../database/db_functions/directory');
-const { updateDirectory } = require('../database/db_functions/item_relocation');
+const { update_directory } = require('../database/db_functions/item_relocation');
 const test_utils = require("../test/other_functions");
 
 // Change item order in a directory.
@@ -12,23 +12,18 @@ const change_item_order = async (req, res) => {
     const db = req.app.get('database');
 
     // Body mismatch
-    if (test_utils.is_blank([item_id, new_order, direction, category_id])
+    if (test_utils.does_not_exist([item_id, new_order, direction, category_id])
         || Object.keys(req.body).length > 4) {
         return res.status(400).send({"errDesc": "Missing or extra body"});
     };
 
     // Type mismatch
-    if (typeof item_id !== 'number' || typeof new_order !== 'number'
-        || typeof direction !== 'string'
-        || (category_id !== null && typeof category_id !== 'number')) {
+    if (([item_id, new_order, direction].some(x => typeof x !== 'string'))
+        || (category_id !== null && typeof category_id !== 'string')) {
             return res.status(400).send({"errDesc": "Type mismatch"});
     }
 
-    if (test_utils.fullSpace.test(direction)) {
-        return res.status(400).send({"errDesc": "Blank value"});
-    }
-
-    const itemInfo = await item_utils.getItemInfo(db, item_id);
+    const itemInfo = await item_utils.get_item_info(db, item_id);
     if (!itemInfo
         || itemInfo.owner !== username
         || itemInfo.item_type === 'root_folder'
@@ -38,9 +33,10 @@ const change_item_order = async (req, res) => {
     }
 
     let categoryError = false;
+    let categoryInfo;
     if (category_id !== null) {
         // Provided category must be valid.
-        var categoryInfo = await item_utils.getItemInfo(db, category_id);
+        categoryInfo = await item_utils.get_item_info(db, category_id);
         if (!categoryInfo) {
             categoryError = true;
         }
@@ -59,9 +55,9 @@ const change_item_order = async (req, res) => {
         // Category and moved item are not in the same folder.
         if (categoryInfo.parent_id !== itemInfo.parent_id) {
             categoryError = true;
-        }
+        }    
     } else {
-        const dirInfo = await item_utils.getItemInfo(db, itemInfo.parent_id);
+        const dirInfo = await item_utils.get_item_info(db, itemInfo.parent_id);
         if (!dirInfo) {
             categoryError = true;
         } else {
@@ -78,10 +74,18 @@ const change_item_order = async (req, res) => {
         return res.status(400).send({"errDesc": "Invalid category"});
     }
 
+    if (categoryInfo) {
+        if (itemInfo.target_language !== categoryInfo.category_target_language) {
+            return res.status(400).send({"errDesc": "Category target language is different."});
+        } else if (itemInfo.source_language !== categoryInfo.category_source_language) {
+            return res.status(400).send({"errDesc": "Category source language is different."});
+        }
+    }
+
     // Item moved to the same place.
-    if (parseInt(itemInfo.item_order) === new_order) {
+    if (itemInfo.item_order === new_order) {
         if (category_id !== null) {
-            if (parseInt(itemInfo.category_id) === category_id) {
+            if (itemInfo.category_id === category_id) {
                 return res.status(200).send({"errDesc": 'No change needed'});
             }
         } else {
@@ -91,7 +95,7 @@ const change_item_order = async (req, res) => {
         }
     }
     
-    await item_utils.updateItemOrder(
+    await item_utils.update_item_order(
         db, username, item_id, new_order, direction, itemInfo.parent_id, category_id)
         .then(() => res.status(200).send())
         .catch(() => res.status(400).send({"errDesc": "Something went wrong..."}));
@@ -106,12 +110,12 @@ const set_item_directory = async (req, res) => {
     const db = req.app.get('database');
 
     // Body mismatch
-    if (test_utils.is_blank([item_id, target_id]) || Object.keys(req.body).length > 2) {
+    if (test_utils.does_not_exist([item_id, target_id]) || Object.keys(req.body).length > 2) {
         return res.status(400).send({"errDesc": "Missing or extra body"});
     };
 
     // Type mismatch
-    if (typeof item_id !== 'number' || (target_id !== null && typeof target_id !== 'number')) {
+    if (typeof item_id !== 'string' || (target_id !== null && typeof target_id !== 'string')) {
         return res.status(400).send({"errDesc": "Type mismatch"});
     }
 
@@ -120,7 +124,7 @@ const set_item_directory = async (req, res) => {
         return res.status(400).send({"errDesc": "Invalid directory"});
     }
     
-    const itemInfo = await item_utils.getItemInfo(db, item_id);
+    const itemInfo = await item_utils.get_item_info(db, item_id);
     if (!itemInfo
         || itemInfo.owner !== username
         || itemInfo.item_type === 'root_folder') {
@@ -133,7 +137,7 @@ const set_item_directory = async (req, res) => {
     let targetError = false;
     if (target_id) {
         // Moving item into a subfolder.
-        const targetInfo = await item_utils.getItemInfo(db, target_id);
+        const targetInfo = await item_utils.get_item_info(db, target_id);
         if (!targetInfo) {
             targetError = true;
         }
@@ -152,7 +156,7 @@ const set_item_directory = async (req, res) => {
         }
     } else {
         // Moving item back to the parent.
-        const parentInfo = await item_utils.getItemInfo(db, itemInfo.parent_id);
+        const parentInfo = await item_utils.get_item_info(db, itemInfo.parent_id);
 
         if (!parentInfo) {
             targetError = true;
@@ -179,21 +183,21 @@ const set_item_directory = async (req, res) => {
 
     // Cannot move item into its own subdirectory
     if (itemInfo.item_type === 'folder') {
-        const folder_tree = await dir_utils.getRecursiveTree(db, username, item_id);
-        const treeIds = folder_tree.map(item => parseInt(item.item_id));
+        const folder_tree = await dir_utils.get_recursive_tree(db, username, item_id);
+        const treeIds = folder_tree.map(item => item.item_id);
         if (treeIds.includes(new_target_id)) {
             return res.status(400).send(
                 {"errDesc": `This directory is a subdirectory of '${itemInfo.item_name}'`});
         }
     }
 
-    const updateStatus = await updateDirectory(
+    const updateStatus = await update_directory(
         db, username, item_id, itemInfo.parent_id, new_target_id, null);
 
     if (!updateStatus.error) {
         return res.status(200).send();
     } else {
-        const description = err_utils.handleError(updateStatus.code);
+        const description = err_utils.handle_error(updateStatus.code);
         return res.status(400).send(
             description == 'Unique Violation' ? 
             {"errDesc": `'${itemInfo.item_name}' already exists in` 

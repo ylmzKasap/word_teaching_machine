@@ -1,12 +1,12 @@
 const db = require('../test_database');
-const  { roV } = require('./other_functions');
+const  { roV } = require('./common/functions');
 
 const user_utils = require('./user_creation');
-const setup = require('./setup');
+const setup = require('../setup');
 const { glob } = require('../build_database');
 
 
-setup.setupBeforeAndAfter(db);
+setup.setup_before_and_after(db);
 
 
 test('Add users and root', async () => {
@@ -32,7 +32,7 @@ test('Add users and root', async () => {
 
 
 test('Delete the user', async () => {
-  await user_utils.deleteUser(db, glob.user_2);
+  await user_utils.delete_user(db, glob.user_2);
 
   const userQuery = `
     SELECT * FROM users WHERE username = $1
@@ -44,9 +44,9 @@ test('Delete the user', async () => {
 
 
 test('Get user info', async () => {
-  const user_1 = await user_utils.getUserInfo(db, glob.user_1);
-  const user_2 = await user_utils.getUserInfo(db, glob.user_2);
-  const user_3 = await user_utils.getUserInfo(db, `NY&+%/K%+%j'4&J768/)\\(=)YKTUY"J646`);
+  const user_1 = await user_utils.get_user_info(db, glob.user_1);
+  const user_2 = await user_utils.get_user_info(db, glob.user_2);
+  const user_3 = await user_utils.get_user_info(db, `NY&+%/K%+%j'4&J768/)\\(=)YKTUY"J646`);
 
   expect(user_1.user_id).toBe("1");
   expect(user_1.username).toBe(glob.user_1);

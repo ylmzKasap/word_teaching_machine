@@ -7,13 +7,13 @@ const serve_user = async (req, res) => {
     const { username, directory_id } = req.params;
 
     const db = req.app.get('database');
-    const info = await user_utils.getUserInfo(db, username);
 
-    const dirId = directory_id === 'home' ? await dir_utils.getRoot(db, username) : directory_id;
+    const info = await user_utils.get_user_info(db, username);
+    const dirId = directory_id === 'home' ? await dir_utils.get_root(db, username) : directory_id;
     
     if (info) {
         if (dirId) {
-            const [directory, dirInfo] = await dir_utils.getDirectory(db, username, dirId);
+            const [directory, dirInfo] = await dir_utils.get_directory(db, username, dirId);
 
             if (directory) {
                 return res.status(200).send([directory, dirInfo]);
@@ -34,15 +34,15 @@ const serve_item = async (req, res) => {
     const { username, directory_id, item_id } = req.params;
     
     const db = req.app.get('database');
-    const pathExists = await item_utils.checkFilePath(db, username, directory_id, item_id);
+    const pathExists = await item_utils.check_deck_path(db, username, directory_id, item_id);
 
     if (!pathExists) {
-        return res.status(404).send({"errDesc": "Item not found"});
+        return res.status(404).send({"errDesc": "Deck not found"});
     }
 
-    const itemInfo = await item_utils.getItemInfo(db, item_id);
+    const itemInfo = await item_utils.get_deck_info(db, item_id);
     
-    if (itemInfo === null) {
+    if (!itemInfo) {
         return res.status(404).send({"errDesc": "Deck not found"});
     } else {
         return res.status(200).send(itemInfo);
