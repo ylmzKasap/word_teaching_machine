@@ -9,7 +9,7 @@ import { optionStyleDefaults, timeoutDefaults } from "./types/QuestionPageDefaul
 import * as types from "./types/QuestionPageTypes";
 
 export const AskFromPicture: React.FC<types.QuestionComponentPropTypes> = (
-  {allPaths, allWords, imgPath, word}) => {
+  {wordInfo, word}) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
 
   const [imageAnimation, setImageAnimtion] = useState("");
@@ -21,16 +21,14 @@ export const AskFromPicture: React.FC<types.QuestionComponentPropTypes> = (
 
   const pageItems = [
     <TextOptions
-      allPaths={allPaths}
-      allWords={allWords}
-      imgPath={imgPath}
+      wordInfo={wordInfo}
       word={word}
       animate={animateImage}
       key={word + "-option"}
     />,
 
     <IntroImage
-      imgPath={imgPath}
+      wordInfo={wordInfo}
       word={word}
       animation={imageAnimation}
       key={word + "-image"}
@@ -83,7 +81,7 @@ const TextOptionBox: React.FC<types.OptionTypes> = (props) => {
         setTimeouts({
           sound: window.setTimeout(() => {
             props.animate();
-            audioMixer.src = `media\\${props.word}.mp3`;
+            audioMixer.src = `media/${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
             playAndCatchError(audioMixer, errorMessage);
           }, 1000),
           click: window.setTimeout(() => handleParentClick(), 2000),
@@ -109,7 +107,7 @@ const TextOptionBox: React.FC<types.OptionTypes> = (props) => {
       onClick={handleClick}
     >
       <NumberBox type="text" number={props.number} style={optionStyle.numStyle} />
-      <div className="option-text">{props.word}</div>
+      <div className="option-text">{props.word[props.wordInfo.target_language]}</div>
     </label>
   );
 };

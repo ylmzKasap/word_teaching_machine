@@ -18,11 +18,17 @@
   box-shadow: rgb(155, 155, 155) -1px 1px 5px 1px;
 }
 
+.form-content {
+  height: 100%;
+  width: 100%;
+  overflow-y: scroll;
+}
+
 .input-label {
   display: flex;
   flex-direction: column;
   line-height: 2.5em;
-  margin: 2% 6% 3% 6%;
+  margin: 2% 6% 1% 6%;
   > .input-info {
     display: flex;
     justify-content: space-between;
@@ -95,16 +101,21 @@
 
 .overlay-nav {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   height: 10%;
   background-color: rgb(56, 56, 56);
   padding-left: 3%;
+  margin-left: 0px;
   color: white;
+  > .extra-info {
+    color:rgb(205, 204, 203);
+    margin: 0px 5px 0px 10px;
+  }
   > .exit-button {
     background-color: rgb(56, 56, 56);
     height: 100%;
     width: 10%;
+    margin-left: auto;
     font-weight: bold;
     border-left: solid rgb(233, 233, 233);
     border-width: 0px 0px 0px 3px;
@@ -161,4 +172,8 @@ input[type="radio"] {
   justify-content: space-around;
   border: inset rgb(118, 118, 118) 2px;
   border-radius: 5px;
+}
+
+#dropdown {
+  padding: 7px;
 }

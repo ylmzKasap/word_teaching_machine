@@ -1,9 +1,18 @@
 import React from "react";
+import { wordTypes } from "../../profile_components/types/profilePageTypes";
 
 export interface LocationTypes {
-  allPaths: string[];
+  words: wordTypes[];
+  target_language: string;
+  source_language: string;
   directory: number;
   rootDirectory: number;
+}
+
+export interface WordInfoTypes {
+  words: wordTypes[];
+  target_language: string;
+  source_language: string;
 }
 
 export type ParamTypes = {
@@ -15,7 +24,7 @@ export type ParamTypes = {
 export interface PageContent {
   component: React.FC<QuestionComponentPropTypes> | null;
   type: string;
-  path: string;
+  word: wordTypes;
   order: number;
 }
 export type PageTypes = PageContent[];
@@ -26,10 +35,8 @@ export interface QuestionBodyTypes {
 }
 
 export interface QuestionComponentPropTypes {
-  allPaths: string[];
-  allWords: string[];
-  imgPath: string;
-  word: string;
+  wordInfo: WordInfoTypes;
+  word: wordTypes;
 }
 
 export interface TextOptionsPropsTypes extends QuestionComponentPropTypes {
@@ -39,8 +46,8 @@ export interface TextOptionsPropsTypes extends QuestionComponentPropTypes {
 
 export interface OptionTypes {
   isCorrect: boolean;
-  imgPath: string;
-  word: string;
+  word: wordTypes;
+  wordInfo: WordInfoTypes;
   number: number;
   key: string;
   animate: () => void;
@@ -73,15 +80,15 @@ export interface TextAnimationContextTypes {
 }
 
 export interface IntroImageTypes {
-  imgPath: string;
-  word: string;
+  wordInfo: WordInfoTypes;
+  word: wordTypes;
   key: string;
   animation?: string;
 }
 
 export interface IntroTextTypes {
-  imgPath: string;
-  word: string;
+  wordInfo: WordInfoTypes;
+  word: wordTypes;
   type: string;
   animation: string;
 }

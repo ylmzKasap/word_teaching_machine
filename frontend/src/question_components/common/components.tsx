@@ -12,8 +12,8 @@ export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
     <div className={`intro-img-box ${imgAnim}`}>
       <img
         className="intro-img"
-        src={`media//${props.imgPath}`}
-        alt={props.word}
+        src={`media/${props.word.image_path}`}
+        alt={`${props.word[props.wordInfo.target_language]}`}
       />
     </div>
   );
@@ -49,11 +49,11 @@ export const IntroText: React.FC<types.IntroTextTypes> = (props) => {
   }
 
   function playSound() {
-    audioMixer.src = `media\\${props.word}.mp3`;
+    audioMixer.src = `media/${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
     audioMixer.load();
     playAndCatchError(audioMixer, "Playback prevented by browser.");
   }
-
+  
   const pageMessage = isMobile ? "Tap" : "Click";
   const pageIcon = isMobile ? "fas fa-fingerprint" : "fa fa-mouse-pointer";
 
@@ -67,7 +67,7 @@ export const IntroText: React.FC<types.IntroTextTypes> = (props) => {
         }}
         onAnimationEnd={toggleAnimation}
       >
-        {props.word}
+        {props.word[props.wordInfo.target_language]}
       </p>
       {props.type === "intro" && (
         <div className="continue">

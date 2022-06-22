@@ -2,7 +2,6 @@ import { ContextMenuInfoTypes, CloneTimeoutTypes } from "../types/profilePageTyp
 import { contextMenuInfoDefault, draggedElementDefault } from "../types/profilePageDefaults";
 import { PageItemPropTypes } from "../types/pageItemTypes";
 import React from "react";
-import { formErrorDefault, nameErrorDefault } from "../types/overlayDefaults";
 
 export function handleItemName(event: React.ChangeEvent) {
   // Used by CreateDeckOverlay and CreateFolderOverlay.
@@ -11,27 +10,19 @@ export function handleItemName(event: React.ChangeEvent) {
   const element = event.target as HTMLInputElement;
 
   const itemName = element.value;
-  let itemNameError = nameErrorDefault;
-  const generalError = formErrorDefault;
+  let itemNameError = "";
 
   if (itemNameFilter.test(itemName)) {
-    itemNameError = {
-      errorClass: "forbidden-input",
-      description: `Forbidden character ' ${itemName.match(itemNameFilter)} '`,
-    };
+    itemNameError = `Forbidden character ' ${itemName.match(itemNameFilter)} '`;
+
   } else if (itemName.length > 40) {
-    itemNameError = {
-      errorClass: "forbidden-input",
-      description: `Input too long: ${itemName.length} characters > 40`,
-    };
+    itemNameError = `Input too long: ${itemName.length} characters > 40`;
+
   } else if (itemName.replace(/[\s]/g, "") === "" && itemName !== "") {
-    itemNameError = {
-      errorClass: "forbidden-input",
-      description: "Input cannot only contain spaces",
-    };
+    itemNameError = "Input cannot only contain spaces";
   }
 
-  return [itemName, itemNameError, generalError] as const;
+  return [itemName, itemNameError] as const;
 }
 
 export function handleDownOnDragged(
@@ -59,7 +50,7 @@ export function create_context_menu(
   if (!closestItem) {
     return {
       closest: element,
-      openedElem: { id: null, type: "void", name: null },
+      openedElem: { id: undefined, type: "void", name: undefined },
       ops: ["no actions"],
     };
   }
@@ -71,10 +62,10 @@ export function create_context_menu(
   if (
     ["card-container", "category-container"].includes(closestItem.className)
   ) {
-    contextMenuInfo.openedElem = { id: null, type: "container", name: null };
+    contextMenuInfo.openedElem = { id: undefined, type: "container", name: undefined };
     contextMenuInfo.ops = ["paste"];
   } else {
-    // Page item like file, folder, thematic-folder, category.
+    // Page item like deck, folder, thematic-folder, category.
     const categoryHeader = closestItem.querySelector(".category-header") as HTMLElement;
     contextMenuInfo.openedElem = {
       id: closestItem.id,
@@ -87,7 +78,7 @@ export function create_context_menu(
 
     if (closestItem.className === "category") {
       contextMenuInfo.ops = ["cut", "paste", "delete"];
-    } else if (closestItem.className === "file") {
+    } else if (closestItem.className === "deck") {
       contextMenuInfo.ops = ["copy", "cut", "delete"];
     } else {
       contextMenuInfo.ops = ["cut", "delete"];

@@ -5,36 +5,36 @@ type Timer = ReturnType<typeof setTimeout>;
 export type userResponse = [serverItemTypes[], dirInfoTypes];
 
 export interface ClipboardTypes {
-  action: string | null;
-  id: string | null;
-  type: string | null;
-  directory: number | null;
+  action: string | undefined;
+  id: string | undefined;
+  type: string | undefined;
+  directory: string | undefined;
 }
 
 export interface DirectoryInfoTypes {
-  item_id: string | null;
-  owner: string | null;
-  item_type: string | null;
-  parent_id: number | null;
-  item_order: string | null;
-  category_id: string | null;
+  item_id: string | undefined;
+  owner: string | undefined;
+  item_type: string | undefined;
+  parent_id: string | null | undefined;
+  item_order: string | undefined;
+  category_id: string | null | undefined;
 }
 
 export interface DraggedElementTypes {
-  id: string;
-  name: string | null;
-  type: string | null;
+  id: string | undefined;
+  name: string | undefined;
+  type: string | undefined;
 }
 
 export interface RequestErrorTypes {
   exists: boolean;
-  description: string | null;
+  description: string | undefined;
 }
 
 export interface ScrollingTypes {
   exists: boolean;
-  element: React.ReactElement | Element | null;
-  clientY: number | null;
+  element: React.ReactElement | Element | undefined;
+  clientY: number | undefined;
   interval: number | Timer;
 }
 
@@ -44,9 +44,9 @@ export interface ContextMenuScrollTypes {
 }
 
 export interface ContextOpenedElemTypes {
-  id: string | null;
-  type: string | null;
-  name: string | null;
+  id: string | undefined;
+  type: string | undefined;
+  name: string | undefined;
 }
 
 export interface ContextMenuInfoTypes {
@@ -79,33 +79,65 @@ export interface CloneTimeoutTypes {
 }
 
 export interface dirInfoTypes {
-  category_id: null;
+  category_id: string | null | undefined;
   item_id: string;
   item_name: string;
   item_order: string;
   item_type: string;
   owner: string;
-  parent_id: number | null;
+  parent_id: string | null | undefined;
+}
+
+export interface wordTypes {
+  artist_id: string | undefined;
+  deck_id: string | undefined;
+  image_path: string | undefined;
+  english?: string;
+  turkish?: string;
+  german?: string;
+  french?: string;
+  spanish?: string;
+  greek?: string;
+  english_sound_path?: string;
+  turkish_sound_path?: string;
+  german_sound_path?: string;
+  french_sound_path?: string;
+  spanish_sound_path?: string;
+  greek_sound_path?: string;
+  word_order: number | undefined;
+  [key: string]: string | undefined | number;
 }
 
 export interface serverItemTypes {
   category_id: string | null;
-  color: string | null;
-  content_id: number | null;
-  content_number: string | null;
-  item_id: string;
+  completed?: boolean;
+  deck_key?: string;
+  category_key?: string;
+  item_id: string;  
   item_name: string;
   item_order: string;
   item_type: string;
   owner: string;
-  parent_id: number;
-  words: string | null
+  parent_id: string;
+  category_source_language?: string;
+  category_target_language?: string;
+  color?: string;
+  source_language?: string;
+  target_language?: string;
+  words?: wordTypes[];
+}
+
+export interface CategoryInfoTypes {
+  id: string | undefined,
+  name: string | undefined,
+  targetLanguage: string | undefined,
+  sourceLanguage: string | undefined
 }
 
 export interface ProfileContextTypes {
   username: string | undefined;
-  rootDirectory: number;
-  directory: number;
+  rootDirectory: string;
+  directory: string;
   directoryInfo: DirectoryInfoTypes;
   items: React.ReactElement[];
   setReRender: React.DispatchWithoutAction;
@@ -113,7 +145,7 @@ export interface ProfileContextTypes {
   setClipboard: React.Dispatch<React.SetStateAction<ClipboardTypes>>;
   contentLoaded: boolean;
   fetchError: boolean;
-  requestError: {exists: boolean; description: string | null};
+  requestError: {exists: boolean; description: string | undefined};
   setRequestError: React.Dispatch<React.SetStateAction<RequestErrorTypes>>;
   contextOpenedElem: ContextOpenedElemTypes;
   contextOptions: string[];
@@ -125,8 +157,8 @@ export interface ProfileContextTypes {
   categoryDrag: boolean;
   deckDisplay: boolean;
   setDeckDisplay: React.Dispatch<React.SetStateAction<boolean>>;
-  categoryId: number;
-  setCategoryId: React.Dispatch<React.SetStateAction<number>>;
+  categoryInfo: CategoryInfoTypes;
+  setCategoryInfo: React.Dispatch<React.SetStateAction<CategoryInfoTypes>>;
   columnNumber: number;
   handleContextMenu: (event: React.MouseEvent) => void;
   handleScroll: (event: React.UIEvent<HTMLElement>) => void;

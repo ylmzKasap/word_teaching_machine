@@ -1,12 +1,14 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useReducer } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
+import { OverlayNavbar } from "./common/components";
 import * as handlers from "./common/handlers";
-import * as components from "./common/components";
+import * as form_components from "./common/form_components";
 import * as defaults from "./types/overlayDefaults";
 import { ProfileContextTypes } from "./types/profilePageTypes";
 import { CreateItemOverlayTypes } from "./types/overlayTypes";
+import { handleOverlayError } from "./common/reducers";
 
 
 export const CreateFolderOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
@@ -24,17 +26,15 @@ export const CreateFolder: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => 
 
   const [folderName, setFolderName] = useState("");
   const [folderType, setFolderType] = useState("regular_folder");
-  const [nameError, setNameError] = useState(defaults.nameErrorDefault);
-  const [formError, setFormError] = useState(defaults.formErrorDefault);
+  const [errors, setErrors] = useReducer(handleOverlayError, defaults.folderErrorDefault);
 
   const { username, directory, setReRender } = useContext(ProfileContext) as ProfileContextTypes;
 
   const handleNameChange = (event: React.ChangeEvent) => {
-    const [itemName, itemNameError, generalError] =
-      handlers.handleItemName(event);
+    const [itemName, itemNameError] = handlers.handleItemName(event);
     setFolderName(itemName);
-    setNameError(itemNameError);
-    setFormError(generalError);
+    setErrors({type: "name", error: itemNameError});
+    setErrors({type: "form", error: ""});
   };
 
   const handleRadioChange = (event: React.ChangeEvent) => {
@@ -53,36 +53,24 @@ export const CreateFolder: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => 
     event.preventDefault();
 
     if (folderName === "") {
-      setFormError({
-        display: {display: "flex"},
-        errorClass: "invalid-form",
-        description: "Enter a folder name.",
-      });
-    } else if (nameError.errorClass !== "") {
-      setFormError({
-        display: {display: "flex"},
-        errorClass: "invalid-form",
-        description: "Fix the problem above.",
-      });
+      setErrors({type: "form", error: "Enter a folder name."});
+    } else if (errors.nameError.errorClass) {
+      setErrors({type: "form", error: "Fix the problem above.",});
     } else {
       axios
         .post(`/create_folder/${username}`, {
           folder_name: folderName,
-          folder_type: folderType,
-          parent_id: directory,
+          folder_type: folderType === 'regular_folder' ? 'folder' : folderType,
+          parent_id: `${directory}`,
         })
         .then(() => {
           setFolderName("");
-          setFormError(defaults.formErrorDefault);
+          setErrors({type: "form", error: ""});
           setReRender();
           setDisplay(false);
         })
         .catch((err) =>
-          setFormError({
-            display: {display: "flex"},
-            errorClass: "invalid-form",
-            description: err.response.data.errDesc,
-          })
+          setErrors({type: "form", error: err.response.data.errDesc})
         );
     }
   };
@@ -93,19 +81,20 @@ export const CreateFolder: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => 
       onSubmit={handleSubmit}
       onKeyDown={handleSubmit}
     >
-      <components.OverlayNavbar
+      <OverlayNavbar
         setDisplay={setDisplay}
         description="Create a new folder"
       />
-      {/* Folder name */}
-      <components.InputField
+      <div className="form-content">
+        {/* Folder name */}
+      <form_components.InputField
         description="Folder Name:"
-        error={nameError}
+        error={errors.nameError}
         value={folderName}
         handler={handleNameChange}
         placeholder="Enter a folder name"
       />
-      <components.Radio
+      <form_components.Radio
         description="Folder Type:"
         buttons={["Regular folder", "Thematic folder"]}
         checked="regular_folder"
@@ -113,10 +102,11 @@ export const CreateFolder: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => 
         handler={handleRadioChange}
       />
       {/* Submit & Error */}
-      <components.SubmitForm
+      <form_components.SubmitForm
         description="Create Folder"
-        formError={formError}
+        formError={errors.formError}
       />
+      </div>
     </form>
   );
 };

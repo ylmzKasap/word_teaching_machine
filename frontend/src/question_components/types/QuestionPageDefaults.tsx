@@ -1,7 +1,9 @@
+import { wordDefault } from "../../profile_components/types/profilePageDefaults";
+
 export const questionPageDefault = [{
   component: null,
   type: "",
-  path: "",
+  word: wordDefault[0],
   order: 0
 }];
 
@@ -17,4 +19,10 @@ export const introTextTimeoutDefaults = {
 export const optionStyleDefaults = {
   animation: "",
   numStyle: ""
+};
+
+export const wordInfoDefault = {
+  words: wordDefault,
+  target_language: '',
+  source_language: '',
 };

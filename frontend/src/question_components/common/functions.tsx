@@ -3,7 +3,7 @@ import { AskFromText } from "../AskFromText";
 import { AskFromPicture } from "../AskFromPicture";
 import * as types from "../types/QuestionPageTypes";
 
-export function shuffle(array: string[]) {
+export function shuffle(array: any[]) {
   let currentIndex = array.length,
     randomIndex;
 
@@ -37,7 +37,8 @@ export function playAndCatchError(mixer:  HTMLAudioElement, message: string) {
   mixer.load();
   let playPromise = mixer.play();
   if (playPromise !== undefined) {
-    playPromise.catch(() => {
+    playPromise.catch((err) => {
+      console.log(err);
       console.log(message);
     });
   }
@@ -48,34 +49,38 @@ export function getRandomOptions(
   // Creates random options with ImageOptionBox and TextOptionBox.
   // Called by ImageOptions and TextOptions.
 
-  let allOptionsCopy = [...props.allPaths];
-  let correctOption = props.imgPath;
+  const allWords = shuffle(props.wordInfo.words);
+  const correctOption = props.word;
   let options = [];
-  let optionCount = allOptionsCopy.length;
+
   // Maximum four options.
-  if (optionCount > 4) {
-    optionCount = 4;
-  }
+  let optionCount = allWords.length > 4 ? 4 : allWords.length;
+
   // Push the correct answer.
   options.push(correctOption);
-  allOptionsCopy.splice(allOptionsCopy.indexOf(correctOption), 1);
-  // Push the incorrect answers.
-  for (let i = 0; i < optionCount - 1; i++) {
-    let randomIndex = Math.floor(Math.random() * allOptionsCopy.length);
-    options.push(allOptionsCopy[randomIndex]);
-    allOptionsCopy.splice(randomIndex, 1);
+  
+  let index = 0;
+  while (options.length !== optionCount) {
+    if (index > optionCount + 1) {
+      break;
+    }
+    if (allWords[index].image_path === correctOption.image_path) {
+      index++;
+      continue;
+    }
+    options.push(allWords[index]);
+    index++;
   }
-  // Shuffle and set the option indexes.
-  shuffle(options);
-  options = options.map((iPath, index) => {
-    let pathStem = iPath.split(".")[0];
+
+  options = shuffle(options);
+  options = options.map((word, index) => {
     return (
       <Component
-        isCorrect={iPath === correctOption}
-        imgPath={iPath}
-        word={pathStem}
+        isCorrect={word.image_path === correctOption.image_path}
+        word={word}
+        wordInfo={props.wordInfo}
         number={index + 1}
-        key={pathStem + `-option-${index}`}
+        key={word[props.wordInfo.target_language] + `-option-${index}`}
         animate={props.animate}
       />
     );
@@ -84,7 +89,7 @@ export function getRandomOptions(
   return [...options];
 }
 
-export function generate_pages(paths: string[]) {
+export function generate_pages(wordInfo: types.WordInfoTypes) {
   // Used by QuestionPage.
 
   function disperse_questions(array: types.PageTypes) {
@@ -99,13 +104,13 @@ export function generate_pages(paths: string[]) {
           ? {
               component: AskFromText,
               type: "AskFromText",
-              path: paths[i],
+              word: wordInfo.words[i],
               order: i + 1,
             }
           : {
               component: AskFromPicture,
               type: "AskFromPicture",
-              path: paths[i],
+              word: wordInfo.words[i],
               order: i + 1,
             }
       );
@@ -113,11 +118,11 @@ export function generate_pages(paths: string[]) {
     return copyArray;
   }
   let pages = [];
-  for (let i = 0; i < paths.length; i++) {
+  for (let i = 0; i < wordInfo.words.length; i++) {
     pages.push({
       component: IntroduceWord,
       type: "IntroduceWord",
-      path: paths[i],
+      word: wordInfo.words[i],
       order: i + 1,
     });
   }
@@ -125,21 +130,15 @@ export function generate_pages(paths: string[]) {
   return [...pages];
 }
 
-export const process_page_object = (obj: types.PageContent, allPaths: string[]) => {
-
+export const process_page_object = (obj: types.PageContent, wordInfo: types.WordInfoTypes) => {
   const keyType = obj.type === "IntroduceWord" ? "-intro-" : "-question-";
-  const wordStem = obj.path.split(".")[0];
-
-  let allWords = allPaths.map((p) => p.split(".")[0]);
 
   return (
     <>
       {obj.component && <obj.component
-        allPaths={allPaths}
-        allWords={allWords}
-        imgPath={obj.path}
-        word={wordStem}
-        key={wordStem + keyType + String(obj.order)}
+        wordInfo={wordInfo}
+        word={obj.word}
+        key={obj.word + keyType + String(obj.order)}
       />
       }
     </>

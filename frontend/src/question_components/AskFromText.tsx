@@ -9,7 +9,7 @@ import * as defaults from "./types/QuestionPageDefaults";
 import * as types from "./types/QuestionPageTypes";
 
 export const AskFromText: React.FC<types.QuestionComponentPropTypes> = (
-  {allPaths, allWords, imgPath, word}) => {
+  {wordInfo, word}) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
 
   const [textAnimation, setTextAnimation] = useState("");
@@ -22,15 +22,13 @@ export const AskFromText: React.FC<types.QuestionComponentPropTypes> = (
   return (
     <div className={"ask-from-text-box"}>
       <IntroText
-        imgPath={imgPath}
+        wordInfo={wordInfo}
         word={word}
         type="ask-from"
         animation={textAnimation}
       />
         <ImageOptions
-          allPaths={allPaths}
-          allWords={allWords}
-          imgPath={imgPath}
+          wordInfo={wordInfo}
           word={word}
           animate={animateText}
           key={word + '-option'}
@@ -69,13 +67,13 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
     if (props.isCorrect === true) {
       if (optionStyle.animation === "") {
         setCorrectFound(true);
-        audioMixer.src = "media\\correct.mp3";
+        audioMixer.src = "media/correct.mp3";
         playAndCatchError(audioMixer, errorMessage);
         setOptionStyle({type: "image", answer: "correct"});
         handleTimeouts({
           sound: window.setTimeout(() => {
             props.animate();
-            audioMixer.src = `media\\${props.word}.mp3`;
+            audioMixer.src = `media/${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
             playAndCatchError(audioMixer, errorMessage);
           }, 1000),
           click: window.setTimeout(() => handleParentClick(), 2000),
@@ -83,7 +81,7 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
       }
     } else {
       if (optionStyle.animation === "") {
-        audioMixer.src = "media\\incorrect.mp3";
+        audioMixer.src = "media/incorrect.mp3";
         playAndCatchError(audioMixer, errorMessage);
         setOptionStyle({type: "image", answer: "incorrect"});
         if (!correctFound) {
@@ -98,8 +96,8 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
     <div className={`image-option-box ${optionStyle.animation}`} onClick={handleClick}>
       <img
         className="image-option"
-        src={`media\\${props.imgPath}`}
-        alt={props.word}
+        src={`media/${props.word.image_path}`}
+        alt={`${props.word[props.wordInfo.target_language]}`}
       />
       <NumberBox type="image" number={props.number} style={optionStyle.numStyle} />
     </div>

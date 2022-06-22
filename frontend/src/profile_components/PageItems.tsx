@@ -21,7 +21,8 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   const params = useParams();
 
   const [selfStyle, setSelfStyle] = useState({...defaults.selfStyleDefault, order: props.order });
-  const [itemStyle, setItemStyle] = useState({ backgroundColor: props.color, boxShadow: "" });
+  const [itemStyle, setItemStyle] = useState(
+    { backgroundColor: props.color ? props.color : "", boxShadow: "" });
   const [folderStyle, setFolderStyle] = useState("");
   const [fillerClass, setFillerClass] = useState("");
   const [lastFillerClass, setLastFillerClass] = useState("");
@@ -121,17 +122,19 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
     }
 
     let targetElem = event.target as HTMLElement;
-    if (!["file", "folder", "category"].includes(targetElem.className)) {
+    if (!["deck", "folder", "category"].includes(targetElem.className)) {
       const closestElem = targetElem.closest(`.${props.type}`) as HTMLElement;
       if (closestElem) {
         targetElem = closestElem;
       }
     }
 
-    if (targetElem.className === "file" && !isDragging) {
+    if (targetElem.className === "deck" && !isDragging) {
       navigate(`${trueDirectory}deck/${extract_int(targetElem.id)}`, {
         state: {
-          allPaths: props.words,
+          words: props.words,
+          source_language: props.source_language,
+          target_language: props.target_language,
           directory: directory,
           rootDirectory: rootDirectory,
         },
@@ -139,21 +142,21 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
     }
 
     if (
-      (["file", "category", "thematic-folder"].includes(targetElem.className) ||
+      (["deck", "category", "thematic-folder"].includes(targetElem.className) ||
       draggedElement.id === targetElem.id) && isDragging
     ) {
       resetDrag(true);
       return;
     }
 
-    setItemStyle(prev => ({...prev, backgroundColor: props.color }));
+    setItemStyle(prev => ({...prev, backgroundColor: props.color ? props.color : ""}));
     setFolderStyle("");
 
-    if (isDragging) {
+    if (isDragging && draggedElement.id) {
       axios
         .put(`/updatedir/${username}`, {
-          item_id: parseInt(extract_int(draggedElement.id)),
-          target_id: parseInt(extract_int(targetElem.id))
+          item_id: extract_int(draggedElement.id),
+          target_id: extract_int(targetElem.id)
         })
         .then(() => setReRender())
         .catch((err) =>
@@ -181,11 +184,11 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
     if (event.type === "mouseover") {
       setItemStyle({
         boxShadow: "rgb(211, 210, 210) 0px 0px 5px 3px",
-        backgroundColor: props.color,
+        backgroundColor: props.color ? props.color : "",
       });
       setFolderStyle("drag-hover-folder");
     } else if (event.type === "mouseout") {
-      setItemStyle({ boxShadow: "", backgroundColor: props.color });
+      setItemStyle({ boxShadow: "", backgroundColor: props.color ? props.color : "" });
       setFolderStyle("");
     }
   };
@@ -258,8 +261,12 @@ const ItemContainer = () => {
   const createThumbnail = () => {
     let thumbnail = [];
     for (let i = 0; i < parentProps.words.length; i++) {
-      let wordPath = parentProps.words[i];
-      let wordStem = wordPath.split(".")[0];
+      const wordObj = parentProps.words[i];
+      if (!parentProps.target_language) {
+        return;
+      }
+
+      const word = wordObj[parentProps.target_language];
       if (thumbnail.length >= 4) {
         break;
       } else {
@@ -268,9 +275,9 @@ const ItemContainer = () => {
             className={`deck-thumbnail${
               parentProps.words.length < 4 ? " n-1" : ""
             }`}
-            src={`media\\${wordPath}`}
-            key={`${wordStem}-${i}`}
-            alt={`${wordStem}-${i}`}
+            src={`media\\${wordObj.image_path}`}
+            key={`${word}-${i}`}
+            alt={`${word}-${i}`}
             draggable="false"
           />
         );
@@ -299,7 +306,7 @@ const ItemContainer = () => {
       {["folder", "thematic-folder"].includes(parentProps.type) && (
         <i className={`fas fa-folder fa-9x ${folderStyle}`}></i>
       )}
-      {parentProps.type === "file" && (
+      {parentProps.type === "deck" && (
         <picture className="thumbnail-container">
           <span className="image-overlay" />
           {createThumbnail()}
@@ -311,7 +318,7 @@ const ItemContainer = () => {
 };
 
 const CategoryContainer = () => {
-  const { setDeckDisplay, isDragging, setCategoryId } =
+  const { setDeckDisplay, isDragging, setCategoryInfo } =
     useContext(ProfileContext) as ProfileContextTypes;
 
   const {
@@ -319,7 +326,7 @@ const CategoryContainer = () => {
     itemStyle,
     handleMouseDown,
     handleMouseUp,
-    handleHover,
+    handleHover
   } = useContext(ItemContext) as PageItemContextTypes;
 
   const addItem = (event: React.MouseEvent) => {
@@ -331,7 +338,11 @@ const CategoryContainer = () => {
     if (!closestElement) return;
     const categoryId = closestElement.id;
 
-    setCategoryId(parseInt(extract_int(categoryId)));
+    setCategoryInfo({
+      id: extract_int(categoryId),
+      name: parentProps.name,
+      sourceLanguage: parentProps.source_language,
+      targetLanguage: parentProps.target_language});
     setDeckDisplay((x) => !x);
   };
 

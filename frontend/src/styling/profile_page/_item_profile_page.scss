@@ -1,4 +1,4 @@
-.file {
+.deck {
   @include flexit();
   position: relative;
   flex-direction: column;
@@ -20,11 +20,11 @@
 }
 
 .folder {
-  @extend .file;
+  @extend .deck;
 }
 
 .thematic-folder {
-  @extend .file;
+  @extend .deck;
   > .fa-folder {
     color: rgb(44, 164, 185);
   }
@@ -154,7 +154,7 @@
   background-color: rgba(184, 183, 182, 0.486);
 }
 
-.file-description {
+.deck-description {
   color: white;
   font-weight: bold;
   background-color: rgba(2, 36, 80, 0.815);

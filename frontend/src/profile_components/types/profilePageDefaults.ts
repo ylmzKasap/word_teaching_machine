@@ -1,28 +1,28 @@
 export const directoryInfoDefault = {
-  item_id: null,
-  owner: null,
-  item_type: null,
-  parent_id: null,
-  item_order: null,
-  category_id: null
+  item_id: undefined,
+  owner: undefined,
+  item_type: undefined,
+  parent_id: undefined,
+  item_order: undefined,
+  category_id: undefined
 };
 
 export const clipboardDefault = {
-  action: null,
-  id: null,
-  type: null,
-  directory: null
+  action: undefined,
+  id: undefined,
+  type: undefined,
+  directory: undefined
 };
 
 export const requestErrorDefault = {
   exists: false,
-  description: null,
+  description: undefined,
 };
 
 export const contextOpenedElemDefault = {
-  id: null,
-  type: null,
-  name: null
+  id: undefined,
+  type: undefined,
+  name: undefined
 };
 
 export const contextMenuStyleDefault = {top: 0, left: 0};
@@ -53,16 +53,31 @@ export const cloneTimeoutDefault = {
 };
 
 export const draggedElementDefault = {
-  id: "",
-  name: null,
-  type: null
+  id: undefined,
+  name: undefined,
+  type: undefined
 };
 
 export const scrollingDefault = {
   exists: false,
-  element: null,
-  clientY: null,
+  element: undefined,
+  clientY: undefined,
   interval: 0
 };
 
+export const wordDefault = [{
+  artist_id: undefined,
+  deck_id: undefined,
+  image_path: undefined,
+  english: undefined,
+  turkish: undefined,
+  word_order: 0
+}];
+
+export const categoryInfoDefault = {
+  id: undefined,
+  name: undefined,
+  targetLanguage: undefined,
+  sourceLanguage: undefined
+};
 

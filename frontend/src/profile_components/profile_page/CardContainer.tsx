@@ -59,9 +59,13 @@ const BottomDragBar: React.FC = () => {
 
   const sendBack = () => {
     // Move dragged item to parent folder.
+    if (!draggedElement.id) {
+      return;
+    }
+    
     axios
       .put(`/updatedir/${username}`, {
-        item_id: parseInt(extract_int(draggedElement.id)),
+        item_id: extract_int(draggedElement.id),
         target_id: null
       })
       .then(() => setReRender())

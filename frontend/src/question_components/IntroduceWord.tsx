@@ -8,17 +8,17 @@ export const IntroduceWord: React.FC<QuestionComponentPropTypes> = (props) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
 
   const [layout] = useState(Math.random());
-  const { imgPath, word } = props;
+  const { wordInfo, word } = props;
 
   const pageItems = [
     <IntroText
-      imgPath={imgPath}
+      wordInfo={wordInfo}
       word={word}
       key={word + "-text"}
       type="intro"
       animation=""
     />,
-    <IntroImage imgPath={imgPath} word={word} key={word + "-image"} />,
+    <IntroImage wordInfo={wordInfo} word={word} key={word + "-image"} />,
   ];
 
   const { handleParentClick } = useContext(QuestionContext) as QuestionContextTypes;

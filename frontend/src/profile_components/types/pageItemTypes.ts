@@ -1,11 +1,16 @@
+import { wordTypes } from "./profilePageTypes";
+
 export interface PageItemPropTypes {
   key: string;
   id: string;
   name: string;
   type: string;
   order: number;
-  words: string | string[];
-  color: string;
+  words: wordTypes[];
+  color?: string;
+  target_language?: string;
+  source_language?: string;
+  completed?: boolean;
   user: string;
   children?: boolean | React.ReactNode[];
 }

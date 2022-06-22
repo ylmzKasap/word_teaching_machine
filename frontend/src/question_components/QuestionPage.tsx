@@ -25,7 +25,7 @@ export const QuestionPage: React.FC = () => {
 
   const [directory] = useState(state ? state.directory : params.dirId ? parseInt(params.dirId) : 0);
   const [rootDirectory, setRootDirectory] = useState(0);
-  const [words, setWords] = useState([""]);
+  const [wordInfo, setWordInfo] = useState<types.WordInfoTypes>(defaults.wordInfoDefault);
   const [pages, setPages] = useState<types.PageTypes>(defaults.questionPageDefault);
   const [pageNumber, setPageNumber] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -36,14 +36,22 @@ export const QuestionPage: React.FC = () => {
   // Get the content from state or fetch it.
   useEffect(() => {
     if (state) {
-      setWords(state.allPaths);
+      setWordInfo({
+        words: state.words,
+        target_language: state.target_language,
+        source_language: state.source_language
+      });
       setRootDirectory(state.rootDirectory);
     } else {
       var { username } = params;
       let deck_id = params.deckId;
       axios
         .get(`/u/${username}/${directory}/item/${deck_id}`)
-        .then((response) => setWords(response.data.words.split(",")))
+        .then((response) => setWordInfo({
+          words: response.data.words,
+          target_language: response.data.target_language,
+          source_language: response.data.source_language
+        }))
         .catch(() => setFetchError(true));
       axios
         .get(`/u/${username}`)
@@ -54,10 +62,10 @@ export const QuestionPage: React.FC = () => {
 
   // Generate pages from words.
   useEffect(() => {
-    if (words[0] !== "" && pages[0].component === null) {
-      setPages(generate_pages(words));
+    if (wordInfo.target_language !== "" && pages[0].component === null) {
+      setPages(generate_pages(wordInfo));
     }
-  }, [words]);
+  }, [wordInfo]);
 
   function goBack() {
     if (pageNumber > 0) {
@@ -109,7 +117,7 @@ export const QuestionPage: React.FC = () => {
       let currentPage = pages[pageNumber];
 
       for (let i = 0; i < restOfArray.length; i++) {
-        if (restOfArray[i].path === currentPage.path) {
+        if (restOfArray[i].word.image_path === currentPage.word.image_path) {
           return;
         }
       }
@@ -117,7 +125,7 @@ export const QuestionPage: React.FC = () => {
       let repeatPage = {
         component: currentPage.component,
         type: currentPage.type,
-        path: currentPage.path,
+        word: currentPage.word,
         order: pages.length + 1,
       };
       let copyPages = [...pages];
@@ -153,7 +161,7 @@ export const QuestionPage: React.FC = () => {
         {pages[0].component !== null && pageNumber < pages.length && (
           <QuestionBody
             animation={childAnimation}
-            page={process_page_object(pages[pageNumber], words)}
+            page={process_page_object(pages[pageNumber], wordInfo)}
           />
         )}
       </QuestionContext.Provider>

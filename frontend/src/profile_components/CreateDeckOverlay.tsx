@@ -1,12 +1,14 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useReducer } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
+import { OverlayNavbar } from "./common/components";
 import * as handlers from "./common/handlers";
-import * as components from "./common/components";
+import * as form_components from "./common/form_components";
 import * as defaults from "./types/overlayDefaults";
 import { CreateItemOverlayTypes } from "./types/overlayTypes";
 import { ProfileContextTypes } from "./types/profilePageTypes";
+import { handleOverlayError, handleLanguage } from "./common/reducers";
 
 export const CreateDeckOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of ProfileNavbar.
@@ -23,21 +25,19 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
 
   const [deckName, setDeckName] = useState("");
   const [words, setWords] = useState("");
-  const [nameError, setNameError] = useState(defaults.nameErrorDefault);
-  const [wordError, setWordError] = useState(defaults.nameErrorDefault);
-  const [formError, setFormError] = useState(defaults.formErrorDefault);
+  const [language, setLanguage] = useReducer(handleLanguage, defaults.languageDefault);
+  const [errors, setErrors] = useReducer(handleOverlayError, defaults.deckErrorDefault);
 
-  const { username, directory, setReRender, categoryId } =
+  const { username, directory, setReRender, categoryInfo } =
     useContext(ProfileContext) as ProfileContextTypes;
 
-  const categorySpec = categoryId ? categoryId : "";
+  const categorySpec = categoryInfo.id ? categoryInfo.id : "";
 
   const handleNameChange = (event: React.ChangeEvent) => {
-    const [itemName, itemNameError, generalError] =
-      handlers.handleItemName(event);
+    const [itemName, itemNameError] = handlers.handleItemName(event);
     setDeckName(itemName);
-    setNameError(itemNameError);
-    setFormError(generalError);
+    setErrors({type: "name", error: itemNameError});
+    setErrors({type: "form", error: ""});
   };
 
   const handleWordChange = (event:React.ChangeEvent) => {
@@ -45,17 +45,20 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
 
     const wordNameFilter = /[.,\\/<>:"|?*]/;
     if (wordNameFilter.test(element.value)) {
-      setWordError({
-        errorClass: "forbidden-input",
-        description: `Forbidden character ' ${element.value.match(
-          wordNameFilter
-        )} '`,
-      });
+      setErrors({type: "word",
+      error: `Forbidden character ' ${element.value.match(wordNameFilter)} '`});
     } else {
-      setWordError(defaults.nameErrorDefault);
+      setErrors({type: "word", error: ""});
     }
     setWords(element.value);
-    setFormError(defaults.formErrorDefault);
+    setErrors({type: "form", error: ""});
+  };
+
+  const handleLanguageChange = (event: React.SyntheticEvent) => {
+    const element = event.target as HTMLInputElement;
+    const field = element.name;
+    const language = element.value;
+    setLanguage({type: field, value: language});
   };
 
   const handleSubmit = (event: React.SyntheticEvent) => {
@@ -66,75 +69,77 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
       .filter((word) => word !== "")
       .filter((word) => !word.match(/^[\s]+$/));
 
-    if (nameError.errorClass !== "" || wordError.errorClass !== "") {
-      setFormError({
-        display: {display: "flex"},
-        errorClass: "invalid-form",
-        description: "Fix the problem(s) above.",
-      });
+    if ((!language.targetLanguage || !language.sourceLanguage) && !categorySpec) {
+      setErrors({type: "form", error:"Pick a language"});
+    } else if (errors.nameError.errorClass || errors.wordError!.errorClass) {
+      setErrors({type: "form", error:"Fix the problem(s) above."});
     } else if (allWords.length === 0) {
-      setFormError(prev => ({
-        ...prev,
-        errorClass: "invalid-form",
-        description: "Enter at least one word.",
-      }));
+      setErrors({type: "form", error:"Enter at least one word."});
     } else if (words === "") {
-      setFormError({
-        display: {display: "flex"},
-        errorClass: "invalid-form",
-        description: "Enter a deck name.",
-      });
+      setErrors({type: "form", error:"Enter a deck name."});
     } else {
       axios
         .post(`/create_deck/${username}`, {
           deckName: deckName,
-          content: { words: allWords },
+          wordArray: allWords,
           parent_id: directory,
           category_id: categorySpec ? categorySpec : null,
+          target_language: 
+            categorySpec ? categoryInfo.targetLanguage : language.targetLanguage!.toLowerCase(),
+          source_language: 
+            categorySpec ? categoryInfo.sourceLanguage : language.sourceLanguage!.toLowerCase()
         })
         .then(() => {
           setDeckName("");
           setWords("");
-          setFormError({
-            display: { display: "none" },
-            errorClass: "",
-            description: "",
-          });
+          setErrors({type: "form", error: ""});
           setReRender();
           setDisplay(false);
         })
         .catch((err) =>
-          setFormError({
-            display: {display: "flex"},
-            errorClass: "invalid-form",
-            description: err.response.data.errDesc,
-          })
-        );
+        setErrors({type: "form", error: err.response.data.errDesc}));
     }
   };
 
   // Children: OverlayNavbar.
   return (
     <form className="create-item-info" onSubmit={handleSubmit}>
-      <components.OverlayNavbar
+      <OverlayNavbar
         setDisplay={setDisplay}
         description="Create a new deck"
+        extra={categoryInfo.targetLanguage}
       />
+      <div className="form-content">
       {/* Deck name */}
-      <components.InputField
+      <form_components.InputField
         description="Deck Name:"
-        error={nameError}
+        error={errors.nameError}
         value={deckName}
         handler={handleNameChange}
         placeholder="Enter a deck name"
       />
+      {!categorySpec && <form_components.DropDown
+        description="I want to learn/teach"
+        handler={handleLanguageChange}
+        topic="target_language"
+        choices={form_components.allLanguages.filter(i => i !== language.sourceLanguage)}
+        chosen={language.targetLanguage}
+      />
+      }
+      {!categorySpec && <form_components.DropDown
+        description="Show translations in"
+        handler={handleLanguageChange}
+        topic="source_language"
+        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
+        chosen={language.sourceLanguage}
+      />}
       {/* Words */}
       <label className="input-label">
         <div className="input-info">
-          Words: <span className="input-error">{wordError.description}</span>
+          Words: <span className="input-error">{errors.wordError!.description}</span>
         </div>
         <textarea
-          className={`word-input ${wordError.errorClass}`}
+          className={`word-input ${errors.wordError!.errorClass}`}
           value={words}
           onChange={handleWordChange}
           placeholder="Enter a word for each line"
@@ -142,7 +147,8 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
         />
       </label>
       {/* Submit & Error */}
-      <components.SubmitForm description="Create Deck" formError={formError} />
+      <form_components.SubmitForm description="Create Deck" formError={errors.formError} />
+      </div> 
     </form>
   );
 };

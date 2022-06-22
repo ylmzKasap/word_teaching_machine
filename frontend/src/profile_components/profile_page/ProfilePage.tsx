@@ -28,8 +28,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   const dirId = params.dirId;
 
   const [userPicture, setUserPicture] = useState("");
-  const [rootDirectory, setRootDirectory] = useState(0);
-  const [directory, setDirectory] = useState(() => dirId ? parseInt(dirId) : parseInt(dir));
+  const [rootDirectory, setRootDirectory] = useState("");
+  const [directory, setDirectory] = useState(() => dirId ? dirId : dir);
   const [directoryInfo, setDirectoryInfo] = useState<types.DirectoryInfoTypes>(
     defaults.directoryInfoDefault);
 
@@ -68,7 +68,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   const [scrolling, setScrolling] = useState<types.ScrollingTypes>(defaults.scrollingDefault);
 
   const [deckDisplay, setDeckDisplay] = useState(false);
-  const [categoryId, setCategoryId] = useState(0);
+  const [categoryInfo, setCategoryInfo] = useState<types.CategoryInfoTypes>(
+    defaults.categoryInfoDefault);
   const [columnNumber] = useWindowSize(directoryInfo, contentLoaded);
 
   let currentContainer: string;
@@ -83,8 +84,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
     axios
       .get(`/u/${username}`)
       .then((response) => {
-        setRootDirectory(response.data.root_id);
-        setDirectory(dirId ? parseInt(dirId) : rootDirectory);
+        setRootDirectory(`${response.data.root_id}`);
+        setDirectory(dirId ? dirId : rootDirectory);
         const image = new Image();
         image.src = `media/profile/${response.data.user_picture}`;
         image.onload = () => {
@@ -105,7 +106,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
         setItems(generate_directory(dirInfo, dirItems, username));
         setDirectoryInfo(dirInfo);
         if (rootDirectory) {
-          setDirectory(dirId ? parseInt(dirId) : rootDirectory);
+          setDirectory(dirId ? dirId : rootDirectory);
         }
       })
       .then(() => setDirectoryLoaded(true))
@@ -131,7 +132,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
 
   // Update clone position.
   useEffect(() => {
-    if (draggedElement.name !== null && isDragging) {
+    if (draggedElement.name && isDragging) {
       setCloneElement(
         <DragClone item={draggedElement.name} cloneStyle={cloneStyle} />
       );
@@ -151,10 +152,10 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
     setRequestError({ exists: false, description: "" });
   }, [clipboard]);
 
-  // Reset categoryId when deck form is closed.
+  // Reset categoryInfo when deck form is closed.
   useEffect(() => {
     if (deckDisplay === false) {
-      setCategoryId(0);
+      setCategoryInfo(defaults.categoryInfoDefault);
     }
   }, [deckDisplay]);
 
@@ -169,7 +170,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   
   // Reset all drag related state.
   function resetDrag(timeout = false): void {
-    if (timeout && draggedElement.name !== null) {
+    if (timeout && draggedElement.name && draggedElement.id) {
       const { top, left, width, height } = document
         ?.getElementById(draggedElement.id)
         ?.getBoundingClientRect() as DOMRect;
@@ -200,7 +201,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
 
   // Set 'isDragging' value to true when mouse moves.
   const handleMouseAction = (event: React.MouseEvent): void => {
-    if (draggedElement.name !== null && !cloneTimeout.exists) {
+    if (draggedElement.name && !cloneTimeout.exists) {
       if (dragCount > 6) {
         setCloneStyle({
           width: "180px",
@@ -237,8 +238,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
     setCategoryDrag(false);
     const specialClass = element.className.split(" ")[0];
     if (
-      draggedElement.name !== null && isDragging &&
-      !["file", "folder", "filler", "drag-button"].includes(specialClass)
+      draggedElement.name && isDragging &&
+      !["deck", "folder", "filler", "drag-button"].includes(specialClass)
     ) {
       resetDrag(true);
     }
@@ -260,7 +261,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
 
     const container = document.querySelector(currentContainer) as HTMLElement;
     const closestItem = find_closest_element(event, [
-      ".file",
+      ".deck",
       ".folder",
       ".thematic-folder",
       ".category",
@@ -328,8 +329,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
         categoryDrag: categoryDrag,
         deckDisplay: deckDisplay,
         setDeckDisplay: setDeckDisplay,
-        categoryId: categoryId,
-        setCategoryId: setCategoryId,
+        categoryInfo: categoryInfo,
+        setCategoryInfo: setCategoryInfo,
         columnNumber: columnNumber,
         handleContextMenu: handleContextMenu,
         handleScroll: handleScroll,

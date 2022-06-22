@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { PageItem } from "../PageItems";
 import axios from "axios";
 import * as profileTypes from "../types/profilePageTypes";
-import { scrollingDefault } from "../types/profilePageDefaults";
+import { scrollingDefault, wordDefault } from "../types/profilePageDefaults";
 
 export function generate_directory(
   info: profileTypes.dirInfoTypes,
@@ -26,10 +27,13 @@ export function generate_directory(
   }
 
   const iterable = thematicOn ? categories : items;
-
+  
   let directory: React.ReactElement[] = [];
   iterable.forEach((pgItem) => {
-    const { item_id, item_name, item_type, item_order, words, color } = pgItem;
+    const { item_id, item_name, item_type, item_order,
+      completed, target_language, source_language,
+      category_target_language, category_source_language, words, color} = pgItem;
+
     directory.push(
       <PageItem
         key={item_id}
@@ -37,8 +41,13 @@ export function generate_directory(
         name={item_name}
         type={item_type.replace(/_/g, "-")}
         order={parseInt(item_order)}
-        words={words ? words.split(",") : ""}
+        words={words ? words : wordDefault}
         color={color ? color : ""}
+        source_language={source_language ? source_language : 
+          category_source_language ? category_source_language : ""}
+        target_language={target_language ? target_language :
+          category_target_language ? category_target_language : ""}
+        completed={completed ? completed : false}
         user={username}
       >
         {thematicOn &&
@@ -51,8 +60,11 @@ export function generate_directory(
                 name={item.item_name}
                 type={item.item_type.replace(/_/g, "-")}
                 order={parseInt(item.item_order)}
-                words={item.words ? item.words.split(",") : ""}
+                words={item.words ? item.words : wordDefault}
                 color={item.color ? item.color : ""}
+                source_language={item.source_language}
+                target_language={item.target_language}
+                completed={item.completed ? item.completed : false}
                 user={username}
               />
             ))}
@@ -101,26 +113,26 @@ export function scroll_div (
     const scrolledElement = document.querySelector(container);
 
     // Type guard
-    if (!scrolling.clientY || !scrolledElement) return;
+    if (!scrolledElement) return;
 
     // Scroll bottom
-    if (window.innerHeight - 80 < event.clientY) {
+    if (window.innerHeight - 100 < event.clientY) {
       let interval = window.innerHeight - event.clientY;
       if (!scrolling.exists) {
         setScroll(setScrolling, scrolledElement, event.clientY, 10, interval);
       } else {
-        if (Math.abs(event.clientY - scrolling.clientY) > 8) {
+        if (Math.abs(event.clientY - scrolling.clientY!) > 5) {
           clearInterval(scrolling.interval);
           setScroll(setScrolling, scrolledElement, event.clientY, 10, interval);
         }
       }
       // Scroll top
-    } else if (event.clientY < 80) {
+    } else if (event.clientY < 150) {
       let interval = event.clientY;
       if (!scrolling.exists) {
         setScroll(setScrolling, scrolledElement, event.clientY, -10, interval);
       } else {
-        if (Math.abs(event.clientY - scrolling.clientY) > 8) {
+        if (Math.abs(event.clientY - scrolling.clientY!) > 5) {
           clearInterval(scrolling.interval);
           setScroll(setScrolling, scrolledElement, event.clientY, -10, interval);
         }
@@ -159,7 +171,7 @@ export function delete_item(
     axios
       .delete(`/delete_item/${username}`, {
         data: {
-          item_id: parseInt(extract_int(itemObj.id))
+          item_id: extract_int(itemObj.id)
         },
       })
       .then(() => {

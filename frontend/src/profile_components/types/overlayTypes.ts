@@ -7,14 +7,12 @@ export interface CreateItemOverlayTypes {
 export interface OverlayNavbarTypes {
   setDisplay: React.Dispatch<React.SetStateAction<boolean>>;
   description: string;
+  extra?: string;
 }
 
 export interface InputFieldTypes {
   description: string;
-  error: {
-    errorClass: string;
-    description: string;
-  }
+  error: NameErrorTypes;
   value: string;
   handler: (event: React.ChangeEvent) => void;
   placeholder: string;
@@ -30,11 +28,29 @@ export interface RadioTypes {
 
 export interface submitButtonTypes {
   description: string;
-  formError: {
-    display: {
-        display: string;
-    };
-    errorClass: string;
-    description: string;
-  }
+  formError: FormErrorTypes;
 }
+
+export interface SelectDropdownTypes {
+  description: string;
+  handler: (event: React.SyntheticEvent) => void;
+  topic: string;
+  choices: string[];
+  chosen: string | undefined;
+}
+
+export interface NameErrorTypes {
+  errorClass: string | undefined;
+  description: string | undefined;
+};
+
+export interface FormErrorTypes {
+  display: { display: string };
+  errorClass: string | undefined;
+  description: string | undefined;
+};
+
+export interface LanguageTypes {
+  targetLanguage: string | undefined;
+  sourceLanguage: string | undefined;
+};
