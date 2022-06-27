@@ -59,49 +59,49 @@ async function setup(db) {
     await item_utils.add_folder(db, glob.user_1, 'folder_2', 'folder', 1);
     await item_utils.add_folder(db, glob.user_1, 'thematic_1', 'thematic_folder', 1);
     await item_utils.add_folder(db, glob.user_1, 'thematic_2', 'thematic_folder', 1);
-    await item_utils.add_deck(db, glob.user_1, 'deck_1', 1, ['square', 'palace', 'coffee table'], 'english', 'turkish');
+    await item_utils.add_deck(db, glob.user_1, 'deck_1', 1, kelimeler, 'english', 'turkish', "learn");
 
     // Categories
-    await item_utils.add_category(db, glob.user_1, 'category_1', 5, '#333', 'english', 'turkish');
-    await item_utils.add_category(db, glob.user_1, 'category_2', 5, '#666', 'english', 'turkish');
-    await item_utils.add_category(db, glob.user_1, 'category_1', 6, '#999', 'turkish', 'german');
-    await item_utils.add_category(db, glob.user_1, 'category_3', 6, '#BBB', 'german', 'turkish');
+    await item_utils.add_category(db, glob.user_1, 'category_1', 5, '#333', 'english', 'turkish', "teach");
+    await item_utils.add_category(db, glob.user_1, 'category_2', 5, '#666', 'english', 'turkish', "teach");
+    await item_utils.add_category(db, glob.user_1, 'category_1', 6, '#999', 'turkish', 'german', "learn");
+    await item_utils.add_category(db, glob.user_1, 'category_3', 6, '#BBB', 'german', 'turkish', "learn");
 
     // Category items
-    await item_utils.add_deck(db, glob.user_1, 'deck_1', 5, words, undefined, undefined, 8);
-    await item_utils.add_deck(db, glob.user_1, 'deck_2', 5, words, undefined, undefined, 8);
-    await item_utils.add_deck(db, glob.user_1, 'deck_3', 5, words, undefined, undefined, 9);
-    await item_utils.add_deck(db, glob.user_1, 'deck_4', 5, words, undefined, undefined, 9);
-    await item_utils.add_deck(db, glob.user_1, 'deck_5', 6, kelimeler, undefined, undefined, 10);
-    await item_utils.add_deck(db, glob.user_1, 'deck_6', 6, kelimeler, undefined, undefined, 10);
-    await item_utils.add_deck(db, glob.user_1, 'deck_1', 6, worter, undefined, undefined, 11);
-    await item_utils.add_deck(db, glob.user_1, 'deck_7', 6, worter, undefined, undefined, 11);
-    await item_utils.add_deck(db, glob.user_1, 'haha yes', 6, worter, undefined, undefined, 11);
+    await item_utils.add_deck(db, glob.user_1, 'deck_1', 5, words, undefined, undefined, "teach", false, 8);
+    await item_utils.add_deck(db, glob.user_1, 'deck_2', 5, words, undefined, undefined, "teach", false, 8);
+    await item_utils.add_deck(db, glob.user_1, 'deck_3', 5, words, undefined, undefined, "teach", false, 9);
+    await item_utils.add_deck(db, glob.user_1, 'deck_4', 5, words, undefined, undefined, "teach", true, 9);
+    await item_utils.add_deck(db, glob.user_1, 'deck_5', 6, kelimeler, undefined, undefined, "teach", true, 10);
+    await item_utils.add_deck(db, glob.user_1, 'deck_6', 6, kelimeler, undefined, undefined, "teach", false, 10);
+    await item_utils.add_deck(db, glob.user_1, 'deck_1', 6, worter, undefined, undefined, "teach", true, 11);
+    await item_utils.add_deck(db, glob.user_1, 'deck_7', 6, worter, undefined, undefined, "teach", false, 11);
+    await item_utils.add_deck(db, glob.user_1, 'haha yes', 6, worter, undefined, undefined, "teach", true, 11);
 
     // Folder Content
-    await item_utils.add_deck(db, glob.user_1, 'deck_1', 4, words, 'english', 'turkish');
+    await item_utils.add_deck(db, glob.user_1, 'deck_1', 4, words, 'english', 'turkish', "teach", true);
     await item_utils.add_folder(db, glob.user_1, 'folder_3', 'folder', 4);
     await item_utils.add_folder(db, glob.user_1, 'thematic_1', 'thematic_folder', 4);
 
     await item_utils.add_folder(db, glob.user_1, 'folder_444', 'folder', 3);
     await item_utils.add_folder(db, glob.user_1, 'folder_1', 'folder', 24);
     await item_utils.add_folder(db, glob.user_1, 'thematic_22', 'thematic_folder', 25);
-    await item_utils.add_deck(db, glob.user_1, 'deck_11', 25, words, 'english', 'turkish');
+    await item_utils.add_deck(db, glob.user_1, 'deck_11', 25, words, 'english', 'turkish', "teach", true);
 
     // Add user 2 items.
     await item_utils.add_folder(db, glob.user_2, 'folder_1', 'folder', 2);
     await item_utils.add_folder(db, glob.user_2, 'folder_2', 'folder', 2);
     await item_utils.add_folder(db, glob.user_2, 'thematic_1', 'thematic_folder', 2);
-    await item_utils.add_category(db, glob.user_2, 'category_1', 30, '#333', 'turkish', 'german');
-    await item_utils.add_category(db, glob.user_2, 'category_2', 30, '#F28', 'german', 'english');
-    await item_utils.add_deck(db, glob.user_2, 'deck_1', 30, kelimeler, undefined, undefined, 31);
-    await item_utils.add_deck(db, glob.user_2, 'deck_2', 30, worter, undefined, undefined, 32);
-    await item_utils.add_deck(db, glob.user_2, 'deck_1', 2, words, 'english', 'turkish');
-    await item_utils.add_deck(db, glob.user_2, 'deck_1', 29, words, 'english', 'german');
+    await item_utils.add_category(db, glob.user_2, 'category_1', 30, '#333', 'turkish', 'german', "teach");
+    await item_utils.add_category(db, glob.user_2, 'category_2', 30, '#F28', 'german', 'english', "teach");
+    await item_utils.add_deck(db, glob.user_2, 'deck_1', 30, kelimeler, undefined, undefined, "teach", false, 31);
+    await item_utils.add_deck(db, glob.user_2, 'deck_2', 30, worter, undefined, undefined, "teach", true, 32);
+    await item_utils.add_deck(db, glob.user_2, 'deck_1', 2, words, 'english', 'turkish', "teach", true);
+    await item_utils.add_deck(db, glob.user_2, 'deck_1', 29, words, 'english', 'german', "teach");
     await item_utils.add_folder(db, glob.user_2, 'folder_1', 'folder', 28);
 
     // Later stuff for testing
-    await item_utils.add_category(db, glob.user_1, 'category_33', 26, '#BBB', 'german', 'english');
+    await item_utils.add_category(db, glob.user_1, 'category_33', 26, '#BBB', 'german', 'english', "teach");
 }
 
 

@@ -1,28 +1,22 @@
-async function locate_words (pool, wordArray, target_language) {
+async function locate_words (pool, wordArray, language) {
     let missingImages = [];
-    let missingSounds = [];
 
     const wordQuery = `
         SELECT *
             FROM word_content
         LEFT JOIN translations
             ON word_content.word_content_id = translations.translation_id
-        LEFT JOIN sound_paths
-            ON translations.translation_id = sound_paths.sound_id
-        WHERE ${target_language} = $1;
+        WHERE ${language} = $1;
     `
     for (word of wordArray) {
         const response = await pool.query(wordQuery, [word])
             .then(res => res.rows[0]).catch((err) => console.log(err));
         if (!response || !response.image_path) {
             missingImages.push(word);
-            missingSounds.push(word);
-        } else if (!response[`${target_language}_sound_path`]) {
-            missingSounds.push(word);
-        }
+        } 
     }
 
-    return [missingImages, missingSounds];
+    return missingImages;
 }
 
 function find_unique_violation(firstObjArray, secondObjArray, columns) {

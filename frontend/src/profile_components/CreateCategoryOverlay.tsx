@@ -25,6 +25,8 @@ export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) =
   // Component of CreateCategoryOverlay.
 
   const [categoryName, setCategoryName] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [includeTranslation, setIncludeTranslation] = useState(false);
   const [color, setColor] = useState("#fff7f0");
   const [language, setLanguage] = useReducer(handleLanguage, defaults.languageDefault);
   const [errors, setErrors] = useReducer(handleOverlayError, defaults.categoryErrorDefault);
@@ -45,6 +47,15 @@ export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) =
     setLanguage({type: field, value: language});
   };
 
+  const handlePurpose = (selectedPurpose: string) => {
+    setPurpose(selectedPurpose);
+    setLanguage({type: "source_language", value: undefined});
+  };
+
+  const handleTranslationDecision = () => {
+    setIncludeTranslation(x => !x);
+  };
+
   const handleColorChange = (event: React.ChangeEvent) => {
     const element = event.target as HTMLInputElement;
     setColor(element.value);
@@ -53,8 +64,10 @@ export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) =
   const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
 
-    if (!language.targetLanguage || !language.sourceLanguage) {
-      setErrors({type: "form", error:"Pick a language"});
+    if (!language.targetLanguage) {
+      setErrors({type: "form", error:"Pick a target language"});
+    } else if (purpose === "learn" && !language.sourceLanguage) {
+      setErrors({type: "form", error:"Pick a source language"});
     } else if (categoryName === "") {
       setErrors({type: "form", error: "Enter a category name."});
     } else if (errors.nameError.errorClass) {
@@ -66,7 +79,8 @@ export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) =
           parent_id: directory,
           color: color,
           target_language: language.targetLanguage.toLowerCase(),
-          source_language: language.sourceLanguage.toLowerCase()
+          source_language: language.sourceLanguage ? language.sourceLanguage.toLowerCase() : null,
+          purpose: purpose
         })
         .then(() => {
           setCategoryName("");
@@ -94,24 +108,51 @@ export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) =
         handler={handleNameChange}
         placeholder="Enter a category name"
       />
+      {/* Purpose */}
+      <form_components.DoubleChoice 
+        description="I want to..."
+        choice_one="learn"
+        choice_two="teach"
+        chosen={purpose}
+        handler={handlePurpose} />
+      {purpose && 
       <form_components.DropDown
-        description="I want to learn/teach"
+        description=""
         handler={handleLanguageChange}
         topic="target_language"
         choices={form_components.allLanguages.filter(i => i !== language.sourceLanguage)}
         chosen={language.targetLanguage}
-      />
+        placeholder={`Choose a language to ${purpose}`}
+      />}
+      {/* Source language for learning */}
+      {purpose === "learn" &&
       <form_components.DropDown
-        description="Show translations in"
+        description="My language is"
         handler={handleLanguageChange}
         topic="source_language"
         choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
         chosen={language.sourceLanguage}
-      />
-      <div className="color-info">
+        placeholder="Choose the language that you will enter the words"
+      />}
+      {purpose === "teach" && 
+      <form_components.Checkbox 
+        description="Show translations on pictures"
+        handler={handleTranslationDecision}
+        value={includeTranslation} />
+      }
+      {includeTranslation &&
+      <form_components.DropDown
+        description=""
+        handler={handleLanguageChange}
+        topic="source_language"
+        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
+        chosen={language.sourceLanguage}
+        placeholder="Choose a language to display the translations"
+      />}
+      <label className="color-info">
         <input type="color" value={color} onChange={handleColorChange} />
         <span className="input-info">Pick a background color</span>
-      </div>
+      </label>
       {/* Submit & Error */}
       <form_components.SubmitForm
         description="Create Category"

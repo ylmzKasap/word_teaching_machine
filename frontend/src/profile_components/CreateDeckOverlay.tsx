@@ -1,4 +1,4 @@
-import React, { useState, useContext, useReducer } from "react";
+import React, { useState, useContext, useReducer, useEffect } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
@@ -9,6 +9,7 @@ import * as defaults from "./types/overlayDefaults";
 import { CreateItemOverlayTypes } from "./types/overlayTypes";
 import { ProfileContextTypes } from "./types/profilePageTypes";
 import { handleOverlayError, handleLanguage } from "./common/reducers";
+import { to_title } from "./common/functions";
 
 export const CreateDeckOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of ProfileNavbar.
@@ -23,21 +24,38 @@ export const CreateDeckOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}
 export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   // Component of CreateDeckOverlay.
 
-  const [deckName, setDeckName] = useState("");
-  const [words, setWords] = useState("");
-  const [language, setLanguage] = useReducer(handleLanguage, defaults.languageDefault);
-  const [errors, setErrors] = useReducer(handleOverlayError, defaults.deckErrorDefault);
-
   const { username, directory, setReRender, categoryInfo } =
     useContext(ProfileContext) as ProfileContextTypes;
 
   const categorySpec = categoryInfo.id ? categoryInfo.id : "";
+
+  const [deckName, setDeckName] = useState("");
+  const [words, setWords] = useState("");
+  const [purpose, setPurpose] = useState(categoryInfo.purpose ? categoryInfo.purpose : "");
+  const [includeTranslation, setIncludeTranslation] = useState(false);
+  const [errors, setErrors] = useReducer(handleOverlayError, defaults.deckErrorDefault);
+  const [language, setLanguage] = useReducer(handleLanguage, (categorySpec ?
+      {targetLanguage: categoryInfo.targetLanguage, sourceLanguage: categoryInfo.sourceLanguage}
+      : defaults.languageDefault));
+
+  useEffect(() => {
+    // Set source language to undefined when translation is unchecked.
+    if (!includeTranslation && purpose === "teach") {
+      setLanguage({type: "source_language", value: undefined});
+    }
+  }, [includeTranslation, purpose]);
 
   const handleNameChange = (event: React.ChangeEvent) => {
     const [itemName, itemNameError] = handlers.handleItemName(event);
     setDeckName(itemName);
     setErrors({type: "name", error: itemNameError});
     setErrors({type: "form", error: ""});
+  };
+
+  const handlePurpose = (selectedPurpose: string) => {
+    setPurpose(selectedPurpose);
+    setLanguage({type: "source_language", value: undefined});
+    setIncludeTranslation(false);
   };
 
   const handleWordChange = (event:React.ChangeEvent) => {
@@ -61,6 +79,10 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
     setLanguage({type: field, value: language});
   };
 
+  const handleTranslationDecision = () => {
+    setIncludeTranslation(x => !x);
+  };
+
   const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
 
@@ -69,8 +91,10 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
       .filter((word) => word !== "")
       .filter((word) => !word.match(/^[\s]+$/));
 
-    if ((!language.targetLanguage || !language.sourceLanguage) && !categorySpec) {
-      setErrors({type: "form", error:"Pick a language"});
+    if (!language.targetLanguage && !categorySpec) {
+      setErrors({type: "form", error:"Pick a target language"});
+    } else if ((purpose === "learn" && !language.sourceLanguage) && !categorySpec) {
+      setErrors({type: "form", error:"Pick a source language"});
     } else if (errors.nameError.errorClass || errors.wordError!.errorClass) {
       setErrors({type: "form", error:"Fix the problem(s) above."});
     } else if (allWords.length === 0) {
@@ -87,7 +111,10 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
           target_language: 
             categorySpec ? categoryInfo.targetLanguage : language.targetLanguage!.toLowerCase(),
           source_language: 
-            categorySpec ? categoryInfo.sourceLanguage : language.sourceLanguage!.toLowerCase()
+            categorySpec ? (categoryInfo.sourceLanguage ? categoryInfo.sourceLanguage : null) : (
+              language.sourceLanguage ? language.sourceLanguage.toLowerCase() : null),
+          show_translation: includeTranslation,
+          purpose: purpose
         })
         .then(() => {
           setDeckName("");
@@ -107,7 +134,6 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
       <OverlayNavbar
         setDisplay={setDisplay}
         description="Create a new deck"
-        extra={categoryInfo.targetLanguage}
       />
       <div className="form-content">
       {/* Deck name */}
@@ -118,25 +144,45 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
         handler={handleNameChange}
         placeholder="Enter a deck name"
       />
-      {!categorySpec && <form_components.DropDown
-        description="I want to learn/teach"
+      {/* Purpose */}
+      {!categorySpec &&
+      <form_components.DoubleChoice 
+        description="I want to..."
+        choice_one="learn"
+        choice_two="teach"
+        chosen={purpose}
+        handler={handlePurpose} />
+      }
+      {!categorySpec && purpose && 
+      <form_components.DropDown
+        description=""
         handler={handleLanguageChange}
         topic="target_language"
         choices={form_components.allLanguages.filter(i => i !== language.sourceLanguage)}
         chosen={language.targetLanguage}
-      />
-      }
-      {!categorySpec && <form_components.DropDown
-        description="Show translations in"
+        placeholder={`Choose a language to ${purpose}`}
+      />}
+      {/* Source language for learning */}
+      {!categorySpec && purpose === "learn" &&
+      <form_components.DropDown
+        description="My language is"
         handler={handleLanguageChange}
         topic="source_language"
         choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
         chosen={language.sourceLanguage}
+        placeholder="Choose the language that you will enter the words"
       />}
       {/* Words */}
+      {((purpose === "teach" && language.targetLanguage)
+        || (purpose === "learn" && language.sourceLanguage)
+        || categorySpec)
+        && 
       <label className="input-label">
         <div className="input-info">
-          Words: <span className="input-error">{errors.wordError!.description}</span>
+          {purpose === "teach" ? `${to_title(language.targetLanguage!)} words that I will teach`
+          : `${to_title(language.sourceLanguage!)} words
+          that I want to learn in ${to_title(language.targetLanguage!)}`}:
+          <span className="input-error">{errors.wordError!.description}</span>
         </div>
         <textarea
           className={`word-input ${errors.wordError!.errorClass}`}
@@ -146,6 +192,23 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
           required
         />
       </label>
+      }
+      {((purpose === "teach" && categoryInfo.sourceLanguage )
+       || (purpose === "learn" && language.sourceLanguage)) && 
+      <form_components.Checkbox 
+        description="Show translations on pictures"
+        handler={handleTranslationDecision}
+        value={includeTranslation} />
+      }
+      {!categorySpec && purpose === "teach" && includeTranslation &&
+      <form_components.DropDown
+        description=""
+        handler={handleLanguageChange}
+        topic="source_language"
+        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
+        chosen={language.sourceLanguage}
+        placeholder="Choose a language to display the translations"
+      />}
       {/* Submit & Error */}
       <form_components.SubmitForm description="Create Deck" formError={errors.formError} />
       </div> 

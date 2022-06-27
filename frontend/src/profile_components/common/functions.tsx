@@ -31,8 +31,8 @@ export function generate_directory(
   let directory: React.ReactElement[] = [];
   iterable.forEach((pgItem) => {
     const { item_id, item_name, item_type, item_order,
-      completed, target_language, source_language,
-      category_target_language, category_source_language, words, color} = pgItem;
+      completed, target_language, source_language, show_translation,
+      category_target_language, category_source_language, words, color, purpose} = pgItem;
 
     directory.push(
       <PageItem
@@ -43,6 +43,8 @@ export function generate_directory(
         order={parseInt(item_order)}
         words={words ? words : wordDefault}
         color={color ? color : ""}
+        purpose={purpose ? purpose : ""}
+        show_translation={show_translation ? show_translation : false}
         source_language={source_language ? source_language : 
           category_source_language ? category_source_language : ""}
         target_language={target_language ? target_language :
@@ -62,6 +64,7 @@ export function generate_directory(
                 order={parseInt(item.item_order)}
                 words={item.words ? item.words : wordDefault}
                 color={item.color ? item.color : ""}
+                show_translation={item.show_translation ? item.show_translation : false}
                 source_language={item.source_language}
                 target_language={item.target_language}
                 completed={item.completed ? item.completed : false}
@@ -186,6 +189,10 @@ export function delete_item(
 export function extract_int(str: string) {
   const intMatch = str.match(/\d+$/);
   return intMatch ? intMatch[0] : "";
+}
+
+export function to_title(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 export function find_closest_element(

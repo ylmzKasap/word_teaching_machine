@@ -3,7 +3,7 @@ import { FormErrorTypes, NameErrorTypes } from "../types/overlayTypes";
 
 export const handleLanguage = (
   state: {targetLanguage: string | undefined; sourceLanguage: string | undefined;},
-  action: {type: string; value: string}) => {
+  action: {type: string; value: string | undefined}) => {
     
   if (action.type === "target_language") {
     return {

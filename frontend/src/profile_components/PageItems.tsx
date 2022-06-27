@@ -15,7 +15,7 @@ export const ItemContext = createContext<PageItemContextTypes | undefined>(undef
 
 export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   // Component of ProfilePage.
-  // Deployed by './common/functions' -> generate_decks.
+  // Deployed by './common/functions' -> generate_directory.
 
   const navigate = useNavigate();
   const params = useParams();
@@ -135,6 +135,7 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
           words: props.words,
           source_language: props.source_language,
           target_language: props.target_language,
+          show_translation: props.show_translation,
           directory: directory,
           rootDirectory: rootDirectory,
         },
@@ -342,7 +343,8 @@ const CategoryContainer = () => {
       id: extract_int(categoryId),
       name: parentProps.name,
       sourceLanguage: parentProps.source_language,
-      targetLanguage: parentProps.target_language});
+      targetLanguage: parentProps.target_language,
+      purpose: parentProps.purpose});
     setDeckDisplay((x) => !x);
   };
 

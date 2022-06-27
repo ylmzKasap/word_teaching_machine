@@ -1,7 +1,7 @@
 // AskFromText -> IntroText | ImageOptions -> ImageOptionBox -> NumberBox
 
 import React, { useContext, useState, useReducer, useEffect } from "react";
-import { IntroText, NumberBox } from "./common/components";
+import { IntroText, NumberBox, WordTranslation } from "./common/components";
 import { getRandomOptions, playAndCatchError } from "./common/functions";
 import { handleStyles } from "./common/reducers";
 import { audioMixer, QuestionContext } from "./QuestionPage";
@@ -99,6 +99,8 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
         src={`media/${props.word.image_path}`}
         alt={`${props.word[props.wordInfo.target_language]}`}
       />
+      {props.wordInfo.show_translation &&
+        <WordTranslation translation={props.word[props.wordInfo.source_language] as string} />}
       <NumberBox type="image" number={props.number} style={optionStyle.numStyle} />
     </div>
   );

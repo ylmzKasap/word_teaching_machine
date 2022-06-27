@@ -100,7 +100,8 @@ async function create_deck_content_table(pool) {
         deck_key BIGINT PRIMARY KEY NOT NULL REFERENCES items (item_id) ON DELETE CASCADE,
         completed BOOLEAN DEFAULT false,
         target_language VARCHAR(50) NOT NULL,
-        source_language VARCHAR(50)
+        source_language VARCHAR(50),
+        show_translation BOOLEAN DEFAULT false
     );`)
 }
 
@@ -117,7 +118,8 @@ async function create_category_content_table(pool) {
     await pool.query(`CREATE TABLE IF NOT EXISTS category_content (
         category_key BIGINT NOT NULL REFERENCES items (item_id) ON DELETE CASCADE,
         category_target_language VARCHAR(50) NOT NULL,
-        category_source_language VARCHAR(50) NOT NULL,
+        category_source_language VARCHAR(50),
+        purpose VARCHAR(10) NOT NULL,
         color VARCHAR(40) NOT NULL
     );`)
 }

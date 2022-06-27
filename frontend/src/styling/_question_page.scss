@@ -72,6 +72,19 @@
   width: 50vw;
 }
 
+.word-translation {
+  position: absolute;
+  @include flexit();
+  bottom: -10px;
+  height: 12%;
+  width: 100%;
+  background-color: rgb(34, 188, 219);
+  color: white;
+  border-radius: 0 0 10px 10px;
+  font-size: calc(1rem + 1vw);
+  overflow: hidden;
+}
+
 .intro-img {
   height: 100%;
   width: 100%;
@@ -138,6 +151,7 @@
 
 .image-option-box {
   @include flexit();
+  position: relative;
   flex-direction: column;
   margin: 5px;
   box-shadow: -1px 1px 5px rgb(161, 160, 160);
@@ -146,6 +160,11 @@
     transform: scale(1.03);
   }
   cursor: pointer;
+  .word-translation {
+    width: 100%;
+    top: -5px;
+    border-radius: 10px 10px 0 0;
+  }
 }
 
 .image-option {

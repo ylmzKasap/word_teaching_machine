@@ -19,6 +19,8 @@
 }
 
 .form-content {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
   overflow-y: scroll;
@@ -27,12 +29,11 @@
 .input-label {
   display: flex;
   flex-direction: column;
-  line-height: 2.5em;
   margin: 2% 6% 1% 6%;
   > .input-info {
     display: flex;
     justify-content: space-between;
-    padding-top: 1%;
+    padding: 7px 0 7px 0;
   }
   > .text-input {
     padding: 0 0 0 2%;
@@ -45,6 +46,9 @@
     line-height: 1.2em;
     height: 12em;
     resize: none;
+  }
+  &.checkbox {
+    margin-right: auto;
   }
 }
 
@@ -62,12 +66,14 @@
   display: flex;
   justify-content: space-between;
   height: 10%;
-  margin: 2% 6% 3% 6%;
+  margin: auto 6% 5% 6%;
   > .submit-form-button {
-    height: 100%;
+    height: 50px;
     flex-basis: 25%;
     padding: 5px;
-    background-color: rgb(86, 194, 226);
+    cursor: pointer;
+    background-color: rgb(20, 203, 108);
+    border-radius: 10px;
     color: white;
     &:hover {
       background-color: rgb(60, 202, 119);
@@ -115,6 +121,7 @@
     background-color: rgb(56, 56, 56);
     height: 100%;
     width: 10%;
+    cursor: pointer;
     margin-left: auto;
     font-weight: bold;
     border-left: solid rgb(233, 233, 233);
@@ -176,4 +183,60 @@ input[type="radio"] {
 
 #dropdown {
   padding: 7px;
+}
+
+#dropdown-label {
+  padding: 0 0 7px 0;
+  margin: 0;
+}
+
+.double-choice-container {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  background-color: rgb(21, 217, 135);
+  border-radius: 10px;
+  >.double-choice {
+    @include flexit();
+    width: 100%;
+    height: 50px;
+    text-align: center;
+    cursor: pointer;
+    &.selected {
+      background-color: rgb(22, 203, 79) !important;
+    }
+    &.not-selected {
+      background-color: gray !important;
+    }
+  }
+  >#choice-one {
+    color: white;
+    background-color: rgb(76, 137, 234);
+    border-radius: 10px 0 0 10px;
+    &:hover {
+      background-color: rgb(76, 168, 234);
+    }
+    &:active {
+      background-color: rgb(85, 125, 189);
+      color: rgb(209, 216, 229);
+    }
+  }
+  >#choice-two {
+    color: white;
+    background-color: rgb(203, 95, 33);
+    border-radius: 0 10px 10px 0;
+    &:hover {
+      background-color: rgb(213, 95, 27);
+    }
+    &:active {
+      background-color: rgb(175, 89, 39);
+      color: rgb(209, 216, 229);
+    }
+  }
+}
+
+.checkbox-info {
+  >[type="checkbox"] {
+    margin: 5px 0 0 10px;
+  }
 }

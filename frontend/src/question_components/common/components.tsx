@@ -4,6 +4,16 @@ import { audioMixer } from "../QuestionPage";
 import * as types from "../types/QuestionPageTypes";
 import { introTextTimeoutDefaults } from "../types/QuestionPageDefaults";
 
+
+export const WordTranslation: React.FC<{translation: string;}> = (props) => {
+  // Shared by AskFromPicture and AskFromText.
+  return (
+    <div className="word-translation">
+      {props.translation}
+    </div>
+  );
+};
+
 export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
   // Shared by IntroduceWord and AskFromPicture.
 
@@ -15,6 +25,10 @@ export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
         src={`media/${props.word.image_path}`}
         alt={`${props.word[props.wordInfo.target_language]}`}
       />
+      {props.wordInfo.show_translation && <WordTranslation
+        translation={props.word[props.wordInfo.source_language] as string}
+       />
+      }
     </div>
   );
 };

@@ -41,6 +41,8 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -71,6 +73,8 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -87,6 +91,8 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -103,6 +109,8 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -116,6 +124,8 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -132,6 +142,8 @@ describe('Create a deck', () => {
                 "parent_id": "3463",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -148,6 +160,8 @@ describe('Create a deck', () => {
                 "parent_id": "2",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -164,6 +178,8 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": "8"
             });
         
@@ -188,6 +204,8 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "orkish",
                 "source_language": "english",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": null
             });
         
@@ -201,10 +219,46 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "english",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": null
             });
         
         fail_with_json(equalResponse, 400, "Invalid language");
+    });
+
+    test('Purpose must be teach or learn', async () => {
+        const response = await request(app(db))
+            .post(createDeckUrl)
+            .send({
+                "deckName": "myDeck",
+                "wordArray": ["elevator", "square", "palace"],
+                "parent_id": "1",
+                "target_language": "english",
+                "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "destroy_humanity",
+                "category_id": null
+            });   
+
+        fail_with_json(response, 400, "Invalid purpose");
+    });
+
+    test('Source language cannot be null when purpose is to learn', async () => {
+        const response = await request(app(db))
+            .post(createDeckUrl)
+            .send({
+                "deckName": "myDeck",
+                "wordArray": ["elevator", "square", "palace"],
+                "parent_id": "1",
+                "target_language": "english",
+                "source_language": null,
+                "show_translation": false,
+                "purpose": "learn",
+                "category_id": null
+            });   
+
+        fail_with_json(response, 400, "Invalid purpose");
     });
 
     test("Deck in a category must have category's language", async () => {
@@ -216,6 +270,8 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "turkish",
                 "source_language": "english",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": "8"
             });
         
@@ -231,6 +287,8 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": "3023"
             });
         
@@ -247,12 +305,13 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": "30"
             });
         
         fail_with_json(response, 400, "Invalid category");
     });
-
 
     test("Category id must be null in a regular folder", async () => {
         const response = await request(app(db))
@@ -263,12 +322,13 @@ describe('Create a deck', () => {
                 "parent_id": "1",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": "5"
             });
         
         fail_with_json(response, 400, "Invalid directory");
     });
-
 
     test("Images must exist", async () => {
         const response = await request(app(db))
@@ -279,12 +339,13 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": "8"
             });
         
         fail_with_json(response, 400, "Some files could not be found");
     });
-
 
     test("Body values must be present and valid", async () => {
         await test_utils.check_type_blank({
@@ -293,6 +354,8 @@ describe('Create a deck', () => {
             "parent_id": "5",
             "target_language": "english",
             "source_language": "turkish",
+            "show_translation": false,
+            "purpose": "teach",
             "category_id": "8"
         }, createDeckUrl, 'post', app, db);
 
@@ -305,6 +368,8 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": "8"
         });
 
@@ -319,6 +384,8 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": true,
+                "purpose": "teach",
                 "category_id": "8"
         });
 
@@ -333,6 +400,8 @@ describe('Create a deck', () => {
                 "parent_id": "5",
                 "target_language": "english",
                 "source_language": "turkish",
+                "show_translation": false,
+                "purpose": "teach",
                 "category_id": "8"
         });
 
@@ -484,7 +553,8 @@ describe('Create a category', () => {
                 "parent_id": "6",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "german"
+                "source_language": null,
+                "purpose": "teach"
             });
         
         expect(response.status).toEqual(200);
@@ -508,7 +578,8 @@ describe('Create a category', () => {
                 "parent_id": "6",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "german"
+                "source_language": "german",
+                "purpose": "teach"
             });
         
         fail_with_json(response, 400, "Category 'category_3' already exists.");
@@ -523,7 +594,8 @@ describe('Create a category', () => {
                 "parent_id": "1",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "german"
+                "source_language": "german",
+                "purpose": "teach"
             });
         
         fail_with_json(rootResponse, 400, "Invalid directory");
@@ -536,7 +608,8 @@ describe('Create a category', () => {
                 "parent_id": "4",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "german"
+                "source_language": "german",
+                "purpose": "teach"
             });
         
         fail_with_json(folderResponse, 400, "Invalid directory");
@@ -550,7 +623,8 @@ describe('Create a category', () => {
                 "parent_id": "30",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "german"
+                "source_language": "german",
+                "purpose": "teach"
             });
         
         fail_with_json(response, 400, "Invalid directory");
@@ -564,7 +638,8 @@ describe('Create a category', () => {
                 "parent_id": "6",
                 "color": "#AA754",
                 "target_language": "english",
-                "source_language": "german"                
+                "source_language": "german",
+                "purpose": "teach"               
             }, createCategoryUrl, app, db);
         
         fail_with_json(response, 400, "Invalid input");
@@ -578,7 +653,8 @@ describe('Create a category', () => {
                 "parent_id": "6",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "uruk-haish"
+                "source_language": "uruk-haish",
+                "purpose": "teach"
             });
         
         fail_with_json(urukResponse, 400, "Invalid language");
@@ -590,10 +666,41 @@ describe('Create a category', () => {
                 "parent_id": "6",
                 "color": "#AA7854",
                 "target_language": "english",
-                "source_language": "english"
+                "source_language": "english",
+                "purpose": "teach"
             });
         
         fail_with_json(equalResponse, 400, "Invalid language");
+    });
+
+    test('Purpose must be teach or learn', async () => {
+        const response = await request(app(db))
+            .post(createCategoryUrl)
+            .send({
+                "category_name": "my_category_223",
+                "parent_id": "6",
+                "color": "#AA7544",
+                "target_language": "english",
+                "source_language": "german",
+                "purpose": "extermination"               
+            }, createCategoryUrl, app, db);
+        
+        fail_with_json(response, 400, "Invalid purpose");
+    });
+
+    test('Source language cannot be null when purpose is learn', async () => {
+        const response = await request(app(db))
+            .post(createCategoryUrl)
+            .send({
+                "category_name": "my_category_223",
+                "parent_id": "6",
+                "color": "#AA7544",
+                "target_language": "english",
+                "source_language": null,
+                "purpose": "learn"               
+            }, createCategoryUrl, app, db);
+        
+        fail_with_json(response, 400, "Invalid purpose");
     });
 
     test("Body values must be present and valid", async () => {
@@ -602,7 +709,8 @@ describe('Create a category', () => {
             "parent_id": "6",
             "color": "#AA7854",
             "target_language": "english",
-            "source_language": "german"
+            "source_language": "german",
+            "purpose": "teach"
         }, createCategoryUrl, 'post', app, db);
     });
 });

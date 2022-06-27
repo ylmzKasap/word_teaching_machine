@@ -26,6 +26,20 @@ export interface RadioTypes {
   handler: (event: React.ChangeEvent) => void;
 }
 
+export interface CheckboxTypes {
+  description: string;
+  value: boolean;
+  handler: () => void;
+}
+
+export interface DoubleChoiceTypes {
+  description: string;
+  choice_one: string;
+  choice_two: string;
+  chosen: string;
+  handler: (selectedPurpose: string) => void
+}
+
 export interface submitButtonTypes {
   description: string;
   formError: FormErrorTypes;
@@ -37,6 +51,7 @@ export interface SelectDropdownTypes {
   topic: string;
   choices: string[];
   chosen: string | undefined;
+  placeholder: string;
 }
 
 export interface NameErrorTypes {

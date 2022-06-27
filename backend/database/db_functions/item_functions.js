@@ -40,7 +40,8 @@ async function get_deck_info(pool, item_id) {
     const deckInfoObj = {
         words: groupedWords[deckInfo[0].item_id],
         target_language: deckInfo[0].target_language,
-        source_language: deckInfo[0].source_language
+        source_language: deckInfo[0].source_language,
+        show_translation: deckInfo[0].show_translation
     }
 
     return deckInfoObj;    

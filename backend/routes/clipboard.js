@@ -3,7 +3,7 @@ const dir_utils = require('../database/db_functions/directory');
 const test_utils = require("../test/other_functions");
 const utils = require("./functions");
 
-const { add_item, add_deck } = require('../database/db_functions/item_creation');
+const { add_deck } = require('../database/db_functions/item_creation');
 const  { update_directory } = require('../database/db_functions/item_relocation');
 
 module.exports = async (req, res) => {
@@ -142,10 +142,12 @@ module.exports = async (req, res) => {
             return res.status(400).send({"errDesc": 'Can only copy a deck.'});
         }
         const deckInfo = await item_utils.get_deck_info(db, item_id);
+        
         const targetWords = deckInfo.words.map(w => w[deckInfo.target_language]);
         await add_deck(db, username, itemInfo.item_name, new_parent, targetWords,
-            deckInfo.target_language, deckInfo.source_language, category_id)
-            .catch((err) => res.status(400).send(
+            deckInfo.target_language, deckInfo.source_language,
+            "teach", deckInfo.show_translation, category_id)
+            .catch(err => res.status(400).send(
                 {"errDesc": `${titleType} '${itemInfo.item_name}' already exists in the directory.`}));
     }
     // Update the directory of the cut item.

@@ -39,7 +39,8 @@ export const QuestionPage: React.FC = () => {
       setWordInfo({
         words: state.words,
         target_language: state.target_language,
-        source_language: state.source_language
+        source_language: state.source_language,
+        show_translation: state.show_translation
       });
       setRootDirectory(state.rootDirectory);
     } else {
@@ -50,7 +51,8 @@ export const QuestionPage: React.FC = () => {
         .then((response) => setWordInfo({
           words: response.data.words,
           target_language: response.data.target_language,
-          source_language: response.data.source_language
+          source_language: response.data.source_language,
+          show_translation: response.data.show_translation
         }))
         .catch(() => setFetchError(true));
       axios

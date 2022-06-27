@@ -25,6 +25,23 @@ export const InputField: React.FC<types.InputFieldTypes> = (props) => {
   );
 };
 
+export const Checkbox: React.FC<types.CheckboxTypes> = (props) => {
+  const { description, value, handler } = props;
+
+  return (
+    <label className="input-label checkbox">
+      <div className="checkbox-info">
+        {description}
+        <input
+          type="checkbox"
+          onChange={handler}
+          checked={value}
+        />
+      </div>
+    </label>
+  );
+};
+
 export const Radio: React.FC<types.RadioTypes> = (props) => {
   const { description, handler, selected, checked } = props;
 
@@ -56,7 +73,7 @@ export const Radio: React.FC<types.RadioTypes> = (props) => {
 };
 
 export const DropDown: React.FC<types.SelectDropdownTypes> = (
-  {description, handler, topic, choices, chosen}) => {
+  {description, handler, topic, choices, chosen, placeholder}) => {
 
   return (
     <div className="input-label">
@@ -69,10 +86,37 @@ export const DropDown: React.FC<types.SelectDropdownTypes> = (
           onChange={handler}
           required
         >
-          <option disabled value="choose">Choose a language</option>
+          <option disabled value="choose">{placeholder}</option>
             {choices.map((v, i) => <option key={`${v}_${i}`} value={v}>{v}</option>)}
         </select>
     </div>
+  );
+};
+
+export const DoubleChoice: React.FC<types.DoubleChoiceTypes> = (props) => {
+  const { description, choice_one, choice_two, chosen, handler } = props;
+
+  let choice_one_selected = "";
+  let choice_two_selected = "";
+  if (chosen) {
+    choice_one_selected = chosen === choice_one ? "selected" : "not-selected";
+    choice_two_selected = chosen === choice_two ? "selected" : "not-selected";
+  }
+
+  return (
+    <label className="input-label">
+      <div className="input-info">{description}</div>
+      <div className="double-choice-container">
+        <span
+          id="choice-one"
+          className={`double-choice ${choice_one_selected}`}
+          onClick={() => handler(choice_one)}>{choice_one}</span>
+        <span 
+          id="choice-two"
+          className={`double-choice ${choice_two_selected}`}
+          onClick={() => handler(choice_two)}>{choice_two}</span>
+      </div>
+    </label>
   );
 };
 

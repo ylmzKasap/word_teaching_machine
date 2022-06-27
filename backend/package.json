@@ -10,9 +10,11 @@
     "dev": "concurrently --kill-others \"npm run server\" \"npm run client\""
   },
   "dependencies": {
+    "aws-sdk": "^2.1160.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.17.2",
+    "microsoft-cognitiveservices-speech-sdk": "^1.22.0",
     "pg": "^8.7.1"
   },
   "devDependencies": {

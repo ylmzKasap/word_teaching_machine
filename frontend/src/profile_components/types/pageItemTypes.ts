@@ -8,6 +8,8 @@ export interface PageItemPropTypes {
   order: number;
   words: wordTypes[];
   color?: string;
+  purpose?: string;
+  show_translation?: boolean;
   target_language?: string;
   source_language?: string;
   completed?: boolean;

@@ -40,9 +40,9 @@ describe('Copy', () => {
             expect(copiedDeck.category_id).toBeNull();
             expect(copiedDeckInfo.target_language).toEqual('english');
             expect(copiedDeckInfo.source_language).toEqual('turkish');
-            expect(copiedDeckInfo.words[0].english).toEqual('square');
-            expect(copiedDeckInfo.words[1].turkish).toEqual('saray');
-            expect(copiedDeckInfo.words[2].artist_id).toEqual('4');
+            expect(copiedDeckInfo.words[0].english).toEqual('palace');
+            expect(copiedDeckInfo.words[1].turkish).toEqual('sehpa');
+            expect(copiedDeckInfo.words[2].artist_id).toEqual('5');
     
             const prevItem = await get_item(db, itemInfo.item_name, 'deck', 1);
             expect(prevItem).not.toBeNull();

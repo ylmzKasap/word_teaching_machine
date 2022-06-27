@@ -40,7 +40,7 @@ async function add_folder(pool, owner, folder_name, folder_type, parent_id) {
     await pool.query(queryString, [owner, parent_id, owner, folder_name, folder_type, parent_id]);
 }
 
-async function add_category(pool, owner, category_name, parent_id, color, target, source) {
+async function add_category(pool, owner, category_name, parent_id, color, target, source, purpose) {
     const sourceL = source ? source : null;
 
     const orderSubQuery = `
@@ -59,16 +59,18 @@ async function add_category(pool, owner, category_name, parent_id, color, target
                 ($3, $4, 'category', $5, ${orderSubQuery})
             RETURNING item_id)
         INSERT INTO category_content
-            (category_key, color, category_target_language, category_source_language)
+            (category_key, color, category_target_language, category_source_language, purpose)
         SELECT
-            new_category.item_id, $6, $7, $8
+            new_category.item_id, $6, $7, $8, $9
         FROM
             new_category;`
         
-    await pool.query(queryString, [owner, parent_id, owner, category_name, parent_id, color, target, sourceL]);
+    await pool.query(queryString, [owner, parent_id, owner, category_name, parent_id, color, target, sourceL, purpose]);
 }
 
-async function add_deck(pool, owner, deck_name, parent_id, wordArray, target, source, category_id) {
+async function add_deck(pool, owner, deck_name, parent_id, wordArray,
+    target, source, purpose, show_translation=false, category_id
+    ) {
     const [operator, categoryVal] = category_id ? ["=", category_id] : ["IS", "NULL"];
     const category = category_id ? category_id : null;
 
@@ -104,17 +106,18 @@ async function add_deck(pool, owner, deck_name, parent_id, wordArray, target, so
             RETURNING item_id
         )
         INSERT INTO deck_content
-            (deck_key, target_language, source_language)
+            (deck_key, target_language, source_language, show_translation)
         SELECT
-            item_id, $7, $8
+            item_id, $7, $8, $9
         FROM
             item_table
         RETURNING
             deck_key;
     `
     const deck_key = await pool.query(queryString, [
-        owner, parent_id, owner, deck_name, parent_id, category, targetLang, sourceLang]);
+        owner, parent_id, owner, deck_name, parent_id, category, targetLang, sourceLang, show_translation]);
 
+    const selectorLanguage = purpose === "teach" ? targetLang : sourceLang;
     // Insert the words.
     const wordQuery = `
         WITH translation_table AS (
@@ -123,7 +126,7 @@ async function add_deck(pool, owner, deck_name, parent_id, wordArray, target, so
             FROM
                 translations
             WHERE
-                ${targetLang} = $1
+                ${selectorLanguage} = $1
             LIMIT 1
         )
         INSERT INTO words

@@ -77,6 +77,7 @@ export const wordDefault = [{
 export const categoryInfoDefault = {
   id: undefined,
   name: undefined,
+  purpose: undefined,
   targetLanguage: undefined,
   sourceLanguage: undefined
 };

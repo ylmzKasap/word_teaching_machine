@@ -121,6 +121,8 @@ export interface serverItemTypes {
   parent_id: string;
   category_source_language?: string;
   category_target_language?: string;
+  purpose?: string;
+  show_translation: boolean;
   color?: string;
   source_language?: string;
   target_language?: string;
@@ -131,7 +133,8 @@ export interface CategoryInfoTypes {
   id: string | undefined,
   name: string | undefined,
   targetLanguage: string | undefined,
-  sourceLanguage: string | undefined
+  sourceLanguage: string | undefined,
+  purpose: string | undefined
 }
 
 export interface ProfileContextTypes {

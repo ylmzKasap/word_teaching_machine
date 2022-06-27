@@ -25,4 +25,5 @@ export const wordInfoDefault = {
   words: wordDefault,
   target_language: '',
   source_language: '',
+  show_translation: false
 };

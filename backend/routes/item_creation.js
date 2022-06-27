@@ -11,14 +11,18 @@ const colorFilter = /^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/
 // Handle deck creation.
 const create_deck = async (req, res) => {
     const { username } = req.params;
-    const { deckName, parent_id, wordArray, target_language, source_language, category_id } = req.body;
+    const { deckName, parent_id, wordArray, target_language,
+        source_language, category_id, purpose, show_translation } = req.body;
 
     const db = req.app.get('database');
 
+    console.log(deckName, parent_id, wordArray, target_language,
+        source_language, category_id, purpose, show_translation);
     // Body mismatch
     if (test_utils.does_not_exist(
-            [deckName, parent_id, wordArray, target_language, source_language, category_id])
-            || Object.keys(req.body).length > 6) {
+            [deckName, parent_id, wordArray, target_language,
+                source_language, category_id, purpose, show_translation])
+            || Object.keys(req.body).length > 8) {
             return res.status(400).send({"errDesc": "Missing or extra body"});
     }
     
@@ -27,8 +31,10 @@ const create_deck = async (req, res) => {
         || !Array.isArray(wordArray)
         || !wordArray.every(w => typeof w === 'string')
         || typeof target_language !== 'string'
-        || typeof source_language !== 'string'
+        || (typeof source_language !== 'string' && source_language !== null)
         || typeof parent_id !== 'string'
+        || typeof purpose !== 'string'
+        || typeof show_translation !== 'boolean'
         || (typeof category_id !== 'string' && category_id !== null)
         ) {
         return res.status(400).send({"errDesc": "Type mismatch"});
@@ -46,6 +52,12 @@ const create_deck = async (req, res) => {
 
     if (filteredWords.length === 0) {
         return res.status(400).send({"errDesc": "Blank value"});
+    }
+
+    // Invalid purpose
+    if (!(["teach", "learn"].includes(purpose))
+        || (purpose === "learn" && !source_language)) {
+        return res.status(400).send({"errDesc": "Invalid purpose"});
     }
 
     // Prevent invalid directory
@@ -101,27 +113,26 @@ const create_deck = async (req, res) => {
 
     // Language is not supported
     if ((!test_utils.availableLanguages.includes(target_language)
-        || !test_utils.availableLanguages.includes(source_language))
+        || (source_language !== null && !test_utils.availableLanguages.includes(source_language)))
         || target_language === source_language) {
             return res.status(400).send({"errDesc": "Invalid language"});
         }
     
-    /*     // Locate image files.
-        const [missingImages, missingSounds] = await utils.locate_words(
-            db, wordArray, target_language);
+    const language = purpose === "teach" ? target_language : source_language;
+    // Locate image files.
+    const missingImages = await utils.locate_words(db, wordArray, language);
 
-        if (missingImages.length > 0 || missingSounds.length > 0) {
-            return res.status(400).send({
-                "errDesc": "Some files could not be found",
-                "images": missingImages,
-                "sounds": missingSounds
-            });
-        } */
+    if (missingImages.length > 0) {
+        return res.status(400).send({
+            "errDesc": "Some files could not be found",
+            "images": missingImages
+        });
+    }
     
     // Create deck
     await item_crt_utils.add_deck(db, 
-        username, deckName, parent_id, wordArray, target_language, source_language, category_id
-        )
+        username, deckName, parent_id, wordArray,
+        target_language, source_language, purpose, show_translation, category_id)
     .then(() => res.status(200).send())
     .catch(err => {
         const description = err_utils.handle_error(err.code);
@@ -192,25 +203,33 @@ const create_folder = async (req, res) => {
 // Handle category creation.
 const create_category = async (req, res) => {
     const { username } = req.params;
-    const { category_name, parent_id, color, target_language, source_language } = req.body;
+    const { category_name, parent_id, color, target_language, source_language, purpose } = req.body;
 
     const db = req.app.get('database');
 
     // Body values are missing or extra
-    if (test_utils.does_not_exist([category_name, parent_id, color, target_language, source_language]) 
-        || Object.keys(req.body).length > 5) {
+    if (test_utils.does_not_exist([category_name, parent_id, color,
+        target_language, source_language, purpose]) 
+        || Object.keys(req.body).length > 6) {
             return res.status(400).send({"errDesc": "Missing or extra body"});
     }
 
     // Type mismatches
-    if (!([category_name, parent_id, color, target_language, source_language]
-        .every(v => typeof v === "string"))) {
+    if (!([category_name, parent_id, color, target_language, purpose]
+        .every(v => typeof v === "string"))
+        || (source_language !== null && typeof source_language !== "string")) {
         return res.status(400).send({"errDesc": "Type mismatch"});
     }
 
     // Forbidden characters
     if (itemNameFilter.test(category_name)){
         return res.status(400).send({"errDesc": "Forbidden character"});
+    }
+
+    // Invalid purpose
+    if (!(["teach", "learn"].includes(purpose))
+        || (purpose === "learn" && !source_language)) {
+        return res.status(400).send({"errDesc": "Invalid purpose"});
     }
 
     // Invalid color value
@@ -220,7 +239,7 @@ const create_category = async (req, res) => {
 
     // Language is not supported
     if ((!test_utils.availableLanguages.includes(target_language)
-        || !test_utils.availableLanguages.includes(source_language))
+        || (source_language !== null && !test_utils.availableLanguages.includes(source_language)))
         || target_language === source_language) {
             return res.status(400).send({"errDesc": "Invalid language"});
         }
@@ -244,7 +263,7 @@ const create_category = async (req, res) => {
     }
 
     await item_crt_utils.add_category(
-        db, username, category_name, parent_id, color, target_language, source_language)
+        db, username, category_name, parent_id, color, target_language, source_language, purpose)
     .then(() => res.status(200).send())
     .catch(err => {
         const description = err_utils.handle_error(err.code);

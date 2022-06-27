@@ -5,6 +5,7 @@ export interface LocationTypes {
   words: wordTypes[];
   target_language: string;
   source_language: string;
+  show_translation: boolean;
   directory: number;
   rootDirectory: number;
 }
@@ -13,6 +14,7 @@ export interface WordInfoTypes {
   words: wordTypes[];
   target_language: string;
   source_language: string;
+  show_translation: boolean;
 }
 
 export type ParamTypes = {
