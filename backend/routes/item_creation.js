@@ -16,8 +16,6 @@ const create_deck = async (req, res) => {
 
     const db = req.app.get('database');
 
-    console.log(deckName, parent_id, wordArray, target_language,
-        source_language, category_id, purpose, show_translation);
     // Body mismatch
     if (test_utils.does_not_exist(
             [deckName, parent_id, wordArray, target_language,

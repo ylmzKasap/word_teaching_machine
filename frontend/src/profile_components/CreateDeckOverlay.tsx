@@ -174,7 +174,7 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
       />}
       {/* Words */}
       {((purpose === "teach" && language.targetLanguage)
-        || (purpose === "learn" && language.sourceLanguage)
+        || (purpose === "learn" && (language.sourceLanguage && language.targetLanguage))
         || categorySpec)
         && 
       <label className="input-label">
@@ -193,7 +193,7 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
         />
       </label>
       }
-      {((purpose === "teach" && categoryInfo.sourceLanguage )
+      {((purpose === "teach" && (categorySpec ? categoryInfo.sourceLanguage : true))
        || (purpose === "learn" && language.sourceLanguage)) && 
       <form_components.Checkbox 
         description="Show translations on pictures"
