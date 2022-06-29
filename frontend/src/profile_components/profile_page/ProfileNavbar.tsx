@@ -18,8 +18,6 @@ declare module 'react' {
 export const ProfileNavBar: React.FC = () => {
   // Component of ProfilePage.
 
-  const [folderDisplay, setFolderDisplay] = useState(false);
-  const [categoryDisplay, setCategoryDisplay] = useState(false);
   const [backDisplay, setBackDisplay] = useState(false);
   const navigate = useNavigate();
 
@@ -30,8 +28,12 @@ export const ProfileNavBar: React.FC = () => {
     directoryInfo,
     fetchError,
     rootDirectory,
-    deckDisplay,
-    setDeckDisplay,
+    deckOverlay,
+    setDeckOverlay,
+    folderOverlay,
+    setFolderOverlay,
+    categoryOverlay,
+    setCategoryOverlay
   } = useContext(ProfileContext) as ProfileContextTypes;
 
   useEffect(() => {
@@ -56,11 +58,11 @@ export const ProfileNavBar: React.FC = () => {
     const element = event.target as HTMLInputElement;
     const itemType = element.getAttribute('type');
     if (itemType === "deck") {
-      setDeckDisplay((view) => !view);
+      setDeckOverlay({type: "view", value: "show"});
     } else if (itemType === "folder") {
-      setFolderDisplay((view) => !view);
+      setFolderOverlay({type: "view", value: "show"});
     } else if (itemType === "category") {
-      setCategoryDisplay((view) => !view);
+      setCategoryOverlay({type: "view", value: "show"});
     }
   };
 
@@ -103,11 +105,11 @@ export const ProfileNavBar: React.FC = () => {
         onClick={() => navigate(`/user/${username}`)}></i>
       }
 
-      {categoryDisplay && (
-        <CreateCategoryOverlay setDisplay={setCategoryDisplay} />
+      {categoryOverlay.display && (
+        <CreateCategoryOverlay />
       )}
-      {deckDisplay && <CreateDeckOverlay setDisplay={setDeckDisplay} />}
-      {folderDisplay && <CreateFolderOverlay setDisplay={setFolderDisplay} />}
+      {deckOverlay.display && <CreateDeckOverlay />}
+      {folderOverlay.display && <CreateFolderOverlay />}
     </div>
   );
 };

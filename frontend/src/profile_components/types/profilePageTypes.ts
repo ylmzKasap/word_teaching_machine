@@ -1,4 +1,5 @@
 import React from "react";
+import { CategoryOverlayTypes, DeckOverlayTypes, FolderOverlayTypes } from "./overlayTypes";
 
 type Timer = ReturnType<typeof setTimeout>;
 
@@ -137,6 +138,19 @@ export interface CategoryInfoTypes {
   purpose: string | undefined
 }
 
+export type SetOverlayType = React.Dispatch<{
+  type: string;
+  value: string;
+  innerType?: string;
+}>
+
+export type SetDeckOverlayType = React.Dispatch<{
+  type: string;
+  value: string;
+  innerType?: string;
+  categoryInfo?: CategoryInfoTypes;
+}>
+
 export interface ProfileContextTypes {
   username: string | undefined;
   rootDirectory: string;
@@ -158,13 +172,15 @@ export interface ProfileContextTypes {
   setDraggedElement: React.Dispatch<React.SetStateAction<DraggedElementTypes>>;
   isDragging: boolean;
   categoryDrag: boolean;
-  deckDisplay: boolean;
-  setDeckDisplay: React.Dispatch<React.SetStateAction<boolean>>;
-  categoryInfo: CategoryInfoTypes;
-  setCategoryInfo: React.Dispatch<React.SetStateAction<CategoryInfoTypes>>;
   columnNumber: number;
   handleContextMenu: (event: React.MouseEvent) => void;
   handleScroll: (event: React.UIEvent<HTMLElement>) => void;
   resetDrag: (timeout?: boolean) => void;
   resetContext: () => void;
+  deckOverlay: DeckOverlayTypes;
+  setDeckOverlay: SetDeckOverlayType;
+  folderOverlay: FolderOverlayTypes;
+  setFolderOverlay: SetOverlayType;
+  categoryOverlay: CategoryOverlayTypes;
+  setCategoryOverlay: SetOverlayType;
 }

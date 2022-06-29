@@ -1,130 +1,113 @@
-import React, { useState, useContext, useReducer, useEffect } from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
 import { OverlayNavbar } from "./common/components";
 import * as handlers from "./common/handlers";
 import * as form_components from "./common/form_components";
-import * as defaults from "./types/overlayDefaults";
-import { CreateItemOverlayTypes } from "./types/overlayTypes";
 import { ProfileContextTypes } from "./types/profilePageTypes";
-import { handleOverlayError, handleLanguage } from "./common/reducers";
 import { to_title } from "./common/functions";
 
-export const CreateDeckOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
+export const CreateDeckOverlay: React.FC = () => {
   // Component of ProfileNavbar.
 
   return (
     <div className="input-overlay">
-      <CreateDeck setDisplay={setDisplay} />
+      <CreateDeck />
     </div>
   );
 };
 
-export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
+export const CreateDeck: React.FC = () => {
   // Component of CreateDeckOverlay.
 
-  const { username, directory, setReRender, categoryInfo } =
+  const { username, directory, setReRender, deckOverlay, setDeckOverlay } =
     useContext(ProfileContext) as ProfileContextTypes;
 
-  const categorySpec = categoryInfo.id ? categoryInfo.id : "";
-
-  const [deckName, setDeckName] = useState("");
-  const [words, setWords] = useState("");
-  const [purpose, setPurpose] = useState(categoryInfo.purpose ? categoryInfo.purpose : "");
-  const [includeTranslation, setIncludeTranslation] = useState(false);
-  const [errors, setErrors] = useReducer(handleOverlayError, defaults.deckErrorDefault);
-  const [language, setLanguage] = useReducer(handleLanguage, (categorySpec ?
-      {targetLanguage: categoryInfo.targetLanguage, sourceLanguage: categoryInfo.sourceLanguage}
-      : defaults.languageDefault));
-
-  useEffect(() => {
-    // Set source language to undefined when translation is unchecked.
-    if (!includeTranslation && purpose === "teach") {
-      setLanguage({type: "source_language", value: undefined});
-    }
-  }, [includeTranslation, purpose]);
+  const categorySpec = deckOverlay.categoryInfo.id ? deckOverlay.categoryInfo.id : "";
 
   const handleNameChange = (event: React.ChangeEvent) => {
     const [itemName, itemNameError] = handlers.handleItemName(event);
-    setDeckName(itemName);
-    setErrors({type: "name", error: itemNameError});
-    setErrors({type: "form", error: ""});
+    setDeckOverlay({type: "deckName", value: itemName});
+    setDeckOverlay({type: "errors", innerType: "name", value: itemNameError});
   };
 
   const handlePurpose = (selectedPurpose: string) => {
-    setPurpose(selectedPurpose);
-    setLanguage({type: "source_language", value: undefined});
-    setIncludeTranslation(false);
+    setDeckOverlay({type: "purpose", value: selectedPurpose});
   };
 
   const handleWordChange = (event:React.ChangeEvent) => {
     const element = event.target as HTMLInputElement;
-
     const wordNameFilter = /[.,\\/<>:"|?*]/;
     if (wordNameFilter.test(element.value)) {
-      setErrors({type: "word",
-      error: `Forbidden character ' ${element.value.match(wordNameFilter)} '`});
+      setDeckOverlay({
+        type: "errors",
+        innerType: "word",
+        value: `Forbidden character ' ${element.value.match(wordNameFilter)} '`});
     } else {
-      setErrors({type: "word", error: ""});
+      setDeckOverlay({type: "errors", innerType: "word", value: ""});
     }
-    setWords(element.value);
-    setErrors({type: "form", error: ""});
+    setDeckOverlay({type: "words", value: element.value});
   };
 
   const handleLanguageChange = (event: React.SyntheticEvent) => {
     const element = event.target as HTMLInputElement;
     const field = element.name;
     const language = element.value;
-    setLanguage({type: field, value: language});
+    setDeckOverlay({type: "language", innerType: field, value: language});
   };
 
   const handleTranslationDecision = () => {
-    setIncludeTranslation(x => !x);
+    setDeckOverlay({type: "includeTranslation", value: ""});
   };
 
   const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
 
-    let allWords = words
+    let allWords = deckOverlay.words
       .split("\n")
       .filter((word) => word !== "")
       .filter((word) => !word.match(/^[\s]+$/));
 
-    if (!language.targetLanguage && !categorySpec) {
-      setErrors({type: "form", error:"Pick a target language"});
-    } else if ((purpose === "learn" && !language.sourceLanguage) && !categorySpec) {
-      setErrors({type: "form", error:"Pick a source language"});
-    } else if (errors.nameError.errorClass || errors.wordError!.errorClass) {
-      setErrors({type: "form", error:"Fix the problem(s) above."});
+    if (!deckOverlay.language.targetLanguage && !categorySpec) {
+      setDeckOverlay({type: "errors", innerType: "form", value: "Pick a target language"});
+    } else if (((deckOverlay.purpose === "learn"
+    && !deckOverlay.language.sourceLanguage) && !categorySpec)
+      || (deckOverlay.includeTranslation && !deckOverlay.language.sourceLanguage)) {
+      setDeckOverlay({type: "errors", innerType: "form", value: "Pick a source language"});
+    } else if (
+        deckOverlay.errors.nameError.errorClass
+       || deckOverlay.errors.wordError!.errorClass) {
+        setDeckOverlay({type: "errors", innerType: "form", value: "Fix the problem(s) above"});
     } else if (allWords.length === 0) {
-      setErrors({type: "form", error:"Enter at least one word."});
-    } else if (words === "") {
-      setErrors({type: "form", error:"Enter a deck name."});
+      setDeckOverlay({type: "errors", innerType: "form", value: "Enter at least one word"});
+    } else if (deckOverlay.words === "") {
+      setDeckOverlay({type: "errors", innerType: "form", value: "Enter a deck name"});
     } else {
       axios
         .post(`/create_deck/${username}`, {
-          deckName: deckName,
+          deckName: deckOverlay.deckName,
           wordArray: allWords,
           parent_id: directory,
           category_id: categorySpec ? categorySpec : null,
-          target_language: 
-            categorySpec ? categoryInfo.targetLanguage : language.targetLanguage!.toLowerCase(),
-          source_language: 
-            categorySpec ? (categoryInfo.sourceLanguage ? categoryInfo.sourceLanguage : null) : (
-              language.sourceLanguage ? language.sourceLanguage.toLowerCase() : null),
-          show_translation: includeTranslation,
-          purpose: purpose
+          target_language: categorySpec
+            ? deckOverlay.categoryInfo.targetLanguage
+            : deckOverlay.language.targetLanguage!.toLowerCase(),
+          source_language: categorySpec
+            ? (deckOverlay.categoryInfo.sourceLanguage
+              ? deckOverlay.categoryInfo.sourceLanguage : null)
+            : (deckOverlay.language.sourceLanguage
+              ? deckOverlay.language.sourceLanguage.toLowerCase()
+              : null),
+          show_translation: deckOverlay.includeTranslation,
+          purpose: deckOverlay.purpose
         })
         .then(() => {
-          setDeckName("");
-          setWords("");
-          setErrors({type: "form", error: ""});
+          setDeckOverlay({type: "clear", value: ""});
           setReRender();
-          setDisplay(false);
         })
         .catch((err) =>
-        setErrors({type: "form", error: err.response.data.errDesc}));
+        setDeckOverlay({type: "errors", innerType: "form", value: err.response.data.errDesc}));
     }
   };
 
@@ -132,15 +115,15 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
   return (
     <form className="create-item-info" onSubmit={handleSubmit}>
       <OverlayNavbar
-        setDisplay={setDisplay}
+        setOverlay={setDeckOverlay}
         description="Create a new deck"
       />
       <div className="form-content">
       {/* Deck name */}
       <form_components.InputField
         description="Deck Name:"
-        error={errors.nameError}
-        value={deckName}
+        error={deckOverlay.errors.nameError}
+        value={deckOverlay.deckName}
         handler={handleNameChange}
         placeholder="Enter a deck name"
       />
@@ -150,67 +133,76 @@ export const CreateDeck: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
         description="I want to..."
         choice_one="learn"
         choice_two="teach"
-        chosen={purpose}
+        chosen={deckOverlay.purpose}
         handler={handlePurpose} />
       }
-      {!categorySpec && purpose && 
+      {!categorySpec && deckOverlay.purpose && 
       <form_components.DropDown
         description=""
         handler={handleLanguageChange}
         topic="target_language"
-        choices={form_components.allLanguages.filter(i => i !== language.sourceLanguage)}
-        chosen={language.targetLanguage}
-        placeholder={`Choose a language to ${purpose}`}
+        choices={form_components.allLanguages.filter(
+          i => i !== deckOverlay.language.sourceLanguage)}
+        chosen={deckOverlay.language.targetLanguage}
+        placeholder={`Choose a language to ${deckOverlay.purpose}`}
       />}
       {/* Source language for learning */}
-      {!categorySpec && purpose === "learn" &&
+      {!categorySpec && deckOverlay.purpose === "learn" &&
       <form_components.DropDown
         description="My language is"
         handler={handleLanguageChange}
         topic="source_language"
-        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
-        chosen={language.sourceLanguage}
+        choices={form_components.allLanguages.filter(
+          i => i !== deckOverlay.language.targetLanguage)}
+        chosen={deckOverlay.language.sourceLanguage}
         placeholder="Choose the language that you will enter the words"
       />}
       {/* Words */}
-      {((purpose === "teach" && language.targetLanguage)
-        || (purpose === "learn" && (language.sourceLanguage && language.targetLanguage))
-        || categorySpec)
-        && 
+      {((deckOverlay.purpose === "teach" && deckOverlay.language.targetLanguage)
+        || (deckOverlay.purpose === "learn" 
+          && (deckOverlay.language.sourceLanguage && deckOverlay.language.targetLanguage))
+        || categorySpec) && 
       <label className="input-label">
         <div className="input-info">
-          {purpose === "teach" ? `${to_title(language.targetLanguage!)} words that I will teach`
-          : `${to_title(language.sourceLanguage!)} words
-          that I want to learn in ${to_title(language.targetLanguage!)}`}:
-          <span className="input-error">{errors.wordError!.description}</span>
+          {deckOverlay.purpose === "teach"
+          ? `${to_title(deckOverlay.language.targetLanguage!)} words that I will teach`
+          : `${to_title(deckOverlay.language.sourceLanguage!)} words
+          that I want to learn in ${to_title(deckOverlay.language.targetLanguage!)}`}:
+          <span className="input-error">{deckOverlay.errors.wordError!.description}</span>
         </div>
         <textarea
-          className={`word-input ${errors.wordError!.errorClass}`}
-          value={words}
+          className={`word-input ${deckOverlay.errors.wordError!.errorClass}`}
+          value={deckOverlay.words}
           onChange={handleWordChange}
           placeholder="Enter a word for each line"
           required
         />
       </label>
       }
-      {((purpose === "teach" && (categorySpec ? categoryInfo.sourceLanguage : true))
-       || (purpose === "learn" && language.sourceLanguage)) && 
+      {((deckOverlay.purpose === "teach" && (
+        categorySpec
+        ? deckOverlay.categoryInfo.sourceLanguage
+        : true))
+       || (deckOverlay.purpose === "learn" && deckOverlay.language.sourceLanguage)) && 
       <form_components.Checkbox 
         description="Show translations on pictures"
         handler={handleTranslationDecision}
-        value={includeTranslation} />
+        value={deckOverlay.includeTranslation} />
       }
-      {!categorySpec && purpose === "teach" && includeTranslation &&
+      {!categorySpec && deckOverlay.purpose === "teach" && deckOverlay.includeTranslation &&
       <form_components.DropDown
         description=""
         handler={handleLanguageChange}
         topic="source_language"
-        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
-        chosen={language.sourceLanguage}
+        choices={form_components.allLanguages.filter(
+          i => i !== deckOverlay.language.targetLanguage)}
+        chosen={deckOverlay.language.sourceLanguage}
         placeholder="Choose a language to display the translations"
       />}
       {/* Submit & Error */}
-      <form_components.SubmitForm description="Create Deck" formError={errors.formError} />
+      <form_components.SubmitForm 
+        description="Create Deck"
+        formError={deckOverlay.errors.formError} />
       </div> 
     </form>
   );

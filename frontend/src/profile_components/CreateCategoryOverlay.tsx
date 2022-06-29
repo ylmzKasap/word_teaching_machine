@@ -1,110 +1,100 @@
-import React, { useState, useContext, useReducer } from "react";
+import React, { useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
 import { OverlayNavbar } from "./common/components";
 import * as handlers from "./common/handlers";
-import * as defaults from "./types/overlayDefaults";
 import * as form_components from "./common/form_components";
 import { ProfileContextTypes } from "./types/profilePageTypes";
-import { CreateItemOverlayTypes } from "./types/overlayTypes";
-import { handleLanguage, handleOverlayError } from "./common/reducers";
 
-export const CreateCategoryOverlay: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
+export const CreateCategoryOverlay: React.FC = () => {
   // Component of ProfileNavbar.
 
   return (
     <div className="input-overlay">
-      <CreateCategory setDisplay={setDisplay} />
+      <CreateCategory />
     </div>
   );
 };
 
 // TODO: Fix memory leak when submit button is pressed multiple times.
-export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) => {
+export const CreateCategory: React.FC = () => {
   // Component of CreateCategoryOverlay.
 
-  const [categoryName, setCategoryName] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [includeTranslation, setIncludeTranslation] = useState(false);
-  const [color, setColor] = useState("#fff7f0");
-  const [language, setLanguage] = useReducer(handleLanguage, defaults.languageDefault);
-  const [errors, setErrors] = useReducer(handleOverlayError, defaults.categoryErrorDefault);
-
-  const { username, directory, setReRender } = useContext(ProfileContext) as ProfileContextTypes;
+  const { username, directory, setReRender,
+    categoryOverlay, setCategoryOverlay } = useContext(ProfileContext) as ProfileContextTypes;
 
   const handleNameChange = (event: React.ChangeEvent) => {
     const [itemName, itemNameError] = handlers.handleItemName(event);
-    setCategoryName(itemName);
-    setErrors({type: "name", error: itemNameError});
-    setErrors({type: "form", error: ""});
+    setCategoryOverlay({type: "categoryName", value: itemName});
+    setCategoryOverlay({type: "errors", innerType: "name", value: itemNameError});
   };
 
   const handleLanguageChange = (event: React.SyntheticEvent) => {
     const element = event.target as HTMLInputElement;
     const field = element.name;
     const language = element.value;
-    setLanguage({type: field, value: language});
+    setCategoryOverlay({type: "language", innerType: field, value: language});
   };
 
   const handlePurpose = (selectedPurpose: string) => {
-    setPurpose(selectedPurpose);
-    setLanguage({type: "source_language", value: undefined});
+    setCategoryOverlay({type: "purpose", value: selectedPurpose});
   };
 
   const handleTranslationDecision = () => {
-    setIncludeTranslation(x => !x);
+    setCategoryOverlay({type: "includeTranslation", value: ""});
   };
 
   const handleColorChange = (event: React.ChangeEvent) => {
     const element = event.target as HTMLInputElement;
-    setColor(element.value);
+    setCategoryOverlay({type: "color", value: element.value});
   };
 
   const handleSubmit = (event: React.SyntheticEvent) => {
     event.preventDefault();
 
-    if (!language.targetLanguage) {
-      setErrors({type: "form", error:"Pick a target language"});
-    } else if (purpose === "learn" && !language.sourceLanguage) {
-      setErrors({type: "form", error:"Pick a source language"});
-    } else if (categoryName === "") {
-      setErrors({type: "form", error: "Enter a category name."});
-    } else if (errors.nameError.errorClass) {
-      setErrors({type: "form", error: "Fix the problem above."});
+    if (!categoryOverlay.language.targetLanguage) {
+      setCategoryOverlay({type: "errors", innerType: "form", value: "Pick a target language"});
+    } else if ((categoryOverlay.purpose === "learn" && !categoryOverlay.language.sourceLanguage)
+      || (categoryOverlay.includeTranslation && !categoryOverlay.language.sourceLanguage)) {
+      setCategoryOverlay({type: "errors", innerType: "form", value: "Pick a source language"});
+    } else if (categoryOverlay.categoryName === "") {
+      setCategoryOverlay({type: "errors", innerType: "form", value: "Enter a category name"});
+    } else if (categoryOverlay.errors.nameError.errorClass) {
+      setCategoryOverlay({type: "errors", innerType: "form", value: "Fix the problem above"});
     } else {
       axios
         .post(`/create_category/${username}`, {
-          category_name: categoryName,
+          category_name: categoryOverlay.categoryName,
           parent_id: directory,
-          color: color,
-          target_language: language.targetLanguage.toLowerCase(),
-          source_language: language.sourceLanguage ? language.sourceLanguage.toLowerCase() : null,
-          purpose: purpose
+          color: categoryOverlay.color,
+          target_language: categoryOverlay.language.targetLanguage.toLowerCase(),
+          source_language: categoryOverlay.language.sourceLanguage
+            ? categoryOverlay.language.sourceLanguage.toLowerCase() : null,
+          purpose: categoryOverlay.purpose
         })
         .then(() => {
-          setCategoryName("");
-          setErrors({type: "form", error: ""});
+          setCategoryOverlay({type: "clear", value: ""});
           setReRender();
-          setDisplay(false);
         })
         .catch((err) =>
-        setErrors({type: "form", error: err.response.data.errDesc}));
+          setCategoryOverlay(
+            {type: "errors", innerType: "form", value: err.response.data.errDesc}));
     }
   };
 
   return (
     <form className="create-item-info" onSubmit={handleSubmit}>
       <OverlayNavbar
-        setDisplay={setDisplay}
+        setOverlay={setCategoryOverlay}
         description="Create a new category"
       />
       <div className="form-content">
         {/* Category name */}
       <form_components.InputField
         description="Category name:"
-        error={errors.nameError}
-        value={categoryName}
+        error={categoryOverlay.errors.nameError}
+        value={categoryOverlay.categoryName}
         handler={handleNameChange}
         placeholder="Enter a category name"
       />
@@ -113,50 +103,53 @@ export const CreateCategory: React.FC<CreateItemOverlayTypes> = ({setDisplay}) =
         description="I want to..."
         choice_one="learn"
         choice_two="teach"
-        chosen={purpose}
+        chosen={categoryOverlay.purpose}
         handler={handlePurpose} />
-      {purpose && 
+      {categoryOverlay.purpose && 
       <form_components.DropDown
         description=""
         handler={handleLanguageChange}
         topic="target_language"
-        choices={form_components.allLanguages.filter(i => i !== language.sourceLanguage)}
-        chosen={language.targetLanguage}
-        placeholder={`Choose a language to ${purpose}`}
+        choices={form_components.allLanguages.filter(
+          i => i !== categoryOverlay.language.sourceLanguage)}
+        chosen={categoryOverlay.language.targetLanguage}
+        placeholder={`Choose a language to ${categoryOverlay.purpose}`}
       />}
       {/* Source language for learning */}
-      {purpose === "learn" &&
+      {categoryOverlay.purpose === "learn" &&
       <form_components.DropDown
         description="My language is"
         handler={handleLanguageChange}
         topic="source_language"
-        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
-        chosen={language.sourceLanguage}
+        choices={form_components.allLanguages.filter(
+          i => i !== categoryOverlay.language.targetLanguage)}
+        chosen={categoryOverlay.language.sourceLanguage}
         placeholder="Choose the language that you will enter the words"
       />}
-      {purpose === "teach" && 
+      {categoryOverlay.purpose === "teach" && 
       <form_components.Checkbox 
         description="Show translations on pictures"
         handler={handleTranslationDecision}
-        value={includeTranslation} />
+        value={categoryOverlay.includeTranslation} />
       }
-      {includeTranslation &&
+      {categoryOverlay.includeTranslation &&
       <form_components.DropDown
         description=""
         handler={handleLanguageChange}
         topic="source_language"
-        choices={form_components.allLanguages.filter(i => i !== language.targetLanguage)}
-        chosen={language.sourceLanguage}
+        choices={form_components.allLanguages.filter(
+          i => i !== categoryOverlay.language.targetLanguage)}
+        chosen={categoryOverlay.language.sourceLanguage}
         placeholder="Choose a language to display the translations"
       />}
       <label className="color-info">
-        <input type="color" value={color} onChange={handleColorChange} />
+        <input type="color" value={categoryOverlay.color} onChange={handleColorChange} />
         <span className="input-info">Pick a background color</span>
       </label>
       {/* Submit & Error */}
       <form_components.SubmitForm
         description="Create Category"
-        formError={errors.formError}
+        formError={categoryOverlay.errors.formError}
       />
       </div>
     </form>

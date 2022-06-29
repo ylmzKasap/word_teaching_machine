@@ -17,6 +17,11 @@ import { ItemContextMenu, NotFound } from "../common/components";
 import { useWindowSize } from "../common/hooks";
 import * as types from "../types/profilePageTypes";
 import * as defaults from "../types/profilePageDefaults";
+import { handleDeckOverlay } from "../common/reducers/createDeckReducer";
+import { categoryOverlayDefaults,
+  deckOverlayDefaults, folderOverlayDefaults } from "../types/overlayDefaults";
+import { handleFolderOverlay } from "../common/reducers/createFolderReducer";
+import { handleCategoryOverlay } from "../common/reducers/createCategoryReducer";
 
 export const ProfileContext = createContext<types.ProfileContextTypes | undefined>(undefined);
 
@@ -67,10 +72,13 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   const [categoryDrag, setCategoryDrag] = useState(false);
   const [scrolling, setScrolling] = useState<types.ScrollingTypes>(defaults.scrollingDefault);
 
-  const [deckDisplay, setDeckDisplay] = useState(false);
-  const [categoryInfo, setCategoryInfo] = useState<types.CategoryInfoTypes>(
-    defaults.categoryInfoDefault);
   const [columnNumber] = useWindowSize(directoryInfo, contentLoaded);
+
+  // Overlay reducers
+  const [deckOverlay, setDeckOverlay] = useReducer(handleDeckOverlay, deckOverlayDefaults);
+  const [folderOverlay, setFolderOverlay] = useReducer(handleFolderOverlay, folderOverlayDefaults);
+  const [categoryOverlay, setCategoryOverlay] = useReducer(
+    handleCategoryOverlay, categoryOverlayDefaults);
 
   let currentContainer: string;
   if (directoryInfo) {
@@ -98,18 +106,28 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
 
   // Render directory.
   useEffect(() => {
+    const currentDir = dirId ? dirId : dir;
     axios
-      .get(`/u/${username}/${dirId ? dirId : dir}`)
+      .get(`/u/${username}/${currentDir}`)
       .then((response) => {
         if (!username) throw Error;
         const [dirItems, dirInfo] = response.data as types.userResponse;
         setItems(generate_directory(dirInfo, dirItems, username));
         setDirectoryInfo(dirInfo);
         if (rootDirectory) {
+          const newDirectory = currentDir === "home" ? rootDirectory : currentDir;
+          // Clear deck creation info on directory change
+          if (newDirectory !== directory) {
+            setDeckOverlay({type: "clear", value: ""});
+            setFolderOverlay({type: "clear", value: ""});
+            setCategoryOverlay({type: "clear", value: ""});
+          }
           setDirectory(dirId ? dirId : rootDirectory);
         }
       })
-      .then(() => setDirectoryLoaded(true))
+      .then(() => {
+        setDirectoryLoaded(true);
+      })
       .catch(() => {
         setDirectoryLoaded(false);
         setContentLoaded(false);
@@ -151,13 +169,6 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   useEffect(() => {
     setRequestError({ exists: false, description: "" });
   }, [clipboard]);
-
-  // Reset categoryInfo when deck form is closed.
-  useEffect(() => {
-    if (deckDisplay === false) {
-      setCategoryInfo(defaults.categoryInfoDefault);
-    }
-  }, [deckDisplay]);
 
   // Reset all context menu related state.
   const resetContext = () => {
@@ -327,15 +338,17 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
         setDraggedElement: setDraggedElement,
         isDragging: isDragging,
         categoryDrag: categoryDrag,
-        deckDisplay: deckDisplay,
-        setDeckDisplay: setDeckDisplay,
-        categoryInfo: categoryInfo,
-        setCategoryInfo: setCategoryInfo,
         columnNumber: columnNumber,
         handleContextMenu: handleContextMenu,
         handleScroll: handleScroll,
         resetDrag: resetDrag,
-        resetContext: resetContext
+        resetContext: resetContext,
+        deckOverlay: deckOverlay,
+        setDeckOverlay: setDeckOverlay,
+        folderOverlay: folderOverlay,
+        setFolderOverlay: setFolderOverlay,
+        categoryOverlay: categoryOverlay,
+        setCategoryOverlay: setCategoryOverlay
       }}
     >
       <div className="profile-page">

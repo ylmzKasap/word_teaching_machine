@@ -319,7 +319,7 @@ const ItemContainer = () => {
 };
 
 const CategoryContainer = () => {
-  const { setDeckDisplay, isDragging, setCategoryInfo } =
+  const { isDragging, setDeckOverlay } =
     useContext(ProfileContext) as ProfileContextTypes;
 
   const {
@@ -339,13 +339,12 @@ const CategoryContainer = () => {
     if (!closestElement) return;
     const categoryId = closestElement.id;
 
-    setCategoryInfo({
+    setDeckOverlay({type: "category", value: "", categoryInfo: {
       id: extract_int(categoryId),
       name: parentProps.name,
       sourceLanguage: parentProps.source_language,
       targetLanguage: parentProps.target_language,
-      purpose: parentProps.purpose});
-    setDeckDisplay((x) => !x);
+      purpose: parentProps.purpose}} );
   };
 
   return (

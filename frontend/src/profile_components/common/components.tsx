@@ -10,12 +10,12 @@ import { FillerTypes } from "../types/pageItemTypes";
 
 
 export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = (
-  {setDisplay, description, extra}) => {
+  {setOverlay, description, extra}) => {
   // Component of CreateDeck, CreateFolder.
 
   const handleExit = (event: React.MouseEvent) => {
     event.preventDefault();
-    setDisplay(false);
+    setOverlay({type: "view", value: "hide"});
   };
 
   return (
