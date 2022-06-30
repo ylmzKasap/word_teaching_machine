@@ -24,6 +24,13 @@ async function get_item (db, name, type, parent) {
   return itemInfo ? itemInfo : null;  
 }
 
+function get_key_values(obj, keys) {
+  return keys.reduce((obj2, key) => {
+    obj2[key] = obj[key] ? obj[key] : null;
+    return obj2;
+  }, {});
+}
+
 function get_word_keys(word) {
   return {
     deck_id: word.deck_id,
@@ -51,5 +58,5 @@ function group_words(wordArray) {
 
 
 module.exports = {
-  roV, get_item, group_words
+  roV, get_item, group_words, get_key_values
 }

@@ -111,21 +111,19 @@ const create_deck = async (req, res) => {
 
     // Language is not supported
     if ((!test_utils.availableLanguages.includes(target_language)
-        || (source_language !== null && !test_utils.availableLanguages.includes(source_language)))
-        || target_language === source_language) {
+        || (source_language !== null && !test_utils.availableLanguages.includes(source_language))
+        || (source_language === null && show_translation === true)
+        || target_language === source_language)) {
             return res.status(400).send({"errDesc": "Invalid language"});
         }
     
-    const language = purpose === "teach" ? target_language : source_language;
-    // Locate image files.
-    const missingImages = await utils.locate_words(db, wordArray, language);
+    const searchLanguage = purpose === "teach" ? target_language : source_language;
 
-    if (missingImages.length > 0) {
-        return res.status(400).send({
-            "errDesc": "Some files could not be found",
-            "images": missingImages
-        });
-    }
+    // Locate image files.
+    const imageArray = await utils.locate_images(
+        db, wordArray, searchLanguage, target_language, source_language);
+
+    console.log(imageArray);
     
     // Create deck
     await item_crt_utils.add_deck(db, 

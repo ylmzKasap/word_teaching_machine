@@ -1,22 +1,40 @@
-async function locate_words (pool, wordArray, language) {
-    let missingImages = [];
+const { get_key_values } = require("../database/db_functions/common/functions");
+
+async function locate_images (pool, wordArray, searchLanguage, target, source) {
+    let images = [];
 
     const wordQuery = `
         SELECT *
             FROM word_content
         LEFT JOIN translations
             ON word_content.word_content_id = translations.translation_id
-        WHERE ${language} = $1;
+        WHERE ${searchLanguage} = $1
+        LIMIT 3;
     `
     for (word of wordArray) {
         const response = await pool.query(wordQuery, [word])
-            .then(res => res.rows[0]).catch((err) => console.log(err));
-        if (!response || !response.image_path) {
-            missingImages.push(word);
-        } 
+            .then(res => res.rows).catch((err) => console.log(err));
+
+        let wordImages = [];
+
+        for (imgObj of response) {
+            wordImages.push(get_key_values(imgObj,
+                ['artist_content_id', 'image_path', target, source ? source : 'source_language']));
+        }
+        
+        if (wordImages.length === 0) {
+            wordImages.push({
+                'artist_content_id': null,
+                'image_path': null,
+                [target]: searchLanguage === target ? word : null,
+                [source ? source : 'source_language']: searchLanguage === source ? word : null
+            })
+        }
+
+        images.push(wordImages);
     }
 
-    return missingImages;
+    return images;
 }
 
 function find_unique_violation(firstObjArray, secondObjArray, columns) {
@@ -48,5 +66,5 @@ function find_unique_violation(firstObjArray, secondObjArray, columns) {
 }
 
 module.exports = {
-    locate_words, find_unique_violation
+    locate_images, find_unique_violation
 }

@@ -261,6 +261,23 @@ describe('Create a deck', () => {
         fail_with_json(response, 400, "Invalid purpose");
     });
 
+    test('Source language cannot be null when show_translation is true', async () => {
+        const response = await request(app(db))
+            .post(createDeckUrl)
+            .send({
+                "deckName": "myDeck",
+                "wordArray": ["elevator", "square", "palace"],
+                "parent_id": "1",
+                "target_language": "english",
+                "source_language": null,
+                "show_translation": true,
+                "purpose": "teach",
+                "category_id": null
+            });   
+
+        fail_with_json(response, 400, "Invalid language");
+    });
+
     test("Deck in a category must have category's language", async () => {
         const response = await request(app(db))
             .post(createDeckUrl)
