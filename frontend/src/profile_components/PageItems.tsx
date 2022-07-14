@@ -276,7 +276,7 @@ const ItemContainer = () => {
             className={`deck-thumbnail${
               parentProps.words.length < 4 ? " n-1" : ""
             }`}
-            src={`media\\${wordObj.image_path}`}
+            src={`${wordObj.image_path}`}
             key={`${word}-${i}`}
             alt={`${word}-${i}`}
             draggable="false"
@@ -305,11 +305,11 @@ const ItemContainer = () => {
     >
       {" "}
       {["folder", "thematic-folder"].includes(parentProps.type) && (
-        <i className={`fas fa-folder fa-9x ${folderStyle}`}></i>
+        <i className={`fas fa-folder fa-8x ${folderStyle}`}></i>
       )}
       {parentProps.type === "deck" && (
         <picture className="thumbnail-container">
-          <span className="image-overlay" />
+          <span className="deck-image-overlay" />
           {createThumbnail()}
         </picture>
       )}

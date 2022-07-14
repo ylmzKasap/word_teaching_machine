@@ -81,7 +81,7 @@ const TextOptionBox: React.FC<types.OptionTypes> = (props) => {
         setTimeouts({
           sound: window.setTimeout(() => {
             props.animate();
-            audioMixer.src = `media/${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
+            audioMixer.src = `${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
             playAndCatchError(audioMixer, errorMessage);
           }, 1000),
           click: window.setTimeout(() => handleParentClick(), 2000),

@@ -134,7 +134,7 @@ if notImported:
     print("\nSome partials exist within the directory but they are not imported:\n")
     for i, partial in enumerate(notImported, 1):
         print(f'{i}. {partial}')
-    print("\nAdd the partials to the main scss file if they are necessary and restarts the compiler.")
+    print("\nAdd the partials to the main scss file if they are necessary and restart the compiler.")
 
     print("\n\nPartials which are not imported:")
     for i in toBeImported:

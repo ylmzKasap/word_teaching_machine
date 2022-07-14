@@ -1,0 +1,255 @@
+#add-image-overlay {
+  position: fixed;
+  height: auto;
+  width: 100%;
+  margin: 0;
+  inset: 0;
+  z-index: 1001;
+  background-color: white;
+}
+
+.add-image-navbar {
+  top: 0px;
+  height: 60px;
+  width: 100%;
+  > .overlay-description {
+    padding-left: 2%;
+  }
+  .exit-button {
+    text-align: center;
+    padding: 0;
+    font-size: 1.3rem;
+    width: 80px;
+  }
+}
+
+#add-image-content {
+  height: calc(100vh - 60px);
+  width: 100%;
+  margin: 0;
+  overflow: auto;
+}
+
+#add-image-wrapper {
+  display: table-row;
+  width: 100%;
+}
+
+[id^=add-image-box] {
+  display: flex;
+  height: 300px;
+  width: 100%;
+  background-color: rgb(255, 255, 255);
+  border: solid rgb(79, 76, 76);
+  margin: 0;
+  border-width: 0 0 4px 0;
+}
+
+#left-number-box {
+  @include flexit();
+  min-width: 50px;
+  height: 100%;
+  background-color: rgb(56, 56, 56);
+  color: white;
+  font-size: 2rem;
+}
+
+.image-card-template {
+  height: 85%;
+  width: 250px;
+  min-width: 250px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 3px 1px rgb(167, 164, 194);
+  margin: 20px 0 20px 30px;
+  overflow: hidden;
+}
+
+[id^=image-translation-box] {
+  @include flexit();
+  @extend .image-card-template;
+  flex-direction: column;
+  background-color: rgb(255, 255, 255);
+}
+
+[id^=image-box] {
+  @extend .image-card-template;
+  @include flexit();
+  flex-direction: column;
+  text-align: center;
+  &.not-found {
+    background-color: rgb(248, 248, 248);
+  }
+  > img {
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+  }
+}
+
+// Only for extending
+.image-content-not-found {
+  cursor: text;
+  background-color: rgb(231, 73, 16);
+  color: white;
+  font-style: italic;
+  &:hover {
+    background-color: rgb(232, 76, 20);
+  }
+}
+
+[id^=image-target-language] {
+  cursor: default;
+  margin-top: auto;
+  text-align: center;
+  padding: 5px;
+  width: 100%;
+  max-height: 70px;
+  &.not-found {
+    @extend .image-content-not-found
+  }
+  &:only-child{
+    margin-bottom: auto;
+  }
+}
+
+[id^=image-source-language], [id^=image-target-language] {
+  > input {
+    font-family: "Poppins", sans-serif;
+    background-color: white;
+    border: solid white 3px;
+    font-weight: bold;
+    padding: 6px;
+    border-radius: 10px;
+    margin: 3px;
+    text-align: center;
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+[id^=image-source-language] {
+  cursor: default;
+  margin-top: auto;
+  text-align: center;
+  padding: 5px;
+  min-height: 1.5rem;
+  width: 100%;
+  background-color: rgb(22, 203, 79);
+  color: white;
+  max-height: 70px;
+  &.not-found {
+    @extend .image-content-not-found
+  }
+}
+
+[id^=language-info] {
+  font-size: 0.8rem;
+}
+
+.image-not-found {
+  cursor: pointer;
+  > .description {
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+  &:hover {
+    > .fa-images {
+      color: rgb(22, 203, 79);
+    }
+  }
+}
+
+.image-info-edited {
+  background-color: rgb(0, 0, 0)
+}
+
+#other-images {
+  display: inline-block;
+  height: 100%;
+  width: calc(100vw - 648px);
+  min-width: 250px;
+  overflow-x: auto;
+  margin: 0px 10px 0px 10px
+}
+
+#other-images-wrapper {
+  $wrapper-padding: 10px;
+  $wrapper-margin: 30px;
+
+  display: inline-block;
+  margin-top: 30px;
+  min-height: 232px;
+  min-width: 220px;
+  > .description {
+    display: flex;
+    align-items: center;
+    background-color: black;
+    color: white;
+    width: calc(100% - $wrapper-padding - $wrapper-margin);
+    height: 30px;
+    padding-left: $wrapper-padding;
+    margin-left: $wrapper-margin;
+    border: solid white;
+    border-width: 0 0 2px 0;
+    border-radius: 10px 10px 0 0;
+  }
+}
+
+#other-image-container {
+  display: flex;
+  align-items: center;
+  height: 85%;
+  min-width: 220px;
+  border-radius: 10px;
+  padding-left: 30px;
+  > .other-image:first-child {
+    border-radius: 0 0 0 10px;
+  }
+  > .other-image:last-child {
+    border-radius: 0 0 10px 0;
+  }
+  > .other-image:only-child {
+    border-radius: 0 0 10px 10px;
+  }
+}
+
+.other-image {
+  width: 220px;
+  height: 200px;
+  overflow: hidden;
+  > img {
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.load-more-images {
+  @include flexit();
+  cursor: pointer;
+  height: 200px;
+  min-width: 30px;
+  writing-mode: vertical-lr;
+  background-color: rgb(0, 214, 0);
+  color: white;
+  border: solid white;
+  border-width: 0 0 0 2px;
+  &:hover {
+    background-color: rgb(13, 235, 13);
+  }
+}
+
+.no-extra-image {
+  @include flexit();
+  height: 200px;
+  width: 220px;
+  background-color: rgb(247, 247, 247);
+  border-radius: 0 0 10px 10px;
+}

@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import axios from "axios";
 
-import { ProfileContext } from "./profile_page/ProfilePage";
-import { OverlayNavbar } from "./common/components";
-import * as handlers from "./common/handlers";
-import * as form_components from "./common/form_components";
-import { ProfileContextTypes } from "./types/profilePageTypes";
-import { to_title } from "./common/functions";
+import { ProfileContext } from "../profile_page/ProfilePage";
+import { OverlayNavbar } from "../common/components";
+import * as handlers from "../common/handlers";
+import * as form_components from "../common/form_components";
+import { ProfileContextTypes } from "../types/profilePageTypes";
+import { to_title } from "../common/functions";
 
 export const CreateDeckOverlay: React.FC = () => {
   // Component of ProfileNavbar.

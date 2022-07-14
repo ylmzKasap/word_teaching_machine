@@ -28,6 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "sass": "cd src/styling && python compile_sass.py",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

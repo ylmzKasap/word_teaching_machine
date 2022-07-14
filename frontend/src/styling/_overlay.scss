@@ -110,9 +110,11 @@
   align-items: center;
   height: 10%;
   background-color: rgb(56, 56, 56);
-  padding-left: 3%;
   margin-left: 0px;
   color: white;
+  > .overlay-description {
+    padding-left: 3%;
+  }
   > .extra-info {
     color:rgb(205, 204, 203);
     margin: 0px 5px 0px 10px;
@@ -126,6 +128,7 @@
     font-weight: bold;
     border-left: solid rgb(233, 233, 233);
     border-width: 0px 0px 0px 3px;
+    text-align: center;
     color: white;
     &:hover {
       background-color: rgb(236, 76, 18);
@@ -135,6 +138,10 @@
       color: rgb(233, 233, 233);
       background-color: rgb(209, 69, 18);
       border-color: rgb(209, 69, 18);
+    }
+    >.exit-sign {
+      display: flex;
+      justify-content: center;
     }
   }
 }

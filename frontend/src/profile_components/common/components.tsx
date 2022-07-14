@@ -10,7 +10,7 @@ import { FillerTypes } from "../types/pageItemTypes";
 
 
 export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = (
-  {setOverlay, description, extra}) => {
+  {setOverlay, specialClass, description, extra}) => {
   // Component of CreateDeck, CreateFolder.
 
   const handleExit = (event: React.MouseEvent) => {
@@ -18,11 +18,14 @@ export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = (
     setOverlay({type: "view", value: "hide"});
   };
 
+  const classInfo = specialClass ? specialClass : "";
   return (
-    <div className="overlay-nav">
-      {description} {extra ? <span className="extra-info">({extra})</span> : ""}
+    <div className={`overlay-nav ${classInfo}`}>
+      <div className="overlay-description">
+        {description} {extra ? <span className="extra-info">({extra})</span> : ""}
+        </div>
       <button className="exit-button" onClick={handleExit}>
-        X
+        <p className="exit-sign">X</p>
       </button>
     </div>
   );
@@ -250,7 +253,7 @@ export const Filler: React.FC<FillerTypes> = (props) => {
 
 export function NotFound() {
   return (
-    <div className="not-found">
+    <div className="page-not-found">
       <i className="fas fa-binoculars fa-9x"></i>
       <h2> Page does not exist. </h2>
     </div>

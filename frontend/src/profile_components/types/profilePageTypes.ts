@@ -1,5 +1,6 @@
 import React from "react";
-import { CategoryOverlayTypes, DeckOverlayTypes, FolderOverlayTypes } from "./overlayTypes";
+import { CategoryOverlayTypes, DeckOverlayTypes,
+  FolderOverlayTypes, ImageOverlayTypes } from "./overlayTypes";
 
 type Timer = ReturnType<typeof setTimeout>;
 
@@ -183,4 +184,6 @@ export interface ProfileContextTypes {
   setFolderOverlay: SetOverlayType;
   categoryOverlay: CategoryOverlayTypes;
   setCategoryOverlay: SetOverlayType;
+  addImageOverlay: ImageOverlayTypes;
+  setAddImageOverlay: SetOverlayType;
 }

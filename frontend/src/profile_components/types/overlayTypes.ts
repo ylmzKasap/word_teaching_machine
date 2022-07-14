@@ -5,6 +5,7 @@ import { CategoryInfoTypes, SetDeckOverlayType, SetOverlayType } from "./profile
 export interface OverlayNavbarTypes {
   setOverlay: SetDeckOverlayType | SetOverlayType;
   description: string;
+  specialClass?: string;
   extra?: string;
 }
 
@@ -104,4 +105,22 @@ export interface CategoryOverlayTypes {
     formError: FormErrorTypes;
   };
   display: boolean;
+}
+
+export interface ImageInfoTypes {
+  artist_content_id: string | null;
+  image_path: string | null;
+  selected: boolean;
+  english?: string | null;
+  turkish?: string | null;
+  german?: string | null;
+  spanish?: string | null;
+  french?: string | null;
+  greek?: string | null;
+}
+
+export interface ImageOverlayTypes {
+  display: boolean;
+  editedId: string;
+  imageInfo: ImageInfoTypes[][];
 }

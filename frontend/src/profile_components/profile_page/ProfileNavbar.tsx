@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from "react";
 
 import { ProfileContext } from "./ProfilePage";
-import { CreateDeckOverlay } from "../CreateDeckOverlay";
-import { CreateFolderOverlay } from "../CreateFolderOverlay";
-import { CreateCategoryOverlay } from "../CreateCategoryOverlay";
+import { CreateDeckOverlay } from "../overlays/CreateDeckOverlay";
+import { CreateFolderOverlay } from "../overlays/CreateFolderOverlay";
+import { CreateCategoryOverlay } from "../overlays/CreateCategoryOverlay";
 import { useNavigate } from "react-router-dom";
 import { ProfileContextTypes } from "../types/profilePageTypes";
 

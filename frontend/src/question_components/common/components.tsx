@@ -22,7 +22,7 @@ export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
     <div className={`intro-img-box ${imgAnim}`}>
       <img
         className="intro-img"
-        src={`media/${props.word.image_path}`}
+        src={`${props.word.image_path}`}
         alt={`${props.word[props.wordInfo.target_language]}`}
       />
       {props.wordInfo.show_translation && <WordTranslation
@@ -63,7 +63,7 @@ export const IntroText: React.FC<types.IntroTextTypes> = (props) => {
   }
 
   function playSound() {
-    audioMixer.src = `media/${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
+    audioMixer.src = `${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
     audioMixer.load();
     playAndCatchError(audioMixer, "Playback prevented by browser.");
   }

@@ -60,6 +60,7 @@
 }
 
 .fa-folder {
+  transform: scale(1.1, 1);
   color: rgb(20, 82, 175);
   pointer-events: none;
 }
@@ -80,6 +81,19 @@
   }
 }
 
+.image-circle {
+  @extend .category-circle;
+  margin-right: 10px;
+}
+
+.fa-file-circle-plus {
+  color: black;
+}
+
+.fa-images {
+  color: rgb(25, 45, 195);
+  transition: color 0.3s;
+}
 
 // 404 Errors
 .fa-binoculars {

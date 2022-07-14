@@ -18,10 +18,12 @@ import { useWindowSize } from "../common/hooks";
 import * as types from "../types/profilePageTypes";
 import * as defaults from "../types/profilePageDefaults";
 import { handleDeckOverlay } from "../common/reducers/createDeckReducer";
-import { categoryOverlayDefaults,
-  deckOverlayDefaults, folderOverlayDefaults } from "../types/overlayDefaults";
+import { categoryOverlayDefaults, deckOverlayDefaults,
+  folderOverlayDefaults, imageOverlayDefaults } from "../types/overlayDefaults";
 import { handleFolderOverlay } from "../common/reducers/createFolderReducer";
 import { handleCategoryOverlay } from "../common/reducers/createCategoryReducer";
+import { AddImageOverlay } from "../overlays/image_overlay/add_image";
+import { handleImageOverlay } from "../common/reducers/addImageReducer";
 
 export const ProfileContext = createContext<types.ProfileContextTypes | undefined>(undefined);
 
@@ -79,6 +81,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   const [folderOverlay, setFolderOverlay] = useReducer(handleFolderOverlay, folderOverlayDefaults);
   const [categoryOverlay, setCategoryOverlay] = useReducer(
     handleCategoryOverlay, categoryOverlayDefaults);
+  const [addImageOverlay, setAddImageOverlay] = useReducer(
+    handleImageOverlay, imageOverlayDefaults);
 
   let currentContainer: string;
   if (directoryInfo) {
@@ -246,8 +250,13 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
 
   const handleMouseUp = (event: React.MouseEvent): void => {
     const element = event.target as HTMLInputElement;
+    let specialClass = "";
+    try {
+      specialClass = element.className.split(" ")[0];
+    } catch {
+      return;
+    }
     setCategoryDrag(false);
-    const specialClass = element.className.split(" ")[0];
     if (
       draggedElement.name && isDragging &&
       !["deck", "folder", "filler", "drag-button"].includes(specialClass)
@@ -348,7 +357,9 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
         folderOverlay: folderOverlay,
         setFolderOverlay: setFolderOverlay,
         categoryOverlay: categoryOverlay,
-        setCategoryOverlay: setCategoryOverlay
+        setCategoryOverlay: setCategoryOverlay,
+        addImageOverlay: addImageOverlay,
+        setAddImageOverlay: setAddImageOverlay
       }}
     >
       <div className="profile-page">
@@ -368,6 +379,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
             </div>
           )}
           {cloneElement}
+          {addImageOverlay.display && <AddImageOverlay />}
           {requestError.exists && <ErrorInfo />}
           {fetchError && <NotFound />}
         </div>

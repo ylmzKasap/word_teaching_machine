@@ -73,7 +73,7 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
         handleTimeouts({
           sound: window.setTimeout(() => {
             props.animate();
-            audioMixer.src = `media/${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
+            audioMixer.src = `${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
             playAndCatchError(audioMixer, errorMessage);
           }, 1000),
           click: window.setTimeout(() => handleParentClick(), 2000),
@@ -96,7 +96,7 @@ const ImageOptionBox: React.FC<types.OptionTypes> = (props) => {
     <div className={`image-option-box ${optionStyle.animation}`} onClick={handleClick}>
       <img
         className="image-option"
-        src={`media/${props.word.image_path}`}
+        src={`${props.word.image_path}`}
         alt={`${props.word[props.wordInfo.target_language]}`}
       />
       {props.wordInfo.show_translation &&
