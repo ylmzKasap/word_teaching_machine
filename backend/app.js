@@ -6,7 +6,8 @@ const user_info = require("./routes/user_info");
 const item_creation = require("./routes/item_creation");
 const item_actions = require("./routes/item_actions");
 const clipboard = require("./routes/clipboard");
-const { fullSpace, is_object, is_blank } = require('./test/other_functions');
+const image_info = require("./routes/image");
+const { is_object, is_blank } = require('./test/other_functions');
 
 
 module.exports = (database) => {
@@ -47,6 +48,9 @@ module.exports = (database) => {
 
     // Clipboard
     app.put('/paste/:username', clipboard);
+
+    // Media
+    app.get('/image/:word/:search/:target/:source?', image_info.get_image);
 
     // Change directory
     app.put('/updatedir/:username', item_actions.set_item_directory);

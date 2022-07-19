@@ -6,7 +6,6 @@
     "test": "jest --runInBand --verbose --watchAll",
     "client": "cd ../frontend && npm start",
     "server": "nodemon server.js",
-    "sass": "cd ../frontend/src/styling && python compile_sass.py",
     "dev": "concurrently --kill-others \"npm run server\" \"npm run client\""
   },
   "dependencies": {

@@ -122,8 +122,8 @@ const create_deck = async (req, res) => {
     // Locate image files.
     const imageArray = await utils.locate_images(
         db, wordArray, searchLanguage, target_language, source_language);
-
-    console.log(imageArray);
+    
+    console.log(imageArray)
     
     // Create deck
     await item_crt_utils.add_deck(db, 

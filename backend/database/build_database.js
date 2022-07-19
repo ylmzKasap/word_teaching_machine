@@ -33,25 +33,30 @@ async function setup(db) {
     await user_utils.add_user(db, glob.user_2);
 
     // Add images
-    await media_utils.add_image(db, 'Van Gogh', 'van_gogh.com', 'square.png', 'admin', {english: 'square', turkish: 'meydan', german: 'Quadrat'});
-    await media_utils.add_image(db, 'Van Gogh', 'van_gogh.com', 'square_2.png', 'admin', {english: 'square', turkish: 'karesini almak', german: 'zu quadrieren'});
-    await media_utils.add_image(db, 'Caravaggio', 'caravaggio.com', 'palace.png', 'admin', {english: 'palace', turkish: 'saray', german: 'Palast'});
-    await media_utils.add_image(db, 'Paul Gaugin', 'paul.com', 'coffee_table.jpg', 'admin', {english: 'coffee table', turkish: 'sehpa', german: 'Kaffetisch', greek: 'τραπεζάκι του καφέ'});
-    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'elevator.png', 'admin', {english: 'elevator', turkish: 'asansör', german: 'Aufzug'});
-    await media_utils.add_image(db, 'Cladue Monet', 'monet.org', 'roof.png', 'admin', {english: 'roof', turkish: 'çatı', german: 'dach'});
+    await media_utils.add_image(db, 'Van Gogh', 'van_gogh.com', 'media/square.png', 'admin', {english: 'square', turkish: 'meydan', german: 'Quadrat'});
+    await media_utils.add_image(db, 'Van Gogh', 'van_gogh.com', 'media/square_2.png', 'admin', {english: 'square', turkish: 'karesini almak', german: 'zu quadrieren'});
+    await media_utils.add_image(db, 'Caravaggio', 'caravaggio.com', 'media/palace.png', 'admin', {english: 'palace', turkish: 'saray', german: 'Palast'});
+    await media_utils.add_image(db, 'Paul Gaugin', 'paul.com', 'media/coffee_table.jpg', 'admin', {english: 'coffee table', turkish: 'sehpa', german: 'Kaffetisch', greek: 'τραπεζάκι του καφέ'});
+    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'media/elevator.png', 'admin', {english: 'elevator', turkish: 'asansör', german: 'Aufzug'});
+    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'media/elevator_2.PNG', 'admin', {english: 'elevator', turkish: '', german: 'Aufzug'});
+    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'media/elevator_3.PNG', 'admin', {english: 'elevator', turkish: 'yükseltici', german: 'Aufzug'});
+    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'media/elevator_4.PNG', 'admin', {english: 'elevator', turkish: 'asansör', german: 'Aufzug'});
+    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'media/elevator_5.PNG', 'admin', {english: 'elevator', turkish: 'asansör', german: 'Aufzug'});
+    await media_utils.add_image(db, 'Caspar David Friedrich', 'caspar.org', 'media/elevator_6.jpeg', 'admin', {english: 'elevator', turkish: 'asansör', german: 'Aufzug'});
+    await media_utils.add_image(db, 'Cladue Monet', 'monet.org', 'media/roof.png', 'admin', {english: 'roof', turkish: 'çatı', german: 'dach'});
 
     // Add sounds
-    await media_utils.add_sound(db, 1, 'english', 'square.mp3');
-    await media_utils.add_sound(db, 2, 'english', 'square.mp3');
-    await media_utils.add_sound(db, 3, 'english', 'palace.mp3');
-    await media_utils.add_sound(db, 4, 'english', 'coffee table.mp3');
-    await media_utils.add_sound(db, 5, 'english', 'elevator.mp3');
-    await media_utils.add_sound(db, 6, 'english', 'roof.mp3');
-    await media_utils.add_sound(db, 1, 'turkish', 'meydan.mp3');
-    await media_utils.add_sound(db, 3, 'turkish', 'saray.mp3');
-    await media_utils.add_sound(db, 4, 'turkish', 'sehpa.mp3');
-    await media_utils.add_sound(db, 5, 'turkish', 'asansör.mp3');
-    await media_utils.add_sound(db, 6, 'turkish', 'çatı.mp3');
+    await media_utils.add_sound(db, 1, 'english', 'media/square.mp3');
+    await media_utils.add_sound(db, 2, 'english', 'media/square.mp3');
+    await media_utils.add_sound(db, 3, 'english', 'media/palace.mp3');
+    await media_utils.add_sound(db, 4, 'english', 'media/coffee table.mp3');
+    await media_utils.add_sound(db, 5, 'english', 'media/elevator.mp3');
+    await media_utils.add_sound(db, 6, 'english', 'media/roof.mp3');
+    await media_utils.add_sound(db, 1, 'turkish', 'media/meydan.mp3');
+    await media_utils.add_sound(db, 3, 'turkish', 'media/saray.mp3');
+    await media_utils.add_sound(db, 4, 'turkish', 'media/sehpa.mp3');
+    await media_utils.add_sound(db, 5, 'turkish', 'media/asansör.mp3');
+    await media_utils.add_sound(db, 6, 'turkish', 'media/çatı.mp3');
 
     // Add user_1 items.
     // Root
