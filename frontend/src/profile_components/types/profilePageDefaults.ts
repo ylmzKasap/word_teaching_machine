@@ -4,14 +4,14 @@ export const directoryInfoDefault = {
   item_type: undefined,
   parent_id: undefined,
   item_order: undefined,
-  category_id: undefined
+  category_id: undefined,
 };
 
 export const clipboardDefault = {
   action: undefined,
   id: undefined,
   type: undefined,
-  directory: undefined
+  directory: undefined,
 };
 
 export const requestErrorDefault = {
@@ -22,17 +22,17 @@ export const requestErrorDefault = {
 export const contextOpenedElemDefault = {
   id: undefined,
   type: undefined,
-  name: undefined
+  name: undefined,
 };
 
-export const contextMenuStyleDefault = {top: 0, left: 0};
+export const contextMenuStyleDefault = { top: 0, left: 0 };
 
-export const contextMenuScrollDefault = {top: 0, scroll: 0};
+export const contextMenuScrollDefault = { top: 0, scroll: 0 };
 
 export const contextMenuInfoDefault = {
   closest: null,
   openedElem: contextOpenedElemDefault,
-  ops: [''],
+  ops: [""],
 };
 
 export const cloneStyleDefault = {
@@ -44,7 +44,7 @@ export const cloneStyleDefault = {
   left: undefined,
   top: undefined,
   boxShadow: undefined,
-  transition: undefined
+  transition: undefined,
 };
 
 export const cloneTimeoutDefault = {
@@ -55,30 +55,31 @@ export const cloneTimeoutDefault = {
 export const draggedElementDefault = {
   id: undefined,
   name: undefined,
-  type: undefined
+  type: undefined,
 };
 
 export const scrollingDefault = {
   exists: false,
   element: undefined,
   clientY: undefined,
-  interval: 0
+  interval: 0,
 };
 
-export const wordDefault = [{
-  artist_id: undefined,
-  deck_id: undefined,
-  image_path: undefined,
-  english: undefined,
-  turkish: undefined,
-  word_order: 0
-}];
+export const wordDefault = [
+  {
+    artist_id: undefined,
+    deck_id: undefined,
+    image_path: undefined,
+    english: undefined,
+    turkish: undefined,
+    word_order: 0,
+  },
+];
 
 export const categoryInfoDefault = {
   id: undefined,
   name: undefined,
   purpose: undefined,
   targetLanguage: undefined,
-  sourceLanguage: undefined
+  sourceLanguage: undefined,
 };
-

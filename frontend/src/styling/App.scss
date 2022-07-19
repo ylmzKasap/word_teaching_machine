@@ -1,14 +1,15 @@
 // Imports
 @import url("https://fonts.googleapis.com/css2?family=Taviraj&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
 
-
-html, body, #main-app {
+html,
+body,
+#main-app {
   height: 100%;
   width: 100%;
   margin: 0;
   font-size: 16px;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 body {
@@ -35,7 +36,8 @@ $small-screen: 1024px;
 @import "./profile_page/drag_profile_page";
 @import "./profile_page/item_profile_page";
 @import "./profile_page/profile_page";
-@import "./profile_page/image_overlay";
+@import "./profile_page/edit_image_overlay";
+@import "./profile_page/add_image_overlay";
 @import "./media_queries/media_queries";
 @import "./media_queries/profile_page";
 @import "./media_queries/question_page";

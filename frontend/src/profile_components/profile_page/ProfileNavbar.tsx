@@ -7,8 +7,7 @@ import { CreateCategoryOverlay } from "../overlays/CreateCategoryOverlay";
 import { useNavigate } from "react-router-dom";
 import { ProfileContextTypes } from "../types/profilePageTypes";
 
-
-declare module 'react' {
+declare module "react" {
   // Extend React's HTMLAttributes to accept custom attributes.
   interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
     type?: string;
@@ -33,7 +32,7 @@ export const ProfileNavBar: React.FC = () => {
     folderOverlay,
     setFolderOverlay,
     categoryOverlay,
-    setCategoryOverlay
+    setCategoryOverlay,
   } = useContext(ProfileContext) as ProfileContextTypes;
 
   useEffect(() => {
@@ -49,20 +48,22 @@ export const ProfileNavBar: React.FC = () => {
   }, [directory, fetchError, contentLoaded, rootDirectory]);
 
   const handleBackClick = () => {
-    const prevDirectory = (
-      directoryInfo.parent_id === rootDirectory ? "" : `/${directoryInfo.parent_id}`);
+    const prevDirectory =
+      directoryInfo.parent_id === rootDirectory
+        ? ""
+        : `/${directoryInfo.parent_id}`;
     navigate(`/user/${username}${prevDirectory}`);
   };
 
   const addItem = (event: React.MouseEvent): void => {
     const element = event.target as HTMLInputElement;
-    const itemType = element.getAttribute('type');
+    const itemType = element.getAttribute("type");
     if (itemType === "deck") {
-      setDeckOverlay({type: "view", value: "show"});
+      setDeckOverlay({ type: "view", value: "show" });
     } else if (itemType === "folder") {
-      setFolderOverlay({type: "view", value: "show"});
+      setFolderOverlay({ type: "view", value: "show" });
     } else if (itemType === "category") {
-      setCategoryOverlay({type: "view", value: "show"});
+      setCategoryOverlay({ type: "view", value: "show" });
     }
   };
 
@@ -100,14 +101,15 @@ export const ProfileNavBar: React.FC = () => {
 
       {
         // Display home icon when a fetch error exists.
-        (fetchError && rootDirectory) &&
-        <i className="fas fa-home"
-        onClick={() => navigate(`/user/${username}`)}></i>
+        fetchError && rootDirectory && (
+          <i
+            className="fas fa-home"
+            onClick={() => navigate(`/user/${username}`)}
+          ></i>
+        )
       }
 
-      {categoryOverlay.display && (
-        <CreateCategoryOverlay />
-      )}
+      {categoryOverlay.display && <CreateCategoryOverlay />}
       {deckOverlay.display && <CreateDeckOverlay />}
       {folderOverlay.display && <CreateFolderOverlay />}
     </div>

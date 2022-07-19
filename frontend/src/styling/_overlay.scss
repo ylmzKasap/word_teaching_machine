@@ -116,7 +116,7 @@
     padding-left: 3%;
   }
   > .extra-info {
-    color:rgb(205, 204, 203);
+    color: rgb(205, 204, 203);
     margin: 0px 5px 0px 10px;
   }
   > .exit-button {
@@ -139,7 +139,7 @@
       background-color: rgb(209, 69, 18);
       border-color: rgb(209, 69, 18);
     }
-    >.exit-sign {
+    > .exit-sign {
       display: flex;
       justify-content: center;
     }
@@ -203,7 +203,7 @@ input[type="radio"] {
   flex-direction: row;
   background-color: rgb(21, 217, 135);
   border-radius: 10px;
-  >.double-choice {
+  > .double-choice {
     @include flexit();
     width: 100%;
     height: 50px;
@@ -216,7 +216,7 @@ input[type="radio"] {
       background-color: gray !important;
     }
   }
-  >#choice-one {
+  > #choice-one {
     color: white;
     background-color: rgb(76, 137, 234);
     border-radius: 10px 0 0 10px;
@@ -228,7 +228,7 @@ input[type="radio"] {
       color: rgb(209, 216, 229);
     }
   }
-  >#choice-two {
+  > #choice-two {
     color: white;
     background-color: rgb(203, 95, 33);
     border-radius: 0 10px 10px 0;
@@ -243,7 +243,7 @@ input[type="radio"] {
 }
 
 .checkbox-info {
-  >[type="checkbox"] {
+  > [type="checkbox"] {
     margin: 5px 0 0 10px;
   }
 }

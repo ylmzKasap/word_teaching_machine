@@ -4,14 +4,9 @@ import { audioMixer } from "../QuestionPage";
 import * as types from "../types/QuestionPageTypes";
 import { introTextTimeoutDefaults } from "../types/QuestionPageDefaults";
 
-
-export const WordTranslation: React.FC<{translation: string;}> = (props) => {
+export const WordTranslation: React.FC<{ translation: string }> = (props) => {
   // Shared by AskFromPicture and AskFromText.
-  return (
-    <div className="word-translation">
-      {props.translation}
-    </div>
-  );
+  return <div className="word-translation">{props.translation}</div>;
 };
 
 export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
@@ -25,10 +20,11 @@ export const IntroImage: React.FC<types.IntroImageTypes> = (props) => {
         src={`${props.word.image_path}`}
         alt={`${props.word[props.wordInfo.target_language]}`}
       />
-      {props.wordInfo.show_translation && <WordTranslation
-        translation={props.word[props.wordInfo.source_language] as string}
-       />
-      }
+      {props.wordInfo.show_translation && (
+        <WordTranslation
+          translation={props.word[props.wordInfo.source_language] as string}
+        />
+      )}
     </div>
   );
 };
@@ -53,7 +49,9 @@ export const IntroText: React.FC<types.IntroTextTypes> = (props) => {
   useEffect(() => {
     return () => {
       for (let key in timeouts) {
-        window.clearTimeout(timeouts[key as keyof typeof introTextTimeoutDefaults]);
+        window.clearTimeout(
+          timeouts[key as keyof typeof introTextTimeoutDefaults]
+        );
       }
     };
   }, [timeouts]);
@@ -63,11 +61,13 @@ export const IntroText: React.FC<types.IntroTextTypes> = (props) => {
   }
 
   function playSound() {
-    audioMixer.src = `${props.word[`${props.wordInfo.target_language}_sound_path`]}`;
+    audioMixer.src = `${
+      props.word[`${props.wordInfo.target_language}_sound_path`]
+    }`;
     audioMixer.load();
     playAndCatchError(audioMixer, "Playback prevented by browser.");
   }
-  
+
   const pageMessage = isMobile ? "Tap" : "Click";
   const pageIcon = isMobile ? "fas fa-fingerprint" : "fa fa-mouse-pointer";
 

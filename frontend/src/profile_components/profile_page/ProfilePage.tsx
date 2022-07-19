@@ -18,16 +18,22 @@ import { useWindowSize } from "../common/hooks";
 import * as types from "../types/profilePageTypes";
 import * as defaults from "../types/profilePageDefaults";
 import { handleDeckOverlay } from "../common/reducers/createDeckReducer";
-import { categoryOverlayDefaults, deckOverlayDefaults,
-  folderOverlayDefaults, imageOverlayDefaults } from "../types/overlayDefaults";
+import {
+  categoryOverlayDefaults,
+  deckOverlayDefaults,
+  folderOverlayDefaults,
+  editImagesDefaults,
+} from "../types/overlayDefaults";
 import { handleFolderOverlay } from "../common/reducers/createFolderReducer";
 import { handleCategoryOverlay } from "../common/reducers/createCategoryReducer";
-import { AddImageOverlay } from "../overlays/image_overlay/add_image";
-import { handleImageOverlay } from "../common/reducers/addImageReducer";
+import EditImageOverlay from "../overlays/image_overlay/edit_image/edit_image_overlay";
+import { handleEditImageOverlay } from "../common/reducers/addImageReducer";
 
-export const ProfileContext = createContext<types.ProfileContextTypes | undefined>(undefined);
+export const ProfileContext = createContext<
+  types.ProfileContextTypes | undefined
+>(undefined);
 
-export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
+export const ProfilePage: React.FC<{ dir: string }> = ({ dir }) => {
   // Rendered by main.
   const params = useParams();
 
@@ -36,14 +42,16 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
 
   const [userPicture, setUserPicture] = useState("");
   const [rootDirectory, setRootDirectory] = useState("");
-  const [directory, setDirectory] = useState(() => dirId ? dirId : dir);
+  const [directory, setDirectory] = useState(() => (dirId ? dirId : dir));
   const [directoryInfo, setDirectoryInfo] = useState<types.DirectoryInfoTypes>(
-    defaults.directoryInfoDefault);
+    defaults.directoryInfoDefault
+  );
 
   const [items, setItems] = useState<React.ReactElement[]>([]);
   const [reRender, setReRender] = useReducer((x) => x + 1, 0);
   const [clipboard, setClipboard] = useState<types.ClipboardTypes>(
-    defaults.clipboardDefault);
+    defaults.clipboardDefault
+  );
 
   // Content fetching related states.
   const [pictureLoaded, setPictureLoaded] = useState(false);
@@ -51,44 +59,65 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   const [contentLoaded, setContentLoaded] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [requestError, setRequestError] = useState<types.RequestErrorTypes>(
-    defaults.requestErrorDefault);
+    defaults.requestErrorDefault
+  );
 
   // Context menu related states.
   const [contextMenu, setContextMenu] = useState(false);
-  const [contextOpenedElem, setContextOpenedElem] = useState<types.ContextOpenedElemTypes>(
-    defaults.contextOpenedElemDefault
+  const [contextOpenedElem, setContextOpenedElem] =
+    useState<types.ContextOpenedElemTypes>(defaults.contextOpenedElemDefault);
+  const [contextOptions, setContextOptions] = useState([""]);
+  const [contextMenuStyle, setContextMenuStyle] = useState(
+    defaults.contextMenuStyleDefault
   );
-  const [contextOptions, setContextOptions] = useState(['']);
-  const [contextMenuStyle, setContextMenuStyle] = useState(defaults.contextMenuStyleDefault);
-  const [contextMenuScroll, setContextMenuScroll] = useState<types.ContextMenuScrollTypes>(
-    defaults.contextMenuScrollDefault);
+  const [contextMenuScroll, setContextMenuScroll] =
+    useState<types.ContextMenuScrollTypes>(defaults.contextMenuScrollDefault);
 
   // Dragging related states.
-  const [cloneElement, setCloneElement] = useState<React.ReactElement | null>(null);
-  const [cloneStyle, setCloneStyle] = useState<types.CloneStyleTypes>(defaults.cloneStyleDefault);
-  const [cloneTimeout, setCloneTimeout] = useState(defaults.cloneTimeoutDefault);
-  const [draggedElement, setDraggedElement] = useState<types.DraggedElementTypes>(
-    defaults.draggedElementDefault);
+  const [cloneElement, setCloneElement] = useState<React.ReactElement | null>(
+    null
+  );
+  const [cloneStyle, setCloneStyle] = useState<types.CloneStyleTypes>(
+    defaults.cloneStyleDefault
+  );
+  const [cloneTimeout, setCloneTimeout] = useState(
+    defaults.cloneTimeoutDefault
+  );
+  const [draggedElement, setDraggedElement] =
+    useState<types.DraggedElementTypes>(defaults.draggedElementDefault);
   const [dragCount, setDragCount] = useState(0);
   const [isDragging, setDrag] = useState(false);
   const [categoryDrag, setCategoryDrag] = useState(false);
-  const [scrolling, setScrolling] = useState<types.ScrollingTypes>(defaults.scrollingDefault);
+  const [scrolling, setScrolling] = useState<types.ScrollingTypes>(
+    defaults.scrollingDefault
+  );
 
   const [columnNumber] = useWindowSize(directoryInfo, contentLoaded);
 
   // Overlay reducers
-  const [deckOverlay, setDeckOverlay] = useReducer(handleDeckOverlay, deckOverlayDefaults);
-  const [folderOverlay, setFolderOverlay] = useReducer(handleFolderOverlay, folderOverlayDefaults);
+  const [deckOverlay, setDeckOverlay] = useReducer(
+    handleDeckOverlay,
+    deckOverlayDefaults
+  );
+  const [folderOverlay, setFolderOverlay] = useReducer(
+    handleFolderOverlay,
+    folderOverlayDefaults
+  );
   const [categoryOverlay, setCategoryOverlay] = useReducer(
-    handleCategoryOverlay, categoryOverlayDefaults);
-  const [addImageOverlay, setAddImageOverlay] = useReducer(
-    handleImageOverlay, imageOverlayDefaults);
+    handleCategoryOverlay,
+    categoryOverlayDefaults
+  );
+  const [editImageOverlay, setEditImageOverlay] = useReducer(
+    handleEditImageOverlay,
+    editImagesDefaults
+  );
 
   let currentContainer: string;
   if (directoryInfo) {
-    currentContainer = directoryInfo.item_type === "thematic_folder"
-      ? ".category-container"
-      : ".card-container";
+    currentContainer =
+      directoryInfo.item_type === "thematic_folder"
+        ? ".category-container"
+        : ".card-container";
   }
 
   // Load user picture.
@@ -119,12 +148,13 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
         setItems(generate_directory(dirInfo, dirItems, username));
         setDirectoryInfo(dirInfo);
         if (rootDirectory) {
-          const newDirectory = currentDir === "home" ? rootDirectory : currentDir;
+          const newDirectory =
+            currentDir === "home" ? rootDirectory : currentDir;
           // Clear deck creation info on directory change
           if (newDirectory !== directory) {
-            setDeckOverlay({type: "clear", value: ""});
-            setFolderOverlay({type: "clear", value: ""});
-            setCategoryOverlay({type: "clear", value: ""});
+            setDeckOverlay({ type: "clear", value: "" });
+            setFolderOverlay({ type: "clear", value: "" });
+            setCategoryOverlay({ type: "clear", value: "" });
           }
           setDirectory(dirId ? dirId : rootDirectory);
         }
@@ -177,12 +207,12 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
   // Reset all context menu related state.
   const resetContext = () => {
     setContextMenu(false);
-    setContextOptions(['']);
+    setContextOptions([""]);
     setContextOpenedElem(defaults.contextOpenedElemDefault);
     setContextMenuScroll(defaults.contextMenuScrollDefault);
     setContextMenuStyle(defaults.contextMenuStyleDefault);
   };
-  
+
   // Reset all drag related state.
   function resetDrag(timeout = false): void {
     if (timeout && draggedElement.name && draggedElement.id) {
@@ -235,13 +265,12 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
             <DragClone item={draggedElement.name} cloneStyle={cloneStyle} />
           );
         }
-        scroll_div(
-          event,
-          currentContainer,
-          scrolling,
-          setScrolling,
-          ["drag-button", "sidebar-container", "user-info", "user-image"]
-        );
+        scroll_div(event, currentContainer, scrolling, setScrolling, [
+          "drag-button",
+          "sidebar-container",
+          "user-info",
+          "user-image",
+        ]);
       } else {
         setDragCount((count) => count + 1);
       }
@@ -258,7 +287,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
     }
     setCategoryDrag(false);
     if (
-      draggedElement.name && isDragging &&
+      draggedElement.name &&
+      isDragging &&
       !["deck", "folder", "filler", "drag-button"].includes(specialClass)
     ) {
       resetDrag(true);
@@ -358,8 +388,8 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
         setFolderOverlay: setFolderOverlay,
         categoryOverlay: categoryOverlay,
         setCategoryOverlay: setCategoryOverlay,
-        addImageOverlay: addImageOverlay,
-        setAddImageOverlay: setAddImageOverlay
+        editImageOverlay: editImageOverlay,
+        setEditImageOverlay: setEditImageOverlay,
       }}
     >
       <div className="profile-page">
@@ -379,7 +409,7 @@ export const ProfilePage: React.FC<{dir: string}> = ({dir}) => {
             </div>
           )}
           {cloneElement}
-          {addImageOverlay.display && <AddImageOverlay />}
+          {editImageOverlay.display && <EditImageOverlay />}
           {requestError.exists && <ErrorInfo />}
           {fetchError && <NotFound />}
         </div>

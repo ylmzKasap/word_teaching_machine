@@ -3,11 +3,13 @@ import { PageItem } from "../PageItems";
 import axios from "axios";
 import * as profileTypes from "../types/profilePageTypes";
 import { scrollingDefault, wordDefault } from "../types/profilePageDefaults";
+import { extract_int } from "./utils";
 
 export function generate_directory(
   info: profileTypes.dirInfoTypes,
   items: profileTypes.serverItemTypes[],
-  username: string) {
+  username: string
+) {
   // Used by ProfilePage.
   // Creates folders and decks with database items.
   const thematicOn = info.item_type === "thematic_folder";
@@ -27,12 +29,24 @@ export function generate_directory(
   }
 
   const iterable = thematicOn ? categories : items;
-  
+
   let directory: React.ReactElement[] = [];
   iterable.forEach((pgItem) => {
-    const { item_id, item_name, item_type, item_order,
-      completed, target_language, source_language, show_translation,
-      category_target_language, category_source_language, words, color, purpose} = pgItem;
+    const {
+      item_id,
+      item_name,
+      item_type,
+      item_order,
+      completed,
+      target_language,
+      source_language,
+      show_translation,
+      category_target_language,
+      category_source_language,
+      words,
+      color,
+      purpose,
+    } = pgItem;
 
     directory.push(
       <PageItem
@@ -45,10 +59,20 @@ export function generate_directory(
         color={color ? color : ""}
         purpose={purpose ? purpose : ""}
         show_translation={show_translation ? show_translation : false}
-        source_language={source_language ? source_language : 
-          category_source_language ? category_source_language : ""}
-        target_language={target_language ? target_language :
-          category_target_language ? category_target_language : ""}
+        source_language={
+          source_language
+            ? source_language
+            : category_source_language
+            ? category_source_language
+            : ""
+        }
+        target_language={
+          target_language
+            ? target_language
+            : category_target_language
+            ? category_target_language
+            : ""
+        }
         completed={completed ? completed : false}
         user={username}
       >
@@ -64,7 +88,9 @@ export function generate_directory(
                 order={parseInt(item.item_order)}
                 words={item.words ? item.words : wordDefault}
                 color={item.color ? item.color : ""}
-                show_translation={item.show_translation ? item.show_translation : false}
+                show_translation={
+                  item.show_translation ? item.show_translation : false
+                }
                 source_language={item.source_language}
                 target_language={item.target_language}
                 completed={item.completed ? item.completed : false}
@@ -83,8 +109,8 @@ const setScroll = (
   cursor: number,
   move: number,
   timing: number
-  ) => {
-    // Helper function for scroll_div
+) => {
+  // Helper function for scroll_div
   if (timing < 7) {
     timing = 7;
   } else if (timing > 30) {
@@ -102,11 +128,13 @@ const setScroll = (
   });
 };
 
-export function scroll_div (
+export function scroll_div(
   event: React.MouseEvent,
   container: string,
   scrolling: profileTypes.ScrollingTypes,
-  setScrolling: React.Dispatch<React.SetStateAction<profileTypes.ScrollingTypes>>,
+  setScrolling: React.Dispatch<
+    React.SetStateAction<profileTypes.ScrollingTypes>
+  >,
   constraints: string[] = []
 ) {
   // Used by: ../ProfilePage -> HandleMouseAction event handler.
@@ -137,7 +165,13 @@ export function scroll_div (
       } else {
         if (Math.abs(event.clientY - scrolling.clientY!) > 5) {
           clearInterval(scrolling.interval);
-          setScroll(setScrolling, scrolledElement, event.clientY, -10, interval);
+          setScroll(
+            setScrolling,
+            scrolledElement,
+            event.clientY,
+            -10,
+            interval
+          );
         }
       }
       // Cancel scroll due to mouse position.
@@ -157,10 +191,14 @@ export function scroll_div (
 }
 
 export function delete_item(
-  itemObj: profileTypes.ContextOpenedElemTypes | profileTypes.DraggedElementTypes,
+  itemObj:
+    | profileTypes.ContextOpenedElemTypes
+    | profileTypes.DraggedElementTypes,
   username: string | undefined,
   setRender: React.DispatchWithoutAction,
-  setRequestError: React.Dispatch<React.SetStateAction<profileTypes.RequestErrorTypes>>
+  setRequestError: React.Dispatch<
+    React.SetStateAction<profileTypes.RequestErrorTypes>
+  >
 ) {
   // Type Guard
   if (!itemObj.type || !itemObj.id || !username) throw Error;
@@ -174,29 +212,25 @@ export function delete_item(
     axios
       .delete(`/delete_item/${username}`, {
         data: {
-          item_id: extract_int(itemObj.id)
+          item_id: extract_int(itemObj.id),
         },
       })
       .then(() => {
         setRender();
       })
       .catch((err) =>
-        setRequestError({ exists: true, description: err.response.data.errDesc })
+        setRequestError({
+          exists: true,
+          description: err.response.data.errDesc,
+        })
       );
   }
 }
 
-export function extract_int(str: string) {
-  const intMatch = str.match(/\d+$/);
-  return intMatch ? intMatch[0] : "";
-}
-
-export function to_title(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 export function find_closest_element(
-  event: React.MouseEvent, selectors: string[]): HTMLElement | null {
+  event: React.MouseEvent,
+  selectors: string[]
+): HTMLElement | null {
   // Accepts an array of selectors and returns the first closest element.
   const element = event.target as HTMLInputElement;
 
@@ -208,9 +242,4 @@ export function find_closest_element(
   }
 
   return null;
-}
-
-
-export function snakify(str: string) {
-  return str.split(' ').join('_').toLowerCase();
 }

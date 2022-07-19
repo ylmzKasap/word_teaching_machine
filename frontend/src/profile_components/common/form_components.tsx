@@ -1,8 +1,13 @@
-import { snakify } from "./functions";
+import { snakify } from "./utils";
 import * as types from "../types/overlayTypes";
 
 export const allLanguages = [
-  'English', 'Turkish', 'German', 'Spanish', 'French', 'Greek'
+  "English",
+  "Turkish",
+  "German",
+  "Spanish",
+  "French",
+  "Greek",
 ];
 
 export const InputField: React.FC<types.InputFieldTypes> = (props) => {
@@ -32,11 +37,7 @@ export const Checkbox: React.FC<types.CheckboxTypes> = (props) => {
     <label className="input-label checkbox">
       <div className="checkbox-info">
         {description}
-        <input
-          type="checkbox"
-          onChange={handler}
-          checked={value}
-        />
+        <input type="checkbox" onChange={handler} checked={value} />
       </div>
     </label>
   );
@@ -72,23 +73,36 @@ export const Radio: React.FC<types.RadioTypes> = (props) => {
   );
 };
 
-export const DropDown: React.FC<types.SelectDropdownTypes> = (
-  {description, handler, topic, choices, chosen, placeholder}) => {
-
+export const DropDown: React.FC<types.SelectDropdownTypes> = ({
+  description,
+  handler,
+  topic,
+  choices,
+  chosen,
+  placeholder,
+}) => {
   return (
     <div className="input-label">
-        <label id="dropdown-label" htmlFor="dropdown">{description}</label>
-        <select
-          id="dropdown"
-          name={topic}
-          className="overlay-dropdown"
-          value={chosen ? chosen : "choose"}
-          onChange={handler}
-          required
-        >
-          <option disabled value="choose">{placeholder}</option>
-            {choices.map((v, i) => <option key={`${v}_${i}`} value={v}>{v}</option>)}
-        </select>
+      <label id="dropdown-label" htmlFor="dropdown">
+        {description}
+      </label>
+      <select
+        id="dropdown"
+        name={topic}
+        className="overlay-dropdown"
+        value={chosen ? chosen : "choose"}
+        onChange={handler}
+        required
+      >
+        <option disabled value="choose">
+          {placeholder}
+        </option>
+        {choices.map((v, i) => (
+          <option key={`${v}_${i}`} value={v}>
+            {v}
+          </option>
+        ))}
+      </select>
     </div>
   );
 };
@@ -110,31 +124,37 @@ export const DoubleChoice: React.FC<types.DoubleChoiceTypes> = (props) => {
         <span
           id="choice-one"
           className={`double-choice ${choice_one_selected}`}
-          onClick={() => handler(choice_one)}>{choice_one}</span>
-        <span 
+          onClick={() => handler(choice_one)}
+        >
+          {choice_one}
+        </span>
+        <span
           id="choice-two"
           className={`double-choice ${choice_two_selected}`}
-          onClick={() => handler(choice_two)}>{choice_two}</span>
+          onClick={() => handler(choice_two)}
+        >
+          {choice_two}
+        </span>
       </div>
     </label>
   );
 };
 
 export const SubmitForm: React.FC<types.submitButtonTypes> = (props) => {
-    const { description, formError } = props;
-  
-    return (
-      <div className="submit-form">
-        <button className="submit-form-button" type="submit">
-          {description}
-        </button>
-        <label
-          className={`error-field ${formError.errorClass}`}
-          style={formError.display}
-        >
-          <span className="fas fa-exclamation-circle"></span>
-          <span className="error-description">{formError.description}</span>
-        </label>
-      </div>
-    );
-  };
+  const { description, formError } = props;
+
+  return (
+    <div className="submit-form">
+      <button className="submit-form-button" type="submit">
+        {description}
+      </button>
+      <label
+        className={`error-field ${formError.errorClass}`}
+        style={formError.display}
+      >
+        <span className="fas fa-exclamation-circle"></span>
+        <span className="error-description">{formError.description}</span>
+      </label>
+    </div>
+  );
+};

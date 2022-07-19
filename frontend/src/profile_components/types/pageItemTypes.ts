@@ -18,9 +18,9 @@ export interface PageItemPropTypes {
 }
 
 export interface SelfStyleTypes {
-  opacity?: string,
-  transition?: string,
-  order: number,
+  opacity?: string;
+  transition?: string;
+  order: number;
 }
 
 export interface FillerTypes {

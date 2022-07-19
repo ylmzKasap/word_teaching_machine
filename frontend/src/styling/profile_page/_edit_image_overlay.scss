@@ -1,4 +1,4 @@
-#add-image-overlay {
+#edit-image-overlay {
   position: fixed;
   height: auto;
   width: 100%;
@@ -8,7 +8,7 @@
   background-color: white;
 }
 
-.add-image-navbar {
+.edit-image-navbar {
   top: 0px;
   height: 60px;
   width: 100%;
@@ -23,19 +23,19 @@
   }
 }
 
-#add-image-content {
+#edit-image-content {
   height: calc(100vh - 60px);
   width: 100%;
   margin: 0;
   overflow: auto;
 }
 
-#add-image-wrapper {
+#edit-image-wrapper {
   display: table-row;
-  width: 100%;
+  min-width: 100vw;
 }
 
-[id^=add-image-box] {
+[id^="edit-image-box"] {
   display: flex;
   height: 300px;
   width: 100%;
@@ -47,11 +47,30 @@
 
 #left-number-box {
   @include flexit();
-  min-width: 50px;
+  position: relative;
+  width: 50px;
   height: 100%;
   background-color: rgb(56, 56, 56);
   color: white;
   font-size: 2rem;
+  > #trash-container {
+    @include flexit();
+    cursor: pointer;
+    position: absolute;
+    transition: background-color 0.2s;
+    height: 14%;
+    width: 100%;
+    bottom: 0px;
+    > #trash-icon {
+      transform: scale(0.6);
+    }
+    &:hover {
+      background-color: rgb(223, 16, 34);
+    }
+    &:active {
+      opacity: 0.8;
+    }
+  }
 }
 
 .image-card-template {
@@ -64,14 +83,25 @@
   overflow: hidden;
 }
 
-[id^=image-translation-box] {
+[id^="image-translation-box"] {
+  position: relative;
   @include flexit();
   @extend .image-card-template;
   flex-direction: column;
   background-color: rgb(255, 255, 255);
 }
 
-[id^=image-box] {
+.image-request {
+  @include flexit();
+  position: absolute;
+  inset: 0;
+  content: "";
+  width: 100%;
+  height: 100%;
+  background-color: rgb(236, 236, 236);
+}
+
+[id^="image-box"] {
   @extend .image-card-template;
   @include flexit();
   flex-direction: column;
@@ -98,7 +128,7 @@
   }
 }
 
-[id^=image-target-language] {
+[id^="image-target-language"] {
   cursor: default;
   margin-top: auto;
   text-align: center;
@@ -106,14 +136,18 @@
   width: 100%;
   max-height: 70px;
   &.not-found {
-    @extend .image-content-not-found
+    @extend .image-content-not-found;
   }
-  &:only-child{
+  &:only-child {
     margin-bottom: auto;
   }
 }
 
-[id^=image-source-language], [id^=image-target-language] {
+[id^="image-source-language"],
+[id^="image-target-language"] {
+  &.editable {
+    cursor: text;
+  }
   > input {
     font-family: "Poppins", sans-serif;
     background-color: white;
@@ -129,7 +163,7 @@
   }
 }
 
-[id^=image-source-language] {
+[id^="image-source-language"] {
   cursor: default;
   margin-top: auto;
   text-align: center;
@@ -140,29 +174,41 @@
   color: white;
   max-height: 70px;
   &.not-found {
-    @extend .image-content-not-found
+    @extend .image-content-not-found;
   }
 }
 
-[id^=language-info] {
+[id^="language-info"] {
   font-size: 0.8rem;
 }
 
 .image-not-found {
   cursor: pointer;
+  background: radial-gradient(circle, rgb(39, 78, 218) 0%, rgb(15, 44, 153) 100%);
+  transition: 2s;
+  height: 100%;
+  width: 100%;
   > .description {
-    margin-bottom: 15px;
+    background-color: white;
+    color: black;
+    @include flexit();
+    height: 21%;
     font-style: italic;
   }
+  > .image-icon {
+    @include flexit();
+    height: 79%;
+  }
   &:hover {
-    > .fa-images {
-      color: rgb(22, 203, 79);
+    >.image-icon {
+      transform: scale(1.1);
     }
   }
 }
 
 .image-info-edited {
-  background-color: rgb(0, 0, 0)
+  cursor: default;
+  background-color: rgb(0, 0, 0);
 }
 
 #other-images {
@@ -171,7 +217,7 @@
   width: calc(100vw - 648px);
   min-width: 250px;
   overflow-x: auto;
-  margin: 0px 10px 0px 10px
+  margin: 0px 10px 0px 10px;
 }
 
 #other-images-wrapper {
@@ -252,4 +298,25 @@
   width: 220px;
   background-color: rgb(247, 247, 247);
   border-radius: 0 0 10px 10px;
+}
+
+#edit-image-row {
+  cursor: pointer;
+  @include flexit();
+  font-size: 1.2rem;
+  height: 100px;
+  width: 100%;
+  background-color: rgb(56, 56, 56);
+  color: white;
+  &:hover {
+    background-color: rgb(79, 79, 79);
+  }
+  &:active {
+    opacity: 0.8;
+  }
+  &:only-child {
+    width: 100vw;
+    border: solid white;
+    border-width: 2px 0 0 0;
+  }
 }

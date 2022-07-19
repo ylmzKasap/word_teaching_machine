@@ -1,29 +1,41 @@
 import React, { useContext } from "react";
 import axios from "axios";
 import { ProfileContext } from "../profile_page/ProfilePage";
-import { delete_item, extract_int } from "./functions";
+import { delete_item } from "./functions";
+import { extract_int } from "./utils";
 
 import * as types from "../types/overlayTypes";
 import * as defaults from "../types/profilePageDefaults";
-import { ProfileContextTypes, ContextRestrictTypes } from "../types/profilePageTypes";
+import {
+  ProfileContextTypes,
+  ContextRestrictTypes,
+} from "../types/profilePageTypes";
 import { FillerTypes } from "../types/pageItemTypes";
 
-
-export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = (
-  {setOverlay, specialClass, description, extra}) => {
+export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = ({
+  setOverlay,
+  specialClass,
+  description,
+  extra,
+}) => {
   // Component of CreateDeck, CreateFolder.
 
   const handleExit = (event: React.MouseEvent) => {
     event.preventDefault();
-    setOverlay({type: "view", value: "hide"});
+    if (specialClass === "add-image-navbar") {
+      setOverlay({ type: "view-image", value: "hide" });
+    } else {
+      setOverlay({ type: "view", value: "hide" });
+    }
   };
 
   const classInfo = specialClass ? specialClass : "";
   return (
     <div className={`overlay-nav ${classInfo}`}>
       <div className="overlay-description">
-        {description} {extra ? <span className="extra-info">({extra})</span> : ""}
-        </div>
+        {description}{" "}
+        {extra ? <span className="extra-info">({extra})</span> : ""}
+      </div>
       <button className="exit-button" onClick={handleExit}>
         <p className="exit-sign">X</p>
       </button>
@@ -51,20 +63,24 @@ export const ItemContextMenu: React.FC = () => {
       [`${!clipboard.id}`]: "Clipboard is empty",
 
       // Pasting category into category.
-      [`${(contextOpenedElem.id === clipboard.id ||
-        contextOpenedElem.type === clipboard.type) &&
-      clipboard.id}`]: "Cannot paste category here",
+      [`${
+        (contextOpenedElem.id === clipboard.id ||
+          contextOpenedElem.type === clipboard.type) &&
+        clipboard.id
+      }`]: "Cannot paste category here",
 
       // Pasting category into a regular folder.
-      [`${clipboard.type === "category" &&
-      directoryInfo.item_type !== "thematic_folder"}`]: 
-      "Cannot paste category here",
+      [`${
+        clipboard.type === "category" &&
+        directoryInfo.item_type !== "thematic_folder"
+      }`]: "Cannot paste category here",
 
       // Pasting an item outside of a category in a thematic folder.
-      [`${directoryInfo.item_type === "thematic_folder" &&
-      clipboard.type !== "category" &&
-      contextOpenedElem.type !== "category"}`]:
-       "Can only paste in a category",
+      [`${
+        directoryInfo.item_type === "thematic_folder" &&
+        clipboard.type !== "category" &&
+        contextOpenedElem.type !== "category"
+      }`]: "Can only paste in a category",
 
       [`${contextOpenedElem.type === "category" && clipboard.type !== "deck"}`]:
         "Categories can only contain decks",
@@ -90,12 +106,7 @@ export const ItemContextMenu: React.FC = () => {
         directory: directory,
       });
     } else if (action === "delete") {
-      delete_item(
-        contextOpenedElem,
-        username,
-        setReRender,
-        setRequestError
-      );
+      delete_item(contextOpenedElem, username, setReRender, setRequestError);
     } else if (action === "paste") {
       // Type guard
       if (!clipboard.id) throw Error;
@@ -117,7 +128,10 @@ export const ItemContextMenu: React.FC = () => {
           setReRender();
         })
         .catch((err) =>
-          setRequestError({ exists: true, description: err.response.data.errDesc })
+          setRequestError({
+            exists: true,
+            description: err.response.data.errDesc,
+          })
         );
     }
     resetContext();
@@ -154,7 +168,7 @@ export const Filler: React.FC<FillerTypes> = (props) => {
     draggedElement,
     resetDrag,
     setReRender,
-    setRequestError
+    setRequestError,
   } = useContext(ProfileContext) as ProfileContextTypes;
 
   // Style the filler on hovering.
@@ -168,10 +182,11 @@ export const Filler: React.FC<FillerTypes> = (props) => {
       return;
     }
 
-    let nextElement =
-      (props.type === "regular"
+    let nextElement = (
+      props.type === "regular"
         ? element.nextElementSibling
-        : element.previousSibling) as Element | null;
+        : element.previousSibling
+    ) as Element | null;
     if (!nextElement) return;
 
     if (isDragging && !cloneTimeout.exists) {
@@ -231,9 +246,12 @@ export const Filler: React.FC<FillerTypes> = (props) => {
         direction: props.type === "last" ? "after" : "before",
       })
       .then(() => setReRender())
-      .catch((err) => setRequestError({
-        exists: true, description: err.response.data.errDesc
-      }));
+      .catch((err) =>
+        setRequestError({
+          exists: true,
+          description: err.response.data.errDesc,
+        })
+      );
   };
 
   return (
@@ -249,7 +267,6 @@ export const Filler: React.FC<FillerTypes> = (props) => {
     />
   );
 };
-
 
 export function NotFound() {
   return (

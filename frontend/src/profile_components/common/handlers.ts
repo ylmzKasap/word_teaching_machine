@@ -1,12 +1,18 @@
-import { ContextMenuInfoTypes, CloneTimeoutTypes } from "../types/profilePageTypes";
-import { contextMenuInfoDefault, draggedElementDefault } from "../types/profilePageDefaults";
+import {
+  ContextMenuInfoTypes,
+  CloneTimeoutTypes,
+} from "../types/profilePageTypes";
+import {
+  contextMenuInfoDefault,
+  draggedElementDefault,
+} from "../types/profilePageDefaults";
 import { PageItemPropTypes } from "../types/pageItemTypes";
+import { itemNameFilter } from "./regex";
 import React from "react";
 
 export function handleItemName(event: React.ChangeEvent) {
   // Used by CreateDeckOverlay and CreateFolderOverlay.
 
-  const itemNameFilter = /[.,\\<>"]/;
   const element = event.target as HTMLInputElement;
 
   const itemName = element.value;
@@ -14,10 +20,8 @@ export function handleItemName(event: React.ChangeEvent) {
 
   if (itemNameFilter.test(itemName)) {
     itemNameError = `Forbidden character ' ${itemName.match(itemNameFilter)} '`;
-
   } else if (itemName.length > 40) {
     itemNameError = `Input too long: ${itemName.length} characters > 40`;
-
   } else if (itemName.replace(/[\s]/g, "") === "" && itemName !== "") {
     itemNameError = "Input cannot only contain spaces";
   }
@@ -27,7 +31,8 @@ export function handleItemName(event: React.ChangeEvent) {
 
 export function handleDownOnDragged(
   props: PageItemPropTypes,
-  cloneTimeout: CloneTimeoutTypes) {
+  cloneTimeout: CloneTimeoutTypes
+) {
   // Used by PageItem component.
 
   if (!cloneTimeout.exists) {
@@ -43,8 +48,10 @@ export function handleDownOnDragged(
 }
 
 export function create_context_menu(
-  event: React.MouseEvent, closestItem: HTMLElement | null): ContextMenuInfoTypes {
-    const element = event.target as HTMLInputElement;
+  event: React.MouseEvent,
+  closestItem: HTMLElement | null
+): ContextMenuInfoTypes {
+  const element = event.target as HTMLInputElement;
 
   // Completely unrelated div.
   if (!closestItem) {
@@ -62,11 +69,17 @@ export function create_context_menu(
   if (
     ["card-container", "category-container"].includes(closestItem.className)
   ) {
-    contextMenuInfo.openedElem = { id: undefined, type: "container", name: undefined };
+    contextMenuInfo.openedElem = {
+      id: undefined,
+      type: "container",
+      name: undefined,
+    };
     contextMenuInfo.ops = ["paste"];
   } else {
     // Page item like deck, folder, thematic-folder, category.
-    const categoryHeader = closestItem.querySelector(".category-header") as HTMLElement;
+    const categoryHeader = closestItem.querySelector(
+      ".category-header"
+    ) as HTMLElement;
     contextMenuInfo.openedElem = {
       id: closestItem.id,
       type: closestItem.className,

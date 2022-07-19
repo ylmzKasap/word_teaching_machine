@@ -33,7 +33,7 @@ export function randint(fromN: number, toN: number) {
   return Math.floor(Math.random() * (toN - fromN + 1)) + fromN;
 }
 
-export function playAndCatchError(mixer:  HTMLAudioElement, message: string) {
+export function playAndCatchError(mixer: HTMLAudioElement, message: string) {
   mixer.load();
   let playPromise = mixer.play();
   if (playPromise !== undefined) {
@@ -45,7 +45,9 @@ export function playAndCatchError(mixer:  HTMLAudioElement, message: string) {
 }
 
 export function getRandomOptions(
-  Component: React.FC<types.OptionTypes>, props: types.TextOptionsPropsTypes) {
+  Component: React.FC<types.OptionTypes>,
+  props: types.TextOptionsPropsTypes
+) {
   // Creates random options with ImageOptionBox and TextOptionBox.
   // Called by ImageOptions and TextOptions.
 
@@ -58,7 +60,7 @@ export function getRandomOptions(
 
   // Push the correct answer.
   options.push(correctOption);
-  
+
   let index = 0;
   while (options.length !== optionCount) {
     if (index > optionCount + 1) {
@@ -130,18 +132,21 @@ export function generate_pages(wordInfo: types.WordInfoTypes) {
   return [...pages];
 }
 
-export const process_page_object = (obj: types.PageContent, wordInfo: types.WordInfoTypes) => {
+export const process_page_object = (
+  obj: types.PageContent,
+  wordInfo: types.WordInfoTypes
+) => {
   const keyType = obj.type === "IntroduceWord" ? "-intro-" : "-question-";
 
   return (
     <>
-      {obj.component && <obj.component
-        wordInfo={wordInfo}
-        word={obj.word}
-        key={obj.word + keyType + String(obj.order)}
-      />
-      }
+      {obj.component && (
+        <obj.component
+          wordInfo={wordInfo}
+          word={obj.word}
+          key={obj.word + keyType + String(obj.order)}
+        />
+      )}
     </>
-    
   );
 };

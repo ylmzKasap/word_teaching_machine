@@ -1,6 +1,10 @@
 import React from "react";
-import { CategoryOverlayTypes, DeckOverlayTypes,
-  FolderOverlayTypes, ImageOverlayTypes } from "./overlayTypes";
+import {
+  CategoryOverlayTypes,
+  DeckOverlayTypes,
+  FolderOverlayTypes,
+  EditImagesTypes,
+} from "./overlayTypes";
 
 type Timer = ReturnType<typeof setTimeout>;
 
@@ -60,24 +64,24 @@ export interface ContextMenuInfoTypes {
 export interface ContextRestrictTypes {
   [paste: string]: {
     [key: string]: string;
-  }
+  };
 }
 
 export interface CloneStyleTypes {
-  width: string | undefined,
-  height?: string | undefined,
-  opacity?: string | undefined,
-  borderRadius?: string | undefined,
-  backgroundColor: string | undefined,
-  left: string | undefined,
-  top: string | undefined,
-  boxShadow?: string | undefined,
-  transition: string | undefined
+  width: string | undefined;
+  height?: string | undefined;
+  opacity?: string | undefined;
+  borderRadius?: string | undefined;
+  backgroundColor: string | undefined;
+  left: string | undefined;
+  top: string | undefined;
+  boxShadow?: string | undefined;
+  transition: string | undefined;
 }
 
 export interface CloneTimeoutTypes {
-  exists: boolean,
-  timeouts: number,
+  exists: boolean;
+  timeouts: number;
 }
 
 export interface dirInfoTypes {
@@ -115,7 +119,7 @@ export interface serverItemTypes {
   completed?: boolean;
   deck_key?: string;
   category_key?: string;
-  item_id: string;  
+  item_id: string;
   item_name: string;
   item_order: string;
   item_type: string;
@@ -132,25 +136,41 @@ export interface serverItemTypes {
 }
 
 export interface CategoryInfoTypes {
-  id: string | undefined,
-  name: string | undefined,
-  targetLanguage: string | undefined,
-  sourceLanguage: string | undefined,
-  purpose: string | undefined
+  id: string | undefined;
+  name: string | undefined;
+  targetLanguage: string | undefined;
+  sourceLanguage: string | undefined;
+  purpose: string | undefined;
 }
 
 export type SetOverlayType = React.Dispatch<{
   type: string;
   value: string;
   innerType?: string;
-}>
+}>;
 
 export type SetDeckOverlayType = React.Dispatch<{
   type: string;
   value: string;
   innerType?: string;
   categoryInfo?: CategoryInfoTypes;
-}>
+}>;
+
+export type SetImageOverlayType = React.Dispatch<{
+  type: string;
+  value: string | number | boolean | ImageRowTypes[] | ImageRowTypes;
+  key?: string;
+  index?: number;
+}>;
+
+export interface ImageRowTypes {
+  artist_content_id: string | null;
+  image_path: string | null;
+  selected: boolean | null;
+  sourceEditable: boolean | null;
+  targetEditable: boolean | null;
+  [x: string]: boolean | string | null;
+}
 
 export interface ProfileContextTypes {
   username: string | undefined;
@@ -163,12 +183,12 @@ export interface ProfileContextTypes {
   setClipboard: React.Dispatch<React.SetStateAction<ClipboardTypes>>;
   contentLoaded: boolean;
   fetchError: boolean;
-  requestError: {exists: boolean; description: string | undefined};
+  requestError: { exists: boolean; description: string | undefined };
   setRequestError: React.Dispatch<React.SetStateAction<RequestErrorTypes>>;
   contextOpenedElem: ContextOpenedElemTypes;
   contextOptions: string[];
-  contextMenuStyle: {top: number; left: number;};
-  cloneTimeout: {exists: boolean; timeouts: number};
+  contextMenuStyle: { top: number; left: number };
+  cloneTimeout: { exists: boolean; timeouts: number };
   draggedElement: DraggedElementTypes;
   setDraggedElement: React.Dispatch<React.SetStateAction<DraggedElementTypes>>;
   isDragging: boolean;
@@ -184,6 +204,6 @@ export interface ProfileContextTypes {
   setFolderOverlay: SetOverlayType;
   categoryOverlay: CategoryOverlayTypes;
   setCategoryOverlay: SetOverlayType;
-  addImageOverlay: ImageOverlayTypes;
-  setAddImageOverlay: SetOverlayType;
+  editImageOverlay: EditImagesTypes;
+  setEditImageOverlay: SetImageOverlayType;
 }

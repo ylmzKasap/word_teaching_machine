@@ -12,7 +12,9 @@ import { NotFound } from "../profile_components/common/components";
 import * as types from "./types/QuestionPageTypes";
 import * as defaults from "./types/QuestionPageDefaults";
 
-export const QuestionContext = createContext<types.QuestionContextTypes | undefined>(undefined);
+export const QuestionContext = createContext<
+  types.QuestionContextTypes | undefined
+>(undefined);
 export var audioMixer = new Audio();
 
 export const QuestionPage: React.FC = () => {
@@ -23,10 +25,16 @@ export const QuestionPage: React.FC = () => {
   const params = useParams<types.ParamTypes>();
   const navigate = useNavigate();
 
-  const [directory] = useState(state ? state.directory : params.dirId ? parseInt(params.dirId) : 0);
+  const [directory] = useState(
+    state ? state.directory : params.dirId ? parseInt(params.dirId) : 0
+  );
   const [rootDirectory, setRootDirectory] = useState(0);
-  const [wordInfo, setWordInfo] = useState<types.WordInfoTypes>(defaults.wordInfoDefault);
-  const [pages, setPages] = useState<types.PageTypes>(defaults.questionPageDefault);
+  const [wordInfo, setWordInfo] = useState<types.WordInfoTypes>(
+    defaults.wordInfoDefault
+  );
+  const [pages, setPages] = useState<types.PageTypes>(
+    defaults.questionPageDefault
+  );
   const [pageNumber, setPageNumber] = useState(0);
   const [progress, setProgress] = useState(0);
   const [childAnimation, setChildAnimtion] = useState("load-page");
@@ -40,7 +48,7 @@ export const QuestionPage: React.FC = () => {
         words: state.words,
         target_language: state.target_language,
         source_language: state.source_language,
-        show_translation: state.show_translation
+        show_translation: state.show_translation,
       });
       setRootDirectory(state.rootDirectory);
     } else {
@@ -48,12 +56,14 @@ export const QuestionPage: React.FC = () => {
       let deck_id = params.deckId;
       axios
         .get(`/u/${username}/${directory}/item/${deck_id}`)
-        .then((response) => setWordInfo({
-          words: response.data.words,
-          target_language: response.data.target_language,
-          source_language: response.data.source_language,
-          show_translation: response.data.show_translation
-        }))
+        .then((response) =>
+          setWordInfo({
+            words: response.data.words,
+            target_language: response.data.target_language,
+            source_language: response.data.source_language,
+            show_translation: response.data.show_translation,
+          })
+        )
         .catch(() => setFetchError(true));
       axios
         .get(`/u/${username}`)
@@ -81,9 +91,7 @@ export const QuestionPage: React.FC = () => {
 
   function goForward() {
     const dirToGo =
-      directory === rootDirectory || fetchError
-        ? ""
-        : `/${directory}`;
+      directory === rootDirectory || fetchError ? "" : `/${directory}`;
     if (pageNumber < pages.length) {
       setPageNumber((pageN) => pageN + 1);
       setChildAnimtion((cAnim) =>
@@ -98,9 +106,7 @@ export const QuestionPage: React.FC = () => {
 
   function handleClick() {
     const dirToGo =
-      directory === rootDirectory || fetchError
-        ? ""
-        : `/${directory}`;
+      directory === rootDirectory || fetchError ? "" : `/${directory}`;
     if (pageNumber < pages.length) {
       setPageNumber((pageN) => pageN + 1);
       setChildAnimtion((cAnim) =>
@@ -196,13 +202,16 @@ const NavBar: React.FC<types.NavBarTypes> = (props) => {
   );
 };
 
-const ProgressBar: React.FC<{width: number}> = ({width}) => {
+const ProgressBar: React.FC<{ width: number }> = ({ width }) => {
   // Component of QuestionPage.
 
   return <div id="progress-bar" style={{ width: `${width}%` }}></div>;
 };
 
-const QuestionBody: React.FC<types.QuestionBodyTypes> = ({animation, page}) => {
+const QuestionBody: React.FC<types.QuestionBodyTypes> = ({
+  animation,
+  page,
+}) => {
   // Component of QuestionPage.
 
   // Children: (Indirect) IntroduceWord, AskFromPicture, AskFromText.

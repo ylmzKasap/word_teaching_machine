@@ -1,6 +1,10 @@
 import React from "react";
-import { CategoryInfoTypes, SetDeckOverlayType, SetOverlayType } from "./profilePageTypes";
-
+import {
+  CategoryInfoTypes,
+  ImageRowTypes,
+  SetDeckOverlayType,
+  SetOverlayType,
+} from "./profilePageTypes";
 
 export interface OverlayNavbarTypes {
   setOverlay: SetDeckOverlayType | SetOverlayType;
@@ -36,7 +40,7 @@ export interface DoubleChoiceTypes {
   choice_one: string;
   choice_two: string;
   chosen: string;
-  handler: (selectedPurpose: string) => void
+  handler: (selectedPurpose: string) => void;
 }
 
 export interface submitButtonTypes {
@@ -56,18 +60,19 @@ export interface SelectDropdownTypes {
 export interface NameErrorTypes {
   errorClass: string | undefined;
   description: string | undefined;
-};
+}
 
 export interface FormErrorTypes {
   display: { display: string };
   errorClass: string | undefined;
   description: string | undefined;
-};
+}
 
 export interface LanguageTypes {
   targetLanguage: string | undefined;
   sourceLanguage: string | undefined;
-};
+  [key: string]: string | undefined;
+}
 
 export interface DeckOverlayTypes {
   deckName: string;
@@ -117,10 +122,16 @@ export interface ImageInfoTypes {
   spanish?: string | null;
   french?: string | null;
   greek?: string | null;
+  [key: string]: string | null | undefined | boolean;
 }
 
-export interface ImageOverlayTypes {
+export interface AddImageTypes {
+  display: boolean;
+}
+
+export interface EditImagesTypes {
   display: boolean;
   editedId: string;
-  imageInfo: ImageInfoTypes[][];
+  imageOverlay: AddImageTypes;
+  imageInfo: ImageRowTypes[][];
 }

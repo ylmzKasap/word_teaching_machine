@@ -1,19 +1,18 @@
 import { useContext } from "react";
 import { ProfileContext } from "./ProfilePage";
-import { ProfileContextTypes, CloneStyleTypes } from "../types/profilePageTypes";
+import {
+  ProfileContextTypes,
+  CloneStyleTypes,
+} from "../types/profilePageTypes";
 
-export const SideBar: React.FC<SideBarTypes> = ({user, userPicture}) => {
+export const SideBar: React.FC<SideBarTypes> = ({ user, userPicture }) => {
   // Component of ProfilePage.
 
   return (
     <div className="sidebar-container">
       <div className="user-info">
         <div className="image-container">
-          <img
-            className="user-image"
-            src={userPicture}
-            alt={user}
-          />
+          <img className="user-image" src={userPicture} alt={user} />
         </div>
         <div className="username">{user}</div>
       </div>
@@ -22,7 +21,9 @@ export const SideBar: React.FC<SideBarTypes> = ({user, userPicture}) => {
 };
 
 export const ErrorInfo: React.FC = () => {
-  const { requestError, setRequestError } = useContext(ProfileContext) as ProfileContextTypes;
+  const { requestError, setRequestError } = useContext(
+    ProfileContext
+  ) as ProfileContextTypes;
 
   const handleExit = () => {
     setRequestError({ exists: false, description: "" });

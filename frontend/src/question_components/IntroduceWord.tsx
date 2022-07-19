@@ -2,7 +2,10 @@ import React, { useState, useContext } from "react";
 import { IntroImage, IntroText } from "./common/components";
 import { QuestionContext } from "./QuestionPage";
 
-import { QuestionComponentPropTypes, QuestionContextTypes } from "./types/QuestionPageTypes";
+import {
+  QuestionComponentPropTypes,
+  QuestionContextTypes,
+} from "./types/QuestionPageTypes";
 
 export const IntroduceWord: React.FC<QuestionComponentPropTypes> = (props) => {
   // Component of QuestionPage - Handled by './functions' -> generate_pages
@@ -21,7 +24,9 @@ export const IntroduceWord: React.FC<QuestionComponentPropTypes> = (props) => {
     <IntroImage wordInfo={wordInfo} word={word} key={word + "-image"} />,
   ];
 
-  const { handleParentClick } = useContext(QuestionContext) as QuestionContextTypes;
+  const { handleParentClick } = useContext(
+    QuestionContext
+  ) as QuestionContextTypes;
 
   function handle_click(event: React.MouseEvent) {
     const element = event.target as HTMLInputElement;

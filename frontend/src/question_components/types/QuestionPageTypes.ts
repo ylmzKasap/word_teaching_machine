@@ -21,7 +21,7 @@ export type ParamTypes = {
   deckId: string;
   dirId: string;
   username: string;
-}
+};
 
 export interface PageContent {
   component: React.FC<QuestionComponentPropTypes> | null;

@@ -1,13 +1,15 @@
 import { useContext } from "react";
 import axios from "axios";
-import { extract_int, delete_item } from "../common/functions";
+import { delete_item } from "../common/functions";
+import { extract_int } from "../common/utils";
 import { ProfileContext } from "./ProfilePage";
 import { ProfileContextTypes } from "../types/profilePageTypes";
+import Trash from "../../assets/font_awesome/Trash";
 
 export const CardContainer: React.FC = () => {
   const { handleContextMenu, handleScroll, items, isDragging, directoryInfo } =
     useContext(ProfileContext) as ProfileContextTypes;
-    
+
   const containerClass =
     directoryInfo.item_type === "thematic_folder"
       ? "category-container"
@@ -46,12 +48,7 @@ const BottomDragBar: React.FC = () => {
     // Delete dragged the item.
     resetDrag();
     if (!cloneTimeout.exists) {
-      delete_item(
-        draggedElement,
-        username,
-        setReRender,
-        setRequestError
-      );
+      delete_item(draggedElement, username, setReRender, setRequestError);
     } else {
       resetDrag();
     }
@@ -62,15 +59,18 @@ const BottomDragBar: React.FC = () => {
     if (!draggedElement.id) {
       return;
     }
-    
+
     axios
       .put(`/updatedir/${username}`, {
         item_id: extract_int(draggedElement.id),
-        target_id: null
+        target_id: null,
       })
       .then(() => setReRender())
       .catch((err) =>
-        setRequestError({ exists: true, description: err.response.data.errDesc })
+        setRequestError({
+          exists: true,
+          description: err.response.data.errDesc,
+        })
       );
     resetDrag();
   };
@@ -84,11 +84,11 @@ const BottomDragBar: React.FC = () => {
             <i className="fas fa-long-arrow-alt-left"></i>
           </div>
         )}
-      {isDragging && (
-        <div className="drag-button trash" onMouseUp={destroyItem}>
-          <i className="fas fa-trash-alt"></i>
-        </div>
-      )}
+      {isDragging &&
+        <Trash 
+          elementClass="drag-button"
+          mouseHandler={destroyItem} />
+      }
     </div>
   );
 };

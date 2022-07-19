@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 import { ProfileContext } from "./profile_page/ProfilePage";
-import { extract_int } from "./common/functions";
+import { extract_int } from "./common/utils";
 import * as handlers from "./common/handlers";
 import { Filler } from "./common/components";
 
@@ -11,7 +11,9 @@ import { PageItemPropTypes, PageItemContextTypes } from "./types/pageItemTypes";
 import { ProfileContextTypes } from "./types/profilePageTypes";
 import * as defaults from "./types/pageItemDefaults";
 
-export const ItemContext = createContext<PageItemContextTypes | undefined>(undefined);
+export const ItemContext = createContext<PageItemContextTypes | undefined>(
+  undefined
+);
 
 export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   // Component of ProfilePage.
@@ -20,9 +22,14 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   const navigate = useNavigate();
   const params = useParams();
 
-  const [selfStyle, setSelfStyle] = useState({...defaults.selfStyleDefault, order: props.order });
-  const [itemStyle, setItemStyle] = useState(
-    { backgroundColor: props.color ? props.color : "", boxShadow: "" });
+  const [selfStyle, setSelfStyle] = useState({
+    ...defaults.selfStyleDefault,
+    order: props.order,
+  });
+  const [itemStyle, setItemStyle] = useState({
+    backgroundColor: props.color ? props.color : "",
+    boxShadow: "",
+  });
   const [folderStyle, setFolderStyle] = useState("");
   const [fillerClass, setFillerClass] = useState("");
   const [lastFillerClass, setLastFillerClass] = useState("");
@@ -59,7 +66,9 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
       if (elem) {
         const closestElem = elem.closest(".category") as HTMLElement | null;
         const elemChildren = closestElem ? closestElem.children : 0;
-        childCount = elemChildren ? elemChildren.length - extraChildren : elemChildren;
+        childCount = elemChildren
+          ? elemChildren.length - extraChildren
+          : elemChildren;
       }
     }
   }
@@ -67,14 +76,14 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   // Set the opacity of dragged element while dragging.
   useEffect(() => {
     if (isDragging && draggedElement.id === props.id) {
-      setSelfStyle(prev => ({
+      setSelfStyle((prev) => ({
         ...prev,
         order: props.order,
-        opacity: "0.5"
+        opacity: "0.5",
       }));
       setFolderStyle("dragged-folder");
     } else {
-      setSelfStyle(prev => ({...prev, order: props.order, opacity: "1"}));
+      setSelfStyle((prev) => ({ ...prev, order: props.order, opacity: "1" }));
       setFolderStyle("");
     }
   }, [isDragging, draggedElement, props.name, props.order, props.id]);
@@ -144,24 +153,31 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
 
     if (
       (["deck", "category", "thematic-folder"].includes(targetElem.className) ||
-      draggedElement.id === targetElem.id) && isDragging
+        draggedElement.id === targetElem.id) &&
+      isDragging
     ) {
       resetDrag(true);
       return;
     }
 
-    setItemStyle(prev => ({...prev, backgroundColor: props.color ? props.color : ""}));
+    setItemStyle((prev) => ({
+      ...prev,
+      backgroundColor: props.color ? props.color : "",
+    }));
     setFolderStyle("");
 
     if (isDragging && draggedElement.id) {
       axios
         .put(`/updatedir/${username}`, {
           item_id: extract_int(draggedElement.id),
-          target_id: extract_int(targetElem.id)
+          target_id: extract_int(targetElem.id),
         })
         .then(() => setReRender())
         .catch((err) =>
-          setRequestError({ exists: true, description: err.response.data.errDesc })
+          setRequestError({
+            exists: true,
+            description: err.response.data.errDesc,
+          })
         );
     }
     resetDrag();
@@ -189,7 +205,10 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
       });
       setFolderStyle("drag-hover-folder");
     } else if (event.type === "mouseout") {
-      setItemStyle({ boxShadow: "", backgroundColor: props.color ? props.color : "" });
+      setItemStyle({
+        boxShadow: "",
+        backgroundColor: props.color ? props.color : "",
+      });
       setFolderStyle("");
     }
   };
@@ -319,15 +338,16 @@ const ItemContainer = () => {
 };
 
 const CategoryContainer = () => {
-  const { isDragging, setDeckOverlay } =
-    useContext(ProfileContext) as ProfileContextTypes;
+  const { isDragging, setDeckOverlay } = useContext(
+    ProfileContext
+  ) as ProfileContextTypes;
 
   const {
     parentProps,
     itemStyle,
     handleMouseDown,
     handleMouseUp,
-    handleHover
+    handleHover,
   } = useContext(ItemContext) as PageItemContextTypes;
 
   const addItem = (event: React.MouseEvent) => {
@@ -339,12 +359,17 @@ const CategoryContainer = () => {
     if (!closestElement) return;
     const categoryId = closestElement.id;
 
-    setDeckOverlay({type: "category", value: "", categoryInfo: {
-      id: extract_int(categoryId),
-      name: parentProps.name,
-      sourceLanguage: parentProps.source_language,
-      targetLanguage: parentProps.target_language,
-      purpose: parentProps.purpose}} );
+    setDeckOverlay({
+      type: "category",
+      value: "",
+      categoryInfo: {
+        id: extract_int(categoryId),
+        name: parentProps.name,
+        sourceLanguage: parentProps.source_language,
+        targetLanguage: parentProps.target_language,
+        purpose: parentProps.purpose,
+      },
+    });
   };
 
   return (
