@@ -5,12 +5,12 @@ import MainImage from "./main_image/main_image";
 import OtherImageContainer from "./other_images/other_image_container";
 
 const ImageInfo: React.FC<ImageInfoTypes> = (props) => {
-  // Rendered by "./edit_image_overlay" -> EditImageContent
+  // Rendered by "./edit_image_content" -> EditImageContent
   // Renders following componenets:
-  // "LeftNumber"
-  // "./translation" -> ImageTranslation
-  // "./image_components" -> MainImage
-  // "./image_components" -> OtherImages
+  // "./left_number" -> LeftNumber
+  // "./translation/image_translation" -> ImageTranslation
+  // "./main_image/main_image" -> MainImage
+  // "./other_images/other_image_container" -> OtherImageContainer
 
   const getSelectedImage = (imageArray: ImageRowTypes[]) => {
     // Takes an array of image objects

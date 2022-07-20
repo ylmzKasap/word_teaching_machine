@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { OverlayNavbar } from "../../../common/components";
+import OverlayNavbar from "../../common/components/overlay_navbar";
 import { ProfileContext } from "../../../profile_page/ProfilePage";
 import { ProfileContextTypes } from "../../../types/profilePageTypes";
 import { ImageUploader } from "./image_uploader";

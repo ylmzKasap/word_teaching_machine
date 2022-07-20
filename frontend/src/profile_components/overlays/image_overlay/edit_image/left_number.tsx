@@ -4,7 +4,7 @@ import { ProfileContextTypes } from "../../../types/profilePageTypes";
 import Trash from "../../../../assets/font_awesome/Trash";
 
 const LeftNumber: React.FC<{ order: number }> = (props) => {
-  // Rendered by "ImageInfo".
+  // Rendered by "./image_info" -> ImageInfo
   const { setEditImageOverlay } = useContext(ProfileContext) as ProfileContextTypes;
 
   const handleTrash = () => {

@@ -3,7 +3,7 @@ import { ProfileContext } from "../../../../profile_page/ProfilePage";
 import { ImageRowTypes, ProfileContextTypes } from "../../../../types/profilePageTypes";
 
 const OtherImage: React.FC<OtherImageTypes> = ({ imgObj, order }) => {
-  // Rendered by "OtherImages"
+  // Rendered by "./other-image-container"  -> OtherImageContainer
 
   const { setEditImageOverlay, deckOverlay } = useContext(ProfileContext) as ProfileContextTypes;
 

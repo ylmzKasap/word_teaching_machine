@@ -6,8 +6,9 @@ import ImageInfo from "./image_info";
 import AddImageOverlay from "../add_image/add_image";
 
 const EditAddImageContent: React.FC<EditAddImageContentTypes> = (props) => {
-  // Rendered by "EditImageOverlay"
-  // Renders a list of "./image_info" -> "ImageInfo" components.
+  // Rendered by "./edit_image_overlay" -> EditImageOverlay
+  // Renders a list of "./image_info" -> ImageInfo components.
+  
   const { editImageOverlay, setEditImageOverlay, deckOverlay } = useContext(
     ProfileContext) as ProfileContextTypes;
 

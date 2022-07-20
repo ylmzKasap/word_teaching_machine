@@ -2,12 +2,12 @@
 import { useContext } from "react";
 import { ProfileContext } from "../../../profile_page/ProfilePage";
 import { ProfileContextTypes } from "../../../types/profilePageTypes";
-import { OverlayNavbar } from "../../../common/components";
+import OverlayNavbar from "../../common/components/overlay_navbar";
 import EditAddImageContent from "./edit_add_image_content";
 
 const EditImageOverlay: React.FC = () => {
-  // Rendered by "../../profile_page" -> "ProfilePage"
-  // Renders "../../common/components/OverlayNavbar" and "EditImageContent"
+  // Rendered by "../../../profile_page" -> "ProfilePage"
+  // Renders "../../../common/components/OverlayNavbar" and "EditImageContent"
 
   const { editImageOverlay, setEditImageOverlay } = useContext(
     ProfileContext

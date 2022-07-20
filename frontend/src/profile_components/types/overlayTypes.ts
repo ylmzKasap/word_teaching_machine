@@ -1,61 +1,7 @@
-import React from "react";
 import {
   CategoryInfoTypes,
   ImageRowTypes,
-  SetDeckOverlayType,
-  SetOverlayType,
 } from "./profilePageTypes";
-
-export interface OverlayNavbarTypes {
-  setOverlay: SetDeckOverlayType | SetOverlayType;
-  description: string;
-  specialClass?: string;
-  extra?: string;
-}
-
-export interface InputFieldTypes {
-  description: string;
-  error: NameErrorTypes;
-  value: string;
-  handler: (event: React.ChangeEvent) => void;
-  placeholder: string;
-}
-
-export interface RadioTypes {
-  description: string;
-  buttons: string[];
-  checked: string;
-  selected: string;
-  handler: (event: React.ChangeEvent) => void;
-}
-
-export interface CheckboxTypes {
-  description: string;
-  value: boolean;
-  handler: () => void;
-}
-
-export interface DoubleChoiceTypes {
-  description: string;
-  choice_one: string;
-  choice_two: string;
-  chosen: string;
-  handler: (selectedPurpose: string) => void;
-}
-
-export interface submitButtonTypes {
-  description: string;
-  formError: FormErrorTypes;
-}
-
-export interface SelectDropdownTypes {
-  description: string;
-  handler: (event: React.SyntheticEvent) => void;
-  topic: string;
-  choices: string[];
-  chosen: string | undefined;
-  placeholder: string;
-}
 
 export interface NameErrorTypes {
   errorClass: string | undefined;

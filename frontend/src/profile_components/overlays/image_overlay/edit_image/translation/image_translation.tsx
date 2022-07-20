@@ -1,12 +1,12 @@
 import { useState, useContext } from "react";
 import { ProfileContext } from "../../../../profile_page/ProfilePage";
 import { ImageRowTypes, ProfileContextTypes } from "../../../../types/profilePageTypes";
-import { LoadingIcon } from "../../../../common/animations";
+import LoadingIcon from "../../../../../assets/animations/loading_icon";
 import Translation from "./translation";
 
 const ImageTranslation: React.FC<ImageTranslationTypes> = ({ word, order }) => {
-  // Rendered by "./image_info" -> ImageInfo
-  // Renders two "Translation" componenets
+  // Rendered by "../image_info" -> ImageInfo
+  // Renders two "./translation" -> Translation components
   // One as the target and one as the source language.
 
   const { deckOverlay } = useContext(ProfileContext) as ProfileContextTypes;

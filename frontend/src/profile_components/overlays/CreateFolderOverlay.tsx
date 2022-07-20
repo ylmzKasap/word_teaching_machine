@@ -2,9 +2,11 @@ import React, { useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "../profile_page/ProfilePage";
-import { OverlayNavbar } from "../common/components";
+import OverlayNavbar from "./common/components/overlay_navbar";
+import InputField from "../common/form_components/input_field";
+import Radio from "../common/form_components/radio_button";
+import SubmitForm from "../common/form_components/submit_form";
 import * as handlers from "../common/handlers";
-import * as form_components from "../common/form_components";
 import { ProfileContextTypes } from "../types/profilePageTypes";
 
 export const CreateFolderOverlay: React.FC = () => {
@@ -96,14 +98,14 @@ export const CreateFolder: React.FC = () => {
       />
       <div className="form-content">
         {/* Folder name */}
-        <form_components.InputField
+        <InputField
           description="Folder Name:"
           error={folderOverlay.errors.nameError}
           value={folderOverlay.folderName}
           handler={handleNameChange}
           placeholder="Enter a folder name"
         />
-        <form_components.Radio
+        <Radio
           description="Folder Type:"
           buttons={["Regular folder", "Thematic folder"]}
           checked="regular_folder"
@@ -111,7 +113,7 @@ export const CreateFolder: React.FC = () => {
           handler={handleRadioChange}
         />
         {/* Submit & Error */}
-        <form_components.SubmitForm
+        <SubmitForm
           description="Create Folder"
           formError={folderOverlay.errors.formError}
         />

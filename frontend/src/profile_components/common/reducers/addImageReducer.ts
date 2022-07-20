@@ -12,12 +12,14 @@ export const handleEditImageOverlay = (
 ): EditImagesTypes => {
   switch (action.type) {
     case "view":
+      // Show or hide image editing overlay.
       return {
         ...state,
         display: action.value === "show"
       };
 
     case "view-image":
+      // Show or hide image uploading overlay.
       return {
         ...state,
         imageOverlay: {
@@ -27,6 +29,7 @@ export const handleEditImageOverlay = (
       };
 
     case "changePicture":
+      // Change the main picture when some other picture is clicked.
       if (action.index === undefined) return state;
       let updatedArray = state.imageInfo;
       updatedArray[action.index] = updatedArray[action.index].map((item) => {
@@ -49,7 +52,6 @@ export const handleEditImageOverlay = (
       };
 
     case "changeValue":
-      console.log('yes');
       // Replace a specific key value with a new one in a particular index.
       let changedArray = state.imageInfo.reduce(
         (previousValue, currentValue, i) => {
@@ -83,6 +85,7 @@ export const handleEditImageOverlay = (
       };
 
     case "changeEdited":
+      // Change the currently editable input element.
       return {
         ...state,
         editedId: action.value as string,

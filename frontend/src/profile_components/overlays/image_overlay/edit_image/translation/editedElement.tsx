@@ -12,7 +12,7 @@ const EditedElement: React.FC<EditedElementPropTypes> = ({
   type,
   setRequestExists
 }) => {
-  // Rendered by "Translation"
+  // Rendered by "./translation" -> Translation
   // Renders an input element which edits the text before.
 
   const { deckOverlay, editImageOverlay, setEditImageOverlay, setRequestError } =
@@ -79,7 +79,7 @@ const EditedElement: React.FC<EditedElementPropTypes> = ({
       return;
     }
 
-    // Make an http request.
+    // Get the image objects form the server
     if (
       trimmedInput !== savedInput &&
       ((type === "targetLanguage" && deckOverlay.purpose === "teach")

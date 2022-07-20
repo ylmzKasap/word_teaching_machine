@@ -2,9 +2,14 @@ import React, { useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "../profile_page/ProfilePage";
-import { OverlayNavbar } from "../common/components";
+import OverlayNavbar from "./common/components/overlay_navbar";
+import InputField from "../common/form_components/input_field";
+import Checkbox from "../common/form_components/checkbox";
+import DropDown from "../common/form_components/dropdown";
+import DoubleChoice from "../common/form_components/double_choice";
+import SubmitForm from "../common/form_components/submit_form";
+import allLanguages from "../common/constants/all_languages";
 import * as handlers from "../common/handlers";
-import * as form_components from "../common/form_components";
 import { ProfileContextTypes } from "../types/profilePageTypes";
 import { to_title } from "../common/utils";
 import { specialCharacterRegex } from "../common/regex";
@@ -155,7 +160,7 @@ export const CreateDeck: React.FC = () => {
       />
       <div className="form-content">
         {/* Deck name */}
-        <form_components.InputField
+        <InputField
           description="Deck Name:"
           error={deckOverlay.errors.nameError}
           value={deckOverlay.deckName}
@@ -164,7 +169,7 @@ export const CreateDeck: React.FC = () => {
         />
         {/* Purpose */}
         {!categorySpec && (
-          <form_components.DoubleChoice
+          <DoubleChoice
             description="I want to..."
             choice_one="learn"
             choice_two="teach"
@@ -173,11 +178,11 @@ export const CreateDeck: React.FC = () => {
           />
         )}
         {!categorySpec && deckOverlay.purpose && (
-          <form_components.DropDown
+          <DropDown
             description=""
             handler={handleLanguageChange}
             topic="target_language"
-            choices={form_components.allLanguages.filter(
+            choices={allLanguages.filter(
               (i) => i !== deckOverlay.language.sourceLanguage
             )}
             chosen={deckOverlay.language.targetLanguage}
@@ -186,11 +191,11 @@ export const CreateDeck: React.FC = () => {
         )}
         {/* Source language for learning */}
         {!categorySpec && deckOverlay.purpose === "learn" && (
-          <form_components.DropDown
+          <DropDown
             description="My language is"
             handler={handleLanguageChange}
             topic="source_language"
-            choices={form_components.allLanguages.filter(
+            choices={allLanguages.filter(
               (i) => i !== deckOverlay.language.targetLanguage
             )}
             chosen={deckOverlay.language.sourceLanguage}
@@ -234,7 +239,7 @@ export const CreateDeck: React.FC = () => {
           (categorySpec ? deckOverlay.categoryInfo.sourceLanguage : true)) ||
           (deckOverlay.purpose === "learn" &&
             deckOverlay.language.sourceLanguage)) && (
-          <form_components.Checkbox
+          <Checkbox
             description="Show translations on pictures"
             handler={handleTranslationDecision}
             value={deckOverlay.includeTranslation}
@@ -243,11 +248,11 @@ export const CreateDeck: React.FC = () => {
         {!categorySpec &&
           deckOverlay.purpose === "teach" &&
           deckOverlay.includeTranslation && (
-            <form_components.DropDown
+            <DropDown
               description=""
               handler={handleLanguageChange}
               topic="source_language"
-              choices={form_components.allLanguages.filter(
+              choices={allLanguages.filter(
                 (i) => i !== deckOverlay.language.targetLanguage
               )}
               chosen={deckOverlay.language.sourceLanguage}
@@ -255,7 +260,7 @@ export const CreateDeck: React.FC = () => {
             />
           )}
         {/* Submit & Error */}
-        <form_components.SubmitForm
+        <SubmitForm
           description="Create Deck"
           formError={deckOverlay.errors.formError}
         />

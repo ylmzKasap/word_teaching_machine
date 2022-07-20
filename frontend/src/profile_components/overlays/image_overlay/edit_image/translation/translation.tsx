@@ -10,7 +10,7 @@ const Translation: React.FC<TranslationTypes> = ({
   setRequestExists,
   elementClass=undefined
 }) => {
-  // Rendered by "ImageTranslation"
+  // Rendered by "./image_translation" -> ImageTranslation
   // Renders translation divs and "EditedElement" if it exists.
 
   const { editImageOverlay, setEditImageOverlay, deckOverlay } =

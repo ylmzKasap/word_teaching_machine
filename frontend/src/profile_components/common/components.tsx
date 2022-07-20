@@ -4,7 +4,6 @@ import { ProfileContext } from "../profile_page/ProfilePage";
 import { delete_item } from "./functions";
 import { extract_int } from "./utils";
 
-import * as types from "../types/overlayTypes";
 import * as defaults from "../types/profilePageDefaults";
 import {
   ProfileContextTypes,
@@ -12,36 +11,6 @@ import {
 } from "../types/profilePageTypes";
 import { FillerTypes } from "../types/pageItemTypes";
 
-export const OverlayNavbar: React.FC<types.OverlayNavbarTypes> = ({
-  setOverlay,
-  specialClass,
-  description,
-  extra,
-}) => {
-  // Component of CreateDeck, CreateFolder.
-
-  const handleExit = (event: React.MouseEvent) => {
-    event.preventDefault();
-    if (specialClass === "add-image-navbar") {
-      setOverlay({ type: "view-image", value: "hide" });
-    } else {
-      setOverlay({ type: "view", value: "hide" });
-    }
-  };
-
-  const classInfo = specialClass ? specialClass : "";
-  return (
-    <div className={`overlay-nav ${classInfo}`}>
-      <div className="overlay-description">
-        {description}{" "}
-        {extra ? <span className="extra-info">({extra})</span> : ""}
-      </div>
-      <button className="exit-button" onClick={handleExit}>
-        <p className="exit-sign">X</p>
-      </button>
-    </div>
-  );
-};
 
 export const ItemContextMenu: React.FC = () => {
   const {

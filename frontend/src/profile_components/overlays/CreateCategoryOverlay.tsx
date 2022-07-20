@@ -2,9 +2,14 @@ import React, { useContext } from "react";
 import axios from "axios";
 
 import { ProfileContext } from "../profile_page/ProfilePage";
-import { OverlayNavbar } from "../common/components";
+import OverlayNavbar from "./common/components/overlay_navbar";
+import InputField from "../common/form_components/input_field";
+import Checkbox from "../common/form_components/checkbox";
+import DropDown from "../common/form_components/dropdown";
+import DoubleChoice from "../common/form_components/double_choice";
+import SubmitForm from "../common/form_components/submit_form";
+import allLanguages from "../common/constants/all_languages";
 import * as handlers from "../common/handlers";
-import * as form_components from "../common/form_components";
 import { ProfileContextTypes } from "../types/profilePageTypes";
 
 export const CreateCategoryOverlay: React.FC = () => {
@@ -17,7 +22,6 @@ export const CreateCategoryOverlay: React.FC = () => {
   );
 };
 
-// TODO: Fix memory leak when submit button is pressed multiple times.
 export const CreateCategory: React.FC = () => {
   // Component of CreateCategoryOverlay.
 
@@ -126,7 +130,7 @@ export const CreateCategory: React.FC = () => {
       />
       <div className="form-content">
         {/* Category name */}
-        <form_components.InputField
+        <InputField
           description="Category name:"
           error={categoryOverlay.errors.nameError}
           value={categoryOverlay.categoryName}
@@ -134,7 +138,7 @@ export const CreateCategory: React.FC = () => {
           placeholder="Enter a category name"
         />
         {/* Purpose */}
-        <form_components.DoubleChoice
+        <DoubleChoice
           description="I want to..."
           choice_one="learn"
           choice_two="teach"
@@ -142,11 +146,11 @@ export const CreateCategory: React.FC = () => {
           handler={handlePurpose}
         />
         {categoryOverlay.purpose && (
-          <form_components.DropDown
+          <DropDown
             description=""
             handler={handleLanguageChange}
             topic="target_language"
-            choices={form_components.allLanguages.filter(
+            choices={allLanguages.filter(
               (i) => i !== categoryOverlay.language.sourceLanguage
             )}
             chosen={categoryOverlay.language.targetLanguage}
@@ -155,11 +159,11 @@ export const CreateCategory: React.FC = () => {
         )}
         {/* Source language for learning */}
         {categoryOverlay.purpose === "learn" && (
-          <form_components.DropDown
+          <DropDown
             description="My language is"
             handler={handleLanguageChange}
             topic="source_language"
-            choices={form_components.allLanguages.filter(
+            choices={allLanguages.filter(
               (i) => i !== categoryOverlay.language.targetLanguage
             )}
             chosen={categoryOverlay.language.sourceLanguage}
@@ -167,18 +171,18 @@ export const CreateCategory: React.FC = () => {
           />
         )}
         {categoryOverlay.purpose === "teach" && (
-          <form_components.Checkbox
+          <Checkbox
             description="Show translations on pictures"
             handler={handleTranslationDecision}
             value={categoryOverlay.includeTranslation}
           />
         )}
         {categoryOverlay.includeTranslation && (
-          <form_components.DropDown
+          <DropDown
             description=""
             handler={handleLanguageChange}
             topic="source_language"
-            choices={form_components.allLanguages.filter(
+            choices={allLanguages.filter(
               (i) => i !== categoryOverlay.language.targetLanguage
             )}
             chosen={categoryOverlay.language.sourceLanguage}
@@ -194,7 +198,7 @@ export const CreateCategory: React.FC = () => {
           <span className="input-info">Pick a background color</span>
         </label>
         {/* Submit & Error */}
-        <form_components.SubmitForm
+        <SubmitForm
           description="Create Category"
           formError={categoryOverlay.errors.formError}
         />
