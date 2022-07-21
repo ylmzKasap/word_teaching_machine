@@ -25,9 +25,10 @@ const OtherImageContainer: React.FC<OtherImageContainerPropTypes> = (props) => {
   const handleLoad = (event: React.MouseEvent<HTMLDivElement>) => {
     // Load other pictures when "load more" button is clicked.
     const element = event.target as HTMLDivElement;
-    const scrollTarget = element.closest("#other-image-container")?.lastChild as HTMLDivElement;
+    const scrollContainer = element.closest("#other-image-container");
     setImagesToDisplay((i) => i + 3);
     setTimeout(() => {
+      const scrollTarget = scrollContainer?.lastChild as HTMLDivElement;
       scrollTarget.scrollIntoView({
         behavior: "smooth",
         block: "nearest",

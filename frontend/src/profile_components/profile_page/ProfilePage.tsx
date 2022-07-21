@@ -1,20 +1,27 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+
+// Libraries
 import React, { useState, useEffect, useReducer, createContext } from "react";
 import { useParams, Outlet } from "react-router-dom";
 import axios from "axios";
 
-import {
-  generate_directory,
-  scroll_div,
-  find_closest_element,
-} from "../common/functions";
+// Hooks
+import useWindowSize from "../common/hooks/use_column_number";
+
+// Functions
+import generate_directory from "../common/functions/generate_directory";
+import scroll_div, { scrollingDefault, ScrollingTypes } from "../common/functions/scroll_div";
+import find_closest_element from "../common/functions/find_closest_element";
 
 import { SideBar, ErrorInfo, DragClone } from "./OtherComponents";
 import { CardContainer } from "./CardContainer";
 import { ProfileNavBar } from "./ProfileNavbar";
-import { create_context_menu } from "../common/handlers";
-import { ItemContextMenu, NotFound } from "../common/components";
-import { useWindowSize } from "../common/hooks";
+import { 
+  contextOpenedElemDefault,
+  ContextOpenedElemTypes,
+  create_context_menu } from "../common/handlers/create_context_menu";
+import ItemContextMenu, { clipboardDefault } from "../common/components/item_context_menu";
+import NotFound from "../common/components/not_found";
 import * as types from "../types/profilePageTypes";
 import * as defaults from "../types/profilePageDefaults";
 import { handleDeckOverlay } from "../common/reducers/createDeckReducer";
@@ -50,7 +57,7 @@ export const ProfilePage: React.FC<{ dir: string }> = ({ dir }) => {
   const [items, setItems] = useState<React.ReactElement[]>([]);
   const [reRender, setReRender] = useReducer((x) => x + 1, 0);
   const [clipboard, setClipboard] = useState<types.ClipboardTypes>(
-    defaults.clipboardDefault
+    clipboardDefault
   );
 
   // Content fetching related states.
@@ -65,7 +72,7 @@ export const ProfilePage: React.FC<{ dir: string }> = ({ dir }) => {
   // Context menu related states.
   const [contextMenu, setContextMenu] = useState(false);
   const [contextOpenedElem, setContextOpenedElem] =
-    useState<types.ContextOpenedElemTypes>(defaults.contextOpenedElemDefault);
+    useState<ContextOpenedElemTypes>(contextOpenedElemDefault);
   const [contextOptions, setContextOptions] = useState([""]);
   const [contextMenuStyle, setContextMenuStyle] = useState(
     defaults.contextMenuStyleDefault
@@ -88,8 +95,8 @@ export const ProfilePage: React.FC<{ dir: string }> = ({ dir }) => {
   const [dragCount, setDragCount] = useState(0);
   const [isDragging, setDrag] = useState(false);
   const [categoryDrag, setCategoryDrag] = useState(false);
-  const [scrolling, setScrolling] = useState<types.ScrollingTypes>(
-    defaults.scrollingDefault
+  const [scrolling, setScrolling] = useState<ScrollingTypes>(
+    scrollingDefault
   );
 
   const [columnNumber] = useWindowSize(directoryInfo, contentLoaded);
@@ -195,7 +202,7 @@ export const ProfilePage: React.FC<{ dir: string }> = ({ dir }) => {
   useEffect(() => {
     if (scrolling.exists) {
       clearInterval(scrolling.interval);
-      setScrolling(defaults.scrollingDefault);
+      setScrolling(scrollingDefault);
     }
   }, [isDragging]);
 
@@ -208,7 +215,7 @@ export const ProfilePage: React.FC<{ dir: string }> = ({ dir }) => {
   const resetContext = () => {
     setContextMenu(false);
     setContextOptions([""]);
-    setContextOpenedElem(defaults.contextOpenedElemDefault);
+    setContextOpenedElem(contextOpenedElemDefault);
     setContextMenuScroll(defaults.contextMenuScrollDefault);
     setContextMenuStyle(defaults.contextMenuStyleDefault);
   };

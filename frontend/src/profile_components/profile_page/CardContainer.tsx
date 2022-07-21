@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import axios from "axios";
-import { delete_item } from "../common/functions";
+import delete_item from "../common/functions/delete_item";
 import { extract_int } from "../common/utils";
 import { ProfileContext } from "./ProfilePage";
 import { ProfileContextTypes } from "../types/profilePageTypes";

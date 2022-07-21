@@ -8,7 +8,7 @@ import {
   process_page_object,
   randint,
 } from "./common/functions";
-import { NotFound } from "../profile_components/common/components";
+import NotFound from "../profile_components/common/components/not_found";
 import * as types from "./types/QuestionPageTypes";
 import * as defaults from "./types/QuestionPageDefaults";
 

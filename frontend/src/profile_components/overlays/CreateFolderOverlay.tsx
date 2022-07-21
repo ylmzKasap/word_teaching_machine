@@ -6,8 +6,8 @@ import OverlayNavbar from "./common/components/overlay_navbar";
 import InputField from "../common/form_components/input_field";
 import Radio from "../common/form_components/radio_button";
 import SubmitForm from "../common/form_components/submit_form";
-import * as handlers from "../common/handlers";
 import { ProfileContextTypes } from "../types/profilePageTypes";
+import { handleItemName } from "../common/form_components/handlers/handleItemName";
 
 export const CreateFolderOverlay: React.FC = () => {
   // Component of ProfileNavbar.
@@ -26,7 +26,7 @@ export const CreateFolder: React.FC = () => {
     useContext(ProfileContext) as ProfileContextTypes;
 
   const handleNameChange = (event: React.ChangeEvent) => {
-    const [itemName, itemNameError] = handlers.handleItemName(event);
+    const [itemName, itemNameError] = handleItemName(event);
     setFolderOverlay({ type: "folderName", value: itemName });
     setFolderOverlay({
       type: "errors",

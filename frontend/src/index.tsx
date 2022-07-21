@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import { ProfilePage } from "./profile_components/profile_page/ProfilePage";
 import { CardContainer } from "./profile_components/profile_page/CardContainer";
-import { NotFound } from "./profile_components/common/components";
+import NotFound from "./profile_components/common/components/not_found";
 import { QuestionPage } from "./question_components/QuestionPage";
 
 const App = () => {

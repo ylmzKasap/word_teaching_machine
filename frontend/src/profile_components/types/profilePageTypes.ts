@@ -1,12 +1,11 @@
 import React from "react";
+import { ContextOpenedElemTypes } from "../common/handlers/create_context_menu";
 import {
   CategoryOverlayTypes,
   DeckOverlayTypes,
   FolderOverlayTypes,
   EditImagesTypes,
 } from "./overlayTypes";
-
-type Timer = ReturnType<typeof setTimeout>;
 
 export type userResponse = [serverItemTypes[], dirInfoTypes];
 
@@ -37,35 +36,11 @@ export interface RequestErrorTypes {
   description: string | undefined;
 }
 
-export interface ScrollingTypes {
-  exists: boolean;
-  element: React.ReactElement | Element | undefined;
-  clientY: number | undefined;
-  interval: number | Timer;
-}
-
 export interface ContextMenuScrollTypes {
   top: number;
   scroll: number;
 }
 
-export interface ContextOpenedElemTypes {
-  id: string | undefined;
-  type: string | undefined;
-  name: string | undefined;
-}
-
-export interface ContextMenuInfoTypes {
-  closest: HTMLElement | null;
-  openedElem: ContextOpenedElemTypes;
-  ops: string[];
-}
-
-export interface ContextRestrictTypes {
-  [paste: string]: {
-    [key: string]: string;
-  };
-}
 
 export interface CloneStyleTypes {
   width: string | undefined;

@@ -133,7 +133,8 @@ const EditedElement: React.FC<EditedElementPropTypes> = ({
         const idPrefix = elementId.match(/[a-z-]+/);
         setEditImageOverlay({ type: "changeEdited", value: `${idPrefix}${order + 1}` });
       } else {
-        setEditImageOverlay({ type: "changeEdited", value: "" });
+        setEditImageOverlay({type: "addRow", value: get_row_default(deckOverlay)});
+        setEditImageOverlay({ type: "changeEdited", value: `image-target-language-${order + 1}` });
       }
     }
   };

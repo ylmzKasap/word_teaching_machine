@@ -58,19 +58,6 @@ export interface CategoryOverlayTypes {
   display: boolean;
 }
 
-export interface ImageInfoTypes {
-  artist_content_id: string | null;
-  image_path: string | null;
-  selected: boolean;
-  english?: string | null;
-  turkish?: string | null;
-  german?: string | null;
-  spanish?: string | null;
-  french?: string | null;
-  greek?: string | null;
-  [key: string]: string | null | undefined | boolean;
-}
-
 export interface AddImageTypes {
   display: boolean;
 }

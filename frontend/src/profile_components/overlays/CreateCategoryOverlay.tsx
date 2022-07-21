@@ -9,8 +9,8 @@ import DropDown from "../common/form_components/dropdown";
 import DoubleChoice from "../common/form_components/double_choice";
 import SubmitForm from "../common/form_components/submit_form";
 import allLanguages from "../common/constants/all_languages";
-import * as handlers from "../common/handlers";
 import { ProfileContextTypes } from "../types/profilePageTypes";
+import { handleItemName } from "../common/form_components/handlers/handleItemName";
 
 export const CreateCategoryOverlay: React.FC = () => {
   // Component of ProfileNavbar.
@@ -34,7 +34,7 @@ export const CreateCategory: React.FC = () => {
   } = useContext(ProfileContext) as ProfileContextTypes;
 
   const handleNameChange = (event: React.ChangeEvent) => {
-    const [itemName, itemNameError] = handlers.handleItemName(event);
+    const [itemName, itemNameError] = handleItemName(event);
     setCategoryOverlay({ type: "categoryName", value: itemName });
     setCategoryOverlay({
       type: "errors",

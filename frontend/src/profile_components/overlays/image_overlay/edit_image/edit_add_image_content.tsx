@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useRef } from "react";
 import { get_row_default } from "../../../types/overlayDefaults";
 import { ProfileContext } from "../../../profile_page/ProfilePage";
 import { ImageRowTypes, ProfileContextTypes } from "../../../types/profilePageTypes";
@@ -11,10 +11,18 @@ const EditAddImageContent: React.FC<EditAddImageContentTypes> = (props) => {
   
   const { editImageOverlay, setEditImageOverlay, deckOverlay } = useContext(
     ProfileContext) as ProfileContextTypes;
+  const addMoreRef = useRef<null | HTMLDivElement>(null);
 
   const addImageRow = () => {
     const rowDefault = get_row_default(deckOverlay);
     setEditImageOverlay({type: "addRow", value: rowDefault});
+    setTimeout(() => {
+      addMoreRef.current!.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start"
+      });
+    }, 100);
   };
 
   return (
@@ -23,7 +31,7 @@ const EditAddImageContent: React.FC<EditAddImageContentTypes> = (props) => {
         {props.imageInfo.map((arr, i) => (
           <ImageInfo imageArray={arr} order={i} key={`image-content-${i}`} />
         ))}
-        <div id="edit-image-row" onClick={addImageRow}>
+        <div id="edit-image-row" ref={addMoreRef} onClick={addImageRow}>
           Add more
         </div>
       </div>

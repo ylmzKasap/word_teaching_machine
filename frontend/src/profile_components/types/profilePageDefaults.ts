@@ -7,33 +7,14 @@ export const directoryInfoDefault = {
   category_id: undefined,
 };
 
-export const clipboardDefault = {
-  action: undefined,
-  id: undefined,
-  type: undefined,
-  directory: undefined,
-};
-
 export const requestErrorDefault = {
   exists: false,
   description: undefined,
 };
 
-export const contextOpenedElemDefault = {
-  id: undefined,
-  type: undefined,
-  name: undefined,
-};
-
 export const contextMenuStyleDefault = { top: 0, left: 0 };
 
 export const contextMenuScrollDefault = { top: 0, scroll: 0 };
-
-export const contextMenuInfoDefault = {
-  closest: null,
-  openedElem: contextOpenedElemDefault,
-  ops: [""],
-};
 
 export const cloneStyleDefault = {
   width: undefined,
@@ -56,13 +37,6 @@ export const draggedElementDefault = {
   id: undefined,
   name: undefined,
   type: undefined,
-};
-
-export const scrollingDefault = {
-  exists: false,
-  element: undefined,
-  clientY: undefined,
-  interval: 0,
 };
 
 export const wordDefault = [

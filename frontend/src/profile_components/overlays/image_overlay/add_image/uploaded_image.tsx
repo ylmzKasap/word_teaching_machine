@@ -2,7 +2,7 @@ import { is_mobile } from "../../../../question_components/common/functions";
 
 export const UploadedImage: React.FC<UploadedImagePropTypes> = (props) => {
   const mobileDevice = is_mobile();
-  const { imageUrl } = props;
+  const { imageUrl, imageName } = props;
 
   const handleClick = () => {
     const inputElement = document.querySelector("#image-upload") as HTMLInputElement;
@@ -21,7 +21,7 @@ export const UploadedImage: React.FC<UploadedImagePropTypes> = (props) => {
       {imageUrl && <img 
         id="uploaded-image"
         src={imageUrl}
-        alt={imageUrl} />}
+        alt={imageName} />}
       <span id="file-selected"></span>
     </div>
     );
@@ -29,6 +29,7 @@ export const UploadedImage: React.FC<UploadedImagePropTypes> = (props) => {
 
 interface UploadedImagePropTypes {
   imageUrl: string;
+  imageName: string;
 }
 
 export default UploadedImage;

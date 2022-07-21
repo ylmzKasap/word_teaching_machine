@@ -305,7 +305,7 @@
   @include flexit();
   font-size: 1.2rem;
   height: 100px;
-  width: 100%;
+  min-width: 98vw;
   background-color: rgb(56, 56, 56);
   color: white;
   &:hover {

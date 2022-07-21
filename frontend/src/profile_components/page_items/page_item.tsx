@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useContext, createContext } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Filler from "../common/components/filler";
+import handleDownOnDragged from "../common/handlers/handle_down_on_dragged";
+import { extract_int } from "../common/utils";
+import { ProfileContext } from "../profile_page/ProfilePage";
+import { ProfileContextTypes, wordTypes } from "../types/profilePageTypes";
+import CategoryContainer from "./containers/category_container";
+import ItemContainer from "./containers/item_container";
 
-import { ProfileContext } from "./profile_page/ProfilePage";
-import { extract_int } from "./common/utils";
-import * as handlers from "./common/handlers";
-import { Filler } from "./common/components";
-
-import { PageItemPropTypes, PageItemContextTypes } from "./types/pageItemTypes";
-import { ProfileContextTypes } from "./types/profilePageTypes";
-import * as defaults from "./types/pageItemDefaults";
 
 export const ItemContext = createContext<PageItemContextTypes | undefined>(
   undefined
@@ -23,7 +22,7 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   const params = useParams();
 
   const [selfStyle, setSelfStyle] = useState({
-    ...defaults.selfStyleDefault,
+    ...selfStyleDefault,
     order: props.order,
   });
   const [itemStyle, setItemStyle] = useState({
@@ -120,7 +119,7 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
     if (targetElem.className !== props.type) {
       targetElem = targetElem.closest(`.${props.type}`)!;
     }
-    const draggedElement = handlers.handleDownOnDragged(props, cloneTimeout);
+    const draggedElement = handleDownOnDragged(props, cloneTimeout);
     setDraggedElement(draggedElement);
   };
 
@@ -267,127 +266,39 @@ export const PageItem: React.FC<PageItemPropTypes> = (props) => {
   );
 };
 
-const ItemContainer = () => {
-  const {
-    parentProps,
-    itemStyle,
-    folderStyle,
-    handleDoubleClick,
-    handleMouseDown,
-    handleMouseUp,
-    handleHover,
-  } = useContext(ItemContext) as PageItemContextTypes;
+export interface PageItemPropTypes {
+  key: string;
+  id: string;
+  name: string;
+  type: string;
+  order: number;
+  words: wordTypes[];
+  color?: string;
+  purpose?: string;
+  show_translation?: boolean;
+  target_language?: string;
+  source_language?: string;
+  completed?: boolean;
+  user: string;
+  children?: boolean | React.ReactNode[];
+}
 
-  const createThumbnail = () => {
-    let thumbnail = [];
-    for (let i = 0; i < parentProps.words.length; i++) {
-      const wordObj = parentProps.words[i];
-      if (!parentProps.target_language) {
-        return;
-      }
-
-      const word = wordObj[parentProps.target_language];
-      if (thumbnail.length >= 4) {
-        break;
-      } else {
-        thumbnail.push(
-          <img
-            className={`deck-thumbnail${
-              parentProps.words.length < 4 ? " n-1" : ""
-            }`}
-            src={`${wordObj.image_path}`}
-            key={`${word}-${i}`}
-            alt={`${word}-${i}`}
-            draggable="false"
-          />
-        );
-      }
-      if (parentProps.words.length < 4) {
-        break;
-      }
-    }
-    return thumbnail;
+export interface PageItemContextTypes {
+  parentProps: PageItemPropTypes;
+  itemStyle: {
+    backgroundColor: string;
+    boxShadow: string;
   };
+  folderStyle: string;
+  handleDoubleClick: () => void;
+  handleMouseDown: (event: React.MouseEvent) => void;
+  handleMouseUp: (event: React.MouseEvent) => void;
+  handleHover: (event: React.MouseEvent) => void;
+}
 
-  return (
-    <div
-      id={parentProps.id}
-      className={parentProps.type}
-      type="item"
-      style={itemStyle}
-      tabIndex={parentProps.order}
-      onDoubleClick={handleDoubleClick}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseOver={handleHover}
-      onMouseOut={handleHover}
-    >
-      {" "}
-      {["folder", "thematic-folder"].includes(parentProps.type) && (
-        <i className={`fas fa-folder fa-8x ${folderStyle}`}></i>
-      )}
-      {parentProps.type === "deck" && (
-        <picture className="thumbnail-container">
-          <span className="deck-image-overlay" />
-          {createThumbnail()}
-        </picture>
-      )}
-      <p className={`${parentProps.type}-description`}>{parentProps.name}</p>
-    </div>
-  );
+export const selfStyleDefault = {
+  opacity: "1",
+  transition: "opacity .3s",
 };
 
-const CategoryContainer = () => {
-  const { isDragging, setDeckOverlay } = useContext(
-    ProfileContext
-  ) as ProfileContextTypes;
-
-  const {
-    parentProps,
-    itemStyle,
-    handleMouseDown,
-    handleMouseUp,
-    handleHover,
-  } = useContext(ItemContext) as PageItemContextTypes;
-
-  const addItem = (event: React.MouseEvent) => {
-    if (isDragging) {
-      return;
-    }
-    const element = event.target as HTMLElement;
-    const closestElement = element.closest(".category");
-    if (!closestElement) return;
-    const categoryId = closestElement.id;
-
-    setDeckOverlay({
-      type: "category",
-      value: "",
-      categoryInfo: {
-        id: extract_int(categoryId),
-        name: parentProps.name,
-        sourceLanguage: parentProps.source_language,
-        targetLanguage: parentProps.target_language,
-        purpose: parentProps.purpose,
-      },
-    });
-  };
-
-  return (
-    <div
-      id={parentProps.id}
-      className={parentProps.type}
-      style={itemStyle}
-      tabIndex={parentProps.order}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseOver={handleHover}
-      onMouseOut={handleHover}
-    >
-      <div className="category-header">
-        <p className={`${parentProps.type}-description`}>{parentProps.name}</p>
-        <i className="fas fa-plus-circle category-circle" onClick={addItem}></i>
-      </div>
-      {parentProps.children}
-    </div>
-  );
-};
+export default PageItem;
