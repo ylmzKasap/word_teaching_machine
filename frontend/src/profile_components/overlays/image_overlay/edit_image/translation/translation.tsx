@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { ProfileContext } from "../../../../profile_page/ProfilePage";
-import { ImageRowTypes, ProfileContextTypes } from "../../../../types/profilePageTypes";
+import {  ProfileContextTypes } from "../../../../types/profilePageTypes";
+import { ImageRowTypes } from "../edit_image_overlay";
 import EditedElement from "./editedElement";
 
 const Translation: React.FC<TranslationTypes> = ({

@@ -71,7 +71,7 @@ export const get_row_default = (deckOverlay: DeckOverlayTypes) => ({
   targetEditable: deckOverlay.purpose === "learn"
 }); 
 
-const teachResponse = [
+export const teachResponse = [
   [
     {
       artist_content_id: "1",
@@ -172,7 +172,7 @@ const teachResponse = [
   ],
 ];
 
-const learnResponse = [
+export const learnResponse = [
   [
     {
       artist_content_id: "1",
@@ -272,14 +272,3 @@ const learnResponse = [
     },
   ],
 ];
-
-export const imageOverlayDefaults = {
-  display: true // change
-};
-
-export const editImagesDefaults = {
-  display: true,
-  editedId: "",
-  imageOverlay: imageOverlayDefaults,
-  imageInfo: teachResponse
-};

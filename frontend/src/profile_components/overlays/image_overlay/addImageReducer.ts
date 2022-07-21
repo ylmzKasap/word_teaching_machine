@@ -1,14 +1,9 @@
-import { EditImagesTypes } from "../../types/overlayTypes";
-import { ImageRowTypes } from "../../types/profilePageTypes";
+import { EditImagesTypes } from "./edit_image/edit_image_overlay";
+import { ImageRowTypes } from "./edit_image/edit_image_overlay";
 
 export const handleEditImageOverlay = (
   state: EditImagesTypes,
-  action: {
-    type: string;
-    value: string | number | boolean | ImageRowTypes | ImageRowTypes[];
-    index?: number;
-    key?: string;
-  }
+  action: ImageOverlayReducerTypes
 ): EditImagesTypes => {
   switch (action.type) {
     case "view":
@@ -112,3 +107,10 @@ export const handleEditImageOverlay = (
       return state;
   }
 };
+
+export interface ImageOverlayReducerTypes {
+  type: string;
+  value: string | number | boolean | ImageRowTypes[] | ImageRowTypes;
+  key?: string;
+  index?: number;
+}

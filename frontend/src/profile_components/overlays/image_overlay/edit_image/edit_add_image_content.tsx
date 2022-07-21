@@ -1,9 +1,10 @@
 import { useContext, useRef } from "react";
 import { get_row_default } from "../../../types/overlayDefaults";
 import { ProfileContext } from "../../../profile_page/ProfilePage";
-import { ImageRowTypes, ProfileContextTypes } from "../../../types/profilePageTypes";
+import { ProfileContextTypes } from "../../../types/profilePageTypes";
 import ImageInfo from "./image_info";
 import AddImageOverlay from "../add_image/add_image";
+import { ImageRowTypes } from "./edit_image_overlay";
 
 const EditAddImageContent: React.FC<EditAddImageContentTypes> = (props) => {
   // Rendered by "./edit_image_overlay" -> EditImageOverlay

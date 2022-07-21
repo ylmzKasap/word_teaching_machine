@@ -1,16 +1,17 @@
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import { ProfileContext } from "../../../../profile_page/ProfilePage";
-import { ImageRowTypes, ProfileContextTypes } from "../../../../types/profilePageTypes";
+import { ProfileContextTypes } from "../../../../types/profilePageTypes";
 import LoadingIcon from "../../../../../assets/animations/loading_icon";
 import Translation from "./translation";
+import { ImageRowTypes } from "../edit_image_overlay";
 
-const ImageTranslation: React.FC<ImageTranslationTypes> = ({ word, order }) => {
+const ImageTranslation: React.FC<ImageTranslationTypes> = ({
+  word, order, requestExists, setRequestExists }) => {
   // Rendered by "../image_info" -> ImageInfo
   // Renders two "./translation" -> Translation components
   // One as the target and one as the source language.
 
   const { deckOverlay } = useContext(ProfileContext) as ProfileContextTypes;
-  const [requestExists, setRequestExists] = useState(false);
 
   return (
     <div id={`image-translation-box-${order}`}>
@@ -42,6 +43,8 @@ const ImageTranslation: React.FC<ImageTranslationTypes> = ({ word, order }) => {
 interface ImageTranslationTypes {
   word: ImageRowTypes;
   order: number;
+  requestExists: boolean;
+  setRequestExists: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default ImageTranslation;

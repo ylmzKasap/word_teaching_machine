@@ -18,7 +18,12 @@ export const ImageUploader = () => {
   return (
     <div id="image-to-add">
       <InputFile handleChange={handleChange} />
-      <UploadedImage imageUrl={imageUrl} imageName={imageName} />
+      <UploadedImage 
+        imageUrl={imageUrl}
+        setImageUrl={setImageUrl}
+        imageName={imageName}
+        setImageName={setImageName}
+      />
     </div>
   );
 };

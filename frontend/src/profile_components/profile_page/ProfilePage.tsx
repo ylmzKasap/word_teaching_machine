@@ -29,12 +29,12 @@ import {
   categoryOverlayDefaults,
   deckOverlayDefaults,
   folderOverlayDefaults,
-  editImagesDefaults,
 } from "../types/overlayDefaults";
 import { handleFolderOverlay } from "../common/reducers/createFolderReducer";
 import { handleCategoryOverlay } from "../common/reducers/createCategoryReducer";
-import EditImageOverlay from "../overlays/image_overlay/edit_image/edit_image_overlay";
-import { handleEditImageOverlay } from "../common/reducers/addImageReducer";
+import EditImageOverlay,
+{ editImagesDefaults } from "../overlays/image_overlay/edit_image/edit_image_overlay";
+import { handleEditImageOverlay } from "../overlays/image_overlay/addImageReducer";
 
 export const ProfileContext = createContext<
   types.ProfileContextTypes | undefined

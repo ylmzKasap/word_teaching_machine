@@ -13,12 +13,24 @@ export const AddImageOverlay = () => {
         <OverlayNavbar
           setOverlay={setEditImageOverlay}
           specialClass="add-image-navbar"
-          description="Upload a new Image"
+          description="Upload a new image"
         />
       <ImageUploader />
       </form>
     </div>
     );
+};
+
+export interface AddImageTypes {
+  display: boolean;
+  imageUrl: string;
+  imageName: string;
+}
+
+export const addImageDefaults = {
+  display: true, // change
+  imageUrl: "",
+  imageName: ""
 };
 
 export default AddImageOverlay;

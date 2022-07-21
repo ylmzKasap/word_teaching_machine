@@ -1,6 +1,5 @@
 import {
   CategoryInfoTypes,
-  ImageRowTypes,
 } from "./profilePageTypes";
 
 export interface NameErrorTypes {
@@ -58,13 +57,3 @@ export interface CategoryOverlayTypes {
   display: boolean;
 }
 
-export interface AddImageTypes {
-  display: boolean;
-}
-
-export interface EditImagesTypes {
-  display: boolean;
-  editedId: string;
-  imageOverlay: AddImageTypes;
-  imageInfo: ImageRowTypes[][];
-}

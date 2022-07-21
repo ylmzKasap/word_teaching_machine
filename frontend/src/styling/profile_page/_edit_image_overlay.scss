@@ -104,6 +104,7 @@
 [id^="image-box"] {
   @extend .image-card-template;
   @include flexit();
+  position: relative;
   flex-direction: column;
   text-align: center;
   &.not-found {

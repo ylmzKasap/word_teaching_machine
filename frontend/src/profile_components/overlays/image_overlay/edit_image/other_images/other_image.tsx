@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { ProfileContext } from "../../../../profile_page/ProfilePage";
-import { ImageRowTypes, ProfileContextTypes } from "../../../../types/profilePageTypes";
+import { ProfileContextTypes } from "../../../../types/profilePageTypes";
+import { ImageRowTypes } from "../edit_image_overlay";
 
 const OtherImage: React.FC<OtherImageTypes> = ({ imgObj, order }) => {
   // Rendered by "./other-image-container"  -> OtherImageContainer

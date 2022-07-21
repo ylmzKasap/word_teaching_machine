@@ -1,10 +1,11 @@
 import React from "react";
 import { ContextOpenedElemTypes } from "../common/handlers/create_context_menu";
+import { ImageOverlayReducerTypes } from "../overlays/image_overlay/addImageReducer";
+import { EditImagesTypes } from "../overlays/image_overlay/edit_image/edit_image_overlay";
 import {
   CategoryOverlayTypes,
   DeckOverlayTypes,
   FolderOverlayTypes,
-  EditImagesTypes,
 } from "./overlayTypes";
 
 export type userResponse = [serverItemTypes[], dirInfoTypes];
@@ -131,22 +132,6 @@ export type SetDeckOverlayType = React.Dispatch<{
   categoryInfo?: CategoryInfoTypes;
 }>;
 
-export type SetImageOverlayType = React.Dispatch<{
-  type: string;
-  value: string | number | boolean | ImageRowTypes[] | ImageRowTypes;
-  key?: string;
-  index?: number;
-}>;
-
-export interface ImageRowTypes {
-  artist_content_id: string | null;
-  image_path: string | null;
-  selected: boolean | null;
-  sourceEditable: boolean | null;
-  targetEditable: boolean | null;
-  [x: string]: boolean | string | null;
-}
-
 export interface ProfileContextTypes {
   username: string | undefined;
   rootDirectory: string;
@@ -180,5 +165,5 @@ export interface ProfileContextTypes {
   categoryOverlay: CategoryOverlayTypes;
   setCategoryOverlay: SetOverlayType;
   editImageOverlay: EditImagesTypes;
-  setEditImageOverlay: SetImageOverlayType;
+  setEditImageOverlay: React.Dispatch<ImageOverlayReducerTypes>;
 }

@@ -1,10 +1,11 @@
-import { useContext } from "react";
-import { ImageRowTypes, ProfileContextTypes } from "../../../types/profilePageTypes";
+import { useContext, useState } from "react";
+import { ProfileContextTypes } from "../../../types/profilePageTypes";
 import LeftNumber from "./left_number";
 import ImageTranslation from "./translation/image_translation";
 import MainImage from "./main_image/main_image";
 import OtherImageContainer from "./other_images/other_image_container";
 import { ProfileContext } from "../../../profile_page/ProfilePage";
+import { ImageRowTypes } from "./edit_image_overlay";
 
 const ImageInfo: React.FC<ImageInfoTypes> = (props) => {
   // Rendered by "./edit_image_content" -> EditImageContent
@@ -15,6 +16,7 @@ const ImageInfo: React.FC<ImageInfoTypes> = (props) => {
   // "./other_images/other_image_container" -> OtherImageContainer
 
   const { deckOverlay } = useContext(ProfileContext) as ProfileContextTypes;
+  const [requestExists, setRequestExists] = useState(false);
 
   const getSelectedImage = (imageArray: ImageRowTypes[]) => {
     // Takes an array of image objects
@@ -41,13 +43,20 @@ const ImageInfo: React.FC<ImageInfoTypes> = (props) => {
   return (
     <div id={`edit-image-box-${props.order}`}>
       <LeftNumber order={props.order} />
-      <ImageTranslation word={selectedImage} order={props.order} />
+      <ImageTranslation
+        word={selectedImage}
+        order={props.order}
+        requestExists={requestExists}
+        setRequestExists={setRequestExists} />
       {/* Render image upload section when a translation is entered */}
       {((deckOverlay.purpose === "teach" && selectedImage[deckOverlay.language.targetLanguage!])
       || (deckOverlay.purpose === "learn" && selectedImage[deckOverlay.language.sourceLanguage!]))
-      && <MainImage word={selectedImage} order={props.order} />}
+      && <MainImage
+        word={selectedImage}
+        order={props.order}
+        requestExists={requestExists} />}
       <div id="other-images">
-        {(otherImages.length > 0 || selectedImage.image_path) && (
+        {((otherImages.length > 0 || selectedImage.image_path) && !requestExists) && (
           <OtherImageContainer
             images={otherImages}
             selected={selectedImage}
