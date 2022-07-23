@@ -13,21 +13,27 @@
 }
 
 #image-to-add {
-  @include flexit();
+  display: flex;
+  align-items: center;
   flex-direction: column;
   width: 40%;
+  height: 100%;
+  min-width: 300px;
 }
 
 #uploaded-image-container {
   cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0px 2px 2px 1px #a7a4c2;
-  height: 255px;
+  min-height: 250px;
   width: 250px;
   border-radius: 10px;
   margin-top: 15px;
   overflow: hidden;
   > img {
-    height: 100%;
+    height: 250px;
     width: 100%;
     max-width: 100%;
   }
@@ -50,7 +56,7 @@
   position: relative;
   flex-direction: column;
   width: 100%;
-  height: 100%;
+  height: 255px;
   background: radial-gradient(circle, rgb(239, 236, 139) 0%, rgb(230, 230, 73) 100%);
   @include arrow_down.arrow-down(4, rgb(43, 43, 44));
   > .arrow-down {
@@ -73,4 +79,27 @@
     width: 100%;
     height: 13%;
   }
+}
+
+#image-upload-error {
+  @include flexit();
+  height: 10%;
+  width: 90%;
+  border: solid black;
+  color: white;
+  border-radius: 10px;
+  background-color: rgb(203, 53, 53);
+  text-align: center;
+  margin: auto 10px 10px 10px;
+  padding: 5px;
+}
+
+#file-selected {
+  @include flexit();
+  color: black;
+  border-top: solid black;
+  width: 100%;
+  height: 40px;
+  text-align: center;
+  background-color: white;
 }

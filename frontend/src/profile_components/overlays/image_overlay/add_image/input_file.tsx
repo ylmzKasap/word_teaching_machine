@@ -6,7 +6,7 @@ export const InputFile: React.FC<InputFileTypes> = (props) => {
       From my device
       <input
         id="image-upload"
-        accept="image/png, image/jpg, image/jpeg"
+        accept="image/png, image/jpg, image/jpeg, image/webp"
         type="file"
       onChange={props.handleChange}/>
     </label>

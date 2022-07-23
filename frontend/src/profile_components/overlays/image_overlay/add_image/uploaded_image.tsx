@@ -1,59 +1,39 @@
-import React from "react";
+import React, { useContext } from "react";
+import LoadingIcon from "../../../../assets/animations/loading_icon";
 import { is_mobile } from "../../../../question_components/common/functions";
+import { ProfileContext } from "../../../profile_page/ProfilePage";
+import { ProfileContextTypes } from "../../../types/profilePageTypes";
 
-export const UploadedImage: React.FC<UploadedImagePropTypes> = (props) => {
+export const UploadedImage: React.FC = (props) => {
   const mobileDevice = is_mobile();
-  const { imageUrl, imageName } = props;
+  const { editImageOverlay } = useContext(ProfileContext) as ProfileContextTypes;
 
   const handleClick = () => {
     const inputElement = document.querySelector("#image-upload") as HTMLInputElement;
     inputElement.click();
   };
 
-  const handleDrag = (event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-  };
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    const element = event.dataTransfer;
-    if (element.files && element.files[0]) {
-      URL.revokeObjectURL(imageUrl);
-      props.setImageUrl(URL.createObjectURL(element.files[0]));
-      props.setImageName(element.files[0].name.split(".")[0]); 
-    }
-  };
+  const image = editImageOverlay.imageOverlay;
 
   return (
     <div
       id="uploaded-image-container"
-      onClick={handleClick}
-      onDrop={handleDrop}
-      onDragEnter={handleDrag}
-      onDragOver={handleDrag}>
-      {!imageUrl && <div className="action-to-add-image">
+      onClick={handleClick}>
+      {editImageOverlay.imageOverlay.imageLoading && <LoadingIcon elementClass="image-request" />}
+      {!image.imageUrl && <div className="action-to-add-image">
         <i className="arrow-down" />
         <p className="description">
           {mobileDevice ? "Tap" : "Click"}
           {(!mobileDevice ? " or drag" : "") + " to upload"}
         </p>
       </div>}
-      {imageUrl && <img 
+      {image.imageUrl && <img 
         id="uploaded-image"
-        src={imageUrl}
-        alt={imageName} />}
-      <span id="file-selected"></span>
+        src={image.imageUrl}
+        alt={image.imageName} />}
+      {image.imageUrl && <span id="file-selected">{image.imagePath}</span>}
     </div>
     );
 };
-
-interface UploadedImagePropTypes {
-  imageUrl: string;
-  setImageUrl: React.Dispatch<React.SetStateAction<string>>;
-  imageName: string;
-  setImageName: React.Dispatch<React.SetStateAction<string>>;
-}
 
 export default UploadedImage;

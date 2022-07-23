@@ -1,5 +1,6 @@
 import { EditImagesTypes } from "./edit_image/edit_image_overlay";
 import { ImageRowTypes } from "./edit_image/edit_image_overlay";
+import { changeUploadedImageTypes } from "./functions/validate_image";
 
 export const handleEditImageOverlay = (
   state: EditImagesTypes,
@@ -102,6 +103,42 @@ export const handleEditImageOverlay = (
           ...state.imageInfo.slice(index + 1)]
       };
 
+    case "changeUploadedImage":
+      const imgObject = action.value as changeUploadedImageTypes;
+      if (imgObject.imageError) {
+        return {
+          ...state,
+          imageOverlay: {
+            ...state.imageOverlay,
+            imageUrl: "",
+            imageName: "",
+            imagePath: "",
+            imageError: imgObject.imageError,
+            imageLoading: false
+          }
+        };
+      }
+      if (imgObject.imageLoading) {
+        return {
+          ...state,
+          imageOverlay: {
+            ...state.imageOverlay,
+            imageLoading: imgObject.imageLoading === "true"
+          }
+        };
+      }
+      URL.revokeObjectURL(state.imageOverlay.imageUrl);
+      return {
+        ...state,
+        imageOverlay: {
+          ...state.imageOverlay,
+          imageUrl: imgObject.imageUrl as string,
+          imageName:imgObject.imagePath?.split('.')[0] as string,
+          imagePath: imgObject.imagePath!,
+          imageError: ""
+        }
+      };
+
     default:
       console.log(`Unknown action type: ${action.type}`);
       return state;
@@ -110,7 +147,9 @@ export const handleEditImageOverlay = (
 
 export interface ImageOverlayReducerTypes {
   type: string;
-  value: string | number | boolean | ImageRowTypes[] | ImageRowTypes;
+  value: (
+    string | number | boolean | ImageRowTypes[] |
+    ImageRowTypes | File | changeUploadedImageTypes);
   key?: string;
   index?: number;
 }
